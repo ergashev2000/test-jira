@@ -1,0 +1,52 @@
+/** Centralised React Query keys. Array prefixes allow broad invalidation. */
+export const QUERY_KEYS = {
+  me: ['auth', 'me'] as const,
+  dashboard: (projectId?: string) => ['dashboard', projectId ?? 'all'] as const,
+  dashboardAll: ['dashboard'] as const,
+  projects: {
+    all: ['projects'] as const,
+    list: (params: object) => ['projects', 'list', params] as const,
+    options: ['projects', 'options'] as const,
+    detail: (key: string) => ['projects', 'detail', key] as const,
+    stats: (id: string) => ['projects', 'stats', id] as const,
+    activity: (params: object) => ['projects', 'activity', params] as const,
+  },
+  sprints: {
+    all: ['sprints'] as const,
+    list: (params: object) => ['sprints', 'list', params] as const,
+  },
+  tasks: {
+    all: ['tasks'] as const,
+    list: (params: object) => ['tasks', 'list', params] as const,
+    my: (params: object) => ['tasks', 'my', params] as const,
+    detail: (key: string) => ['tasks', 'detail', key] as const,
+    comments: (id: string) => ['tasks', 'comments', id] as const,
+    attachments: (id: string) => ['tasks', 'attachments', id] as const,
+    activity: (id: string) => ['tasks', 'activity', id] as const,
+    blockers: (id: string) => ['tasks', 'blockers', id] as const,
+    dailyPlan: ['tasks', 'daily-plan'] as const,
+    search: (q: string) => ['search', q] as const,
+  },
+  users: {
+    all: ['users'] as const,
+    list: (params: object) => ['users', 'list', params] as const,
+    options: ['users', 'options'] as const,
+  },
+  teams: { all: ['teams'] as const },
+  reports: {
+    all: ['reports'] as const,
+    daily: (userId: string, date: string) => ['reports', 'daily', userId, date] as const,
+    teamDaily: (teamId: string, date: string) => ['reports', 'team-daily', teamId, date] as const,
+    sprint: (sprintId: string) => ['reports', 'sprint', sprintId] as const,
+    project: (projectId: string) => ['reports', 'project', projectId] as const,
+  },
+  notifications: {
+    all: ['notifications'] as const,
+    list: (params: object) => ['notifications', 'list', params] as const,
+    latest: ['notifications', 'latest'] as const,
+    settings: ['notifications', 'settings'] as const,
+  },
+  auditLog: (params: object) => ['audit-log', params] as const,
+  settings: ['settings'] as const,
+  telegram: ['profile', 'telegram'] as const,
+};
