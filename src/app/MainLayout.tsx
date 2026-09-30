@@ -2,18 +2,18 @@ import { Button, Dropdown, Grid, Tooltip } from 'antd';
 import { useEffect, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 
-import { Logo, logout } from '@/modules/auth';
+import { logout } from '@/modules/auth';
 import { useAppSettings } from '@/modules/settings';
 import { NotificationBell } from '@/modules/notifications';
 import { TaskDrawer } from '@/modules/tasks';
 import { ROLES, ROUTES } from '@/shared/constants';
+import { Icon } from '@/shared/components/ui/Icon';
+import { UserAvatar } from '@/shared/components/ui/UserAvatar';
 import { useSessionStore } from '@/shared/lib/session';
 import { cn } from '@/shared/utils';
 
-import { Icon } from '../ui/Icon';
-import { UserAvatar } from '../ui/UserAvatar';
-import { GlobalSearch } from './GlobalSearch';
-import { Sidebar } from './Sidebar';
+import { GlobalSearch } from '@/shared/components/layout/GlobalSearch';
+import { Sidebar } from '@/shared/components/layout/Sidebar';
 
 /** App shell: top bar (workspace · search · inbox · user), sidebar, inset content panel. */
 export const MainLayout = () => {
@@ -32,7 +32,7 @@ export const MainLayout = () => {
     <div className="flex h-full flex-col bg-bg">
       <header className="flex h-12 shrink-0 items-center gap-3 px-3">
         <div className={cn('flex items-center gap-2 transition-all', collapsed ? 'w-10' : 'w-[216px]')}>
-          <Logo size={22} />
+          <img src="/logo.svg" alt="logo image" className='size-6'/>
           {!collapsed && <span className="truncate text-[13px] font-semibold">{settings?.general.companyName ?? 'Workspace'}</span>}
         </div>
         <Tooltip title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}>

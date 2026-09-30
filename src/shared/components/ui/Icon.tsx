@@ -32,6 +32,7 @@ import {
   LockIcon,
   Logout03Icon,
   Mail01Icon,
+  Moon02Icon,
   MoreHorizontalIcon,
   Notification03Icon,
   Pdf01Icon,
@@ -44,6 +45,7 @@ import {
   Shield01Icon,
   SidebarLeftIcon,
   StopCircleIcon,
+  Sun03Icon,
   Tag01Icon,
   Target02Icon,
   Task01Icon,
@@ -91,6 +93,7 @@ export const Icons = {
   lock: LockIcon,
   logout: Logout03Icon,
   mail: Mail01Icon,
+  moon: Moon02Icon,
   more: MoreHorizontalIcon,
   notification: Notification03Icon,
   pdf: Pdf01Icon,
@@ -104,6 +107,7 @@ export const Icons = {
   sidebar: SidebarLeftIcon,
   sprint: Rocket01Icon,
   stop: StopCircleIcon,
+  sun: Sun03Icon,
   tag: Tag01Icon,
   target: Target02Icon,
   task: Task01Icon,
@@ -126,7 +130,13 @@ interface IconProps {
   strokeWidth?: number;
 }
 
-export const Icon = ({ name, size = 16, className, color = 'currentColor', strokeWidth = 1.7 }: IconProps) => (
+export const Icon = ({
+  name,
+  size = 16,
+  className,
+  color = 'currentColor',
+  strokeWidth = 1.7,
+}: IconProps) => (
   <HugeiconsIcon
     icon={Icons[name]}
     size={size}

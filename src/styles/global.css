@@ -114,3 +114,43 @@
     color: #000 !important;
   }
 }
+
+/* Auth screens: own light/dark palette, independent of the app's dark theme. */
+.auth-shell[data-theme='light'] {
+  --c-bg: #f3f7fe;
+  --c-panel: #ffffff;
+  --c-surface: #ffffff;
+  --c-surface-2: #eef3fc;
+  --c-line: #e3e9f3;
+  --c-line-strong: #c9d4e6;
+  --c-fg: #0f1b33;
+  --c-fg-2: #5b6478;
+  --c-fg-3: #8a93a6;
+  background: linear-gradient(115deg, #dfeaff 0%, #eef4ff 45%, #f6f9ff 100%);
+  color-scheme: light;
+}
+.auth-shell[data-theme='dark'] {
+  --c-bg: #070b14;
+  --c-panel: #0b1220;
+  --c-surface: #0e1628;
+  --c-surface-2: #132038;
+  --c-line: #1f2a40;
+  --c-line-strong: #2c3a56;
+  --c-fg: #eef2fb;
+  --c-fg-2: #9aa5bd;
+  --c-fg-3: #66718a;
+  background: linear-gradient(115deg, #0c1a33 0%, #08101f 45%, #060a13 100%);
+  color-scheme: dark;
+}
+.auth-shell {
+  color: var(--c-fg);
+}
+/* Fade the illustration's own backdrop into the page background. */
+.auth-hero {
+  mask-image: linear-gradient(to right, #000 55%, transparent 98%);
+}
+/* Dark mode: invert the light backdrop to near-black while keeping the blue hues. */
+.auth-shell[data-theme='dark'] .auth-hero img {
+  filter: invert(1) hue-rotate(180deg) saturate(1.4) brightness(0.95);
+  mix-blend-mode: lighten;
+}

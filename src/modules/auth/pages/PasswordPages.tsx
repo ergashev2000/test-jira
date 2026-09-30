@@ -27,9 +27,18 @@ export const ForgotPasswordPage = () => {
 
   return (
     <AuthLayout title="Reset your password" subtitle="Enter your email and we'll send you a reset link">
-      <Form layout="vertical" requiredMark={false} onFinish={(v: { email: string }) => mutation.mutate(v.email)}>
+      <Form
+        layout="vertical"
+        requiredMark={false}
+        onFinish={(v: { email: string }) => mutation.mutate(v.email)}
+      >
         <Form.Item name="email" label="Email" rules={[rules.required('Email'), rules.email]}>
-          <Input size="large" prefix={<Icon name="mail" className="text-fg-3" />} placeholder="you@company.uz" autoFocus />
+          <Input
+            size="large"
+            prefix={<Icon name="mail" className="text-fg-3" />}
+            placeholder="you@company.uz"
+            autoFocus
+          />
         </Form.Item>
         <Button type="primary" htmlType="submit" size="large" block loading={mutation.isPending}>
           Send reset link
@@ -57,7 +66,11 @@ export const ResetPasswordPage = () => {
 
   return (
     <AuthLayout title="Set a new password">
-      <Form layout="vertical" requiredMark={false} onFinish={(v: { password: string }) => mutation.mutate(v.password)}>
+      <Form
+        layout="vertical"
+        requiredMark={false}
+        onFinish={(v: { password: string }) => mutation.mutate(v.password)}
+      >
         <Form.Item name="password" label="New password" rules={[rules.required('Password'), rules.min(6)]}>
           <Input.Password size="large" autoFocus />
         </Form.Item>
@@ -69,7 +82,9 @@ export const ResetPasswordPage = () => {
             rules.required('Confirmation'),
             ({ getFieldValue }) => ({
               validator: (_, v) =>
-                !v || v === getFieldValue('password') ? Promise.resolve() : Promise.reject(new Error('Passwords do not match')),
+                !v || v === getFieldValue('password')
+                  ? Promise.resolve()
+                  : Promise.reject(new Error('Passwords do not match')),
             }),
           ]}
         >

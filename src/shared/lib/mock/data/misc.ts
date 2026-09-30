@@ -79,7 +79,7 @@ export const sprintReports: SprintReport[] = [
 ];
 
 export const settings: AppSettings = {
-  general: { companyName: 'Acme Software', timezone: 'Asia/Tashkent', workingDays: [1, 2, 3, 4, 5], workStart: '09:00', workEnd: '18:00' },
+  general: { companyName: 'U-management', timezone: 'Asia/Tashkent', workingDays: [1, 2, 3, 4, 5], workStart: '09:00', workEnd: '18:00' },
   telegram: { botUsername: 'pm_system_bot', enabled: true, morningTime: '09:00', eveningTime: '18:00' },
   tasks: { defaultPriority: 'MEDIUM', requireReview: true, maxAttachmentMb: 10,
     allowedFileTypes: ['png', 'jpg', 'jpeg', 'pdf', 'doc', 'docx', 'txt', 'log', 'zip'] },

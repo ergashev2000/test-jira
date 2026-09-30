@@ -1,5 +1,4 @@
 import { App, Button, Checkbox, Form, Input } from 'antd';
-import { Icon } from '@/shared/components/ui/Icon';
 import { useMutation } from '@tanstack/react-query';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 
@@ -40,26 +39,40 @@ export const LoginPage = () => {
   if (token) return <Navigate to={sp.get('redirect') || ROUTES.HOME} replace />;
 
   return (
-    <AuthLayout title="Log in to Tasker" subtitle="Project & task management for your team">
-      <Form form={form} layout="vertical" requiredMark={false} onFinish={(v) => mutation.mutate(v)} initialValues={{ remember: true }}>
-        <Form.Item name="username" label="Username or email" rules={[rules.required('Username')]}>
-          <Input size="large" prefix={<Icon name="user" className="text-fg-3" />} placeholder="shohrux" autoFocus autoComplete="username" />
+    <AuthLayout title="Welcome back" subtitle="Log in to Tasker to manage your projects and tasks">
+      <Form
+        form={form}
+        requiredMark={false}
+        onFinish={(v) => mutation.mutate(v)}
+        initialValues={{ remember: true }}
+      >
+        <Form.Item name="username" rules={[rules.required('Username')]} className="!mb-5">
+          <Input size="large" placeholder="Username or email" autoFocus autoComplete="username" />
         </Form.Item>
-        <Form.Item name="password" label="Password" rules={[rules.required('Password')]}>
-          <Input.Password size="large" prefix={<Icon name="lock" className="text-fg-3" />} placeholder="••••••" autoComplete="current-password" />
+        <Form.Item name="password" rules={[rules.required('Password')]} className="!mb-3">
+          <Input.Password size="large" placeholder="Password" autoComplete="current-password" />
         </Form.Item>
-        <div className="mb-5 flex items-center justify-between">
+        <div className="mb-8 flex items-center justify-between">
           <Form.Item name="remember" valuePropName="checked" noStyle>
             <Checkbox>Remember me</Checkbox>
           </Form.Item>
-          <Link to={ROUTES.FORGOT_PASSWORD}>Forgot password?</Link>
+          <Link to={ROUTES.FORGOT_PASSWORD} className="!text-fg-3 hover:!text-fg-2">
+            Forgot password?
+          </Link>
         </div>
-        <Button type="primary" htmlType="submit" size="large" block loading={mutation.isPending}>
-          Continue
+        <Button
+          type="primary"
+          htmlType="submit"
+          size="large"
+          block
+          loading={mutation.isPending}
+          className="!h-12 !text-base"
+        >
+          Log in
         </Button>
       </Form>
 
-      <div className="mt-6 border-t border-line pt-4">
+      <div className="mt-8 border-t border-line pt-5">
         <div className="mb-2 text-xs text-fg-3">Demo accounts · password 123456</div>
         <div className="grid grid-cols-2 gap-1.5">
           {DEMO.map((d) => (

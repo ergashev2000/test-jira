@@ -58,10 +58,10 @@ export const DashboardPage = () => {
       } />
       <div className="flex flex-col gap-4 p-5">
         <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-          <KpiCard loading={isLoading} icon={<Icon name="projects" size={14} />} title="Active projects" value={k?.activeProjects ?? 0} onClick={go.projects} />
-          <KpiCard loading={isLoading} icon={<Icon name="sprint" size={14} />} title="Active sprints" value={k?.activeSprints ?? 0} onClick={go.sprints} />
-          <KpiCard loading={isLoading} icon={<Icon name="task" size={14} />} title="Total tasks" value={k?.totalTasks ?? 0} onClick={go.tasks} />
-          <KpiCard loading={isLoading} icon={<Icon name="check" size={14} />} title="Completed today" value={k?.completedToday ?? 0} color="#4cb782" onClick={go.completed} />
+          <KpiCard loading={isLoading} icon={<Icon name="projects" size={14} />} title="Active projects" color='#fff' value={k?.activeProjects ?? 0}  onClick={go.projects} />
+          <KpiCard loading={isLoading} icon={<Icon name="sprint" size={14} />} title="Active sprints" color='#fff' value={k?.activeSprints ?? 0} onClick={go.sprints} />
+          <KpiCard loading={isLoading} icon={<Icon name="task" size={14} />} title="Total tasks" color='#fff' value={k?.totalTasks ?? 0} onClick={go.tasks} />
+          <KpiCard loading={isLoading} icon={<Icon name="check" size={14} />} title="Completed today"  value={k?.completedToday ?? 0} color="#4cb782" onClick={go.completed} />
           <KpiCard loading={isLoading} icon={<Icon name="clock" size={14} />} title="Overdue tasks" value={k?.overdue ?? 0} color="#eb5757" onClick={go.overdue} />
           <KpiCard loading={isLoading} icon={<Icon name="alert" size={14} />} title="Blocked tasks" value={k?.blocked ?? 0} color="#f2994a" onClick={go.blocked} />
         </div>
