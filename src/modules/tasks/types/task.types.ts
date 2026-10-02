@@ -2,10 +2,13 @@ import type {
   CancelReason,
   CancelRequest,
   Priority,
+  Project,
+  Sprint,
   Task,
   TaskBlocker,
   TaskStatus,
   TaskType,
+  User,
 } from '@/shared/types';
 
 export type {
@@ -84,8 +87,16 @@ export interface CancelPayload {
   note: string;
 }
 
+/** Where a task hit matched when it wasn't the key/title — shown as a hint row. */
+export type TaskMatchField = 'description' | 'label' | 'assignee' | 'project' | 'status' | 'priority';
+
 export interface SearchResults {
-  tasks: Pick<TaskRow, 'id' | 'key' | 'title' | 'status' | 'projectKey'>[];
-  projects: { id: string; key: string; name: string }[];
-  users: { id: string; fullName: string; username: string; position: string }[];
+  tasks: (Pick<TaskRow, 'id' | 'key' | 'title' | 'status' | 'priority' | 'projectKey' | 'assigneeId'> & {
+    match: { field: TaskMatchField; snippet: string } | null;
+  })[];
+  projects: Pick<Project, 'id' | 'key' | 'name' | 'status' | 'description'>[];
+  sprints: (Pick<Sprint, 'id' | 'name' | 'goal' | 'status'> & { projectKey: string; projectName: string })[];
+  users: Pick<User, 'id' | 'fullName' | 'username' | 'position' | 'email'>[];
+  teams: { id: string; name: string; memberCount: number; leadId: string }[];
+  comments: { id: string; taskKey: string; taskTitle: string; authorId: string; snippet: string }[];
 }

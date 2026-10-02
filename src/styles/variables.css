@@ -20,7 +20,7 @@
   --c-status-todo: #d0d1d6;
   --c-scrollbar: #2a2a2f;
   --c-shadow: rgba(0, 0, 0, 0.6);
-  --c-mask: rgba(0, 0, 0, 0.5);
+  --c-mask: rgba(0, 0, 0, 0.219);
   --font-sans: 'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif;
   color-scheme: dark;
 }
@@ -46,6 +46,6 @@
   --c-status-todo: #a3a4ad;
   --c-scrollbar: #d3d3da;
   --c-shadow: rgba(16, 16, 24, 0.14);
-  --c-mask: rgba(16, 16, 24, 0.28);
+  --c-mask: rgba(16, 16, 24, 0.16);
   color-scheme: light;
 }

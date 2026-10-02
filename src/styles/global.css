@@ -81,7 +81,7 @@
   .ant-modal-mask,
   .ant-drawer-mask {
     background-color: var(--c-mask);
-    backdrop-filter: blur(6px);
+    backdrop-filter: blur(2px);
   }
 
   /* Top-bar actions (theme toggle, inbox, profile): white chips in light, card surface in dark */
@@ -102,14 +102,6 @@
     background: var(--c-surface-2);
     border-color: var(--c-line-strong);
     color: var(--c-fg);
-  }
-
-  /* Global search: same height and surface as the top-bar actions */
-  .header-search.ant-input-affix-wrapper {
-    height: 36px;
-    border-radius: 8px;
-    background: var(--c-card);
-    border-color: var(--c-line);
   }
 
   /* Borderless "ghost" inputs used in Linear-style create modals */

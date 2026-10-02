@@ -3,41 +3,14 @@ import { useState, type ReactNode } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 
 import { useProjectLookups } from '@/shared/api/lookups';
-import { hasPermission, ROUTES, type Permission } from '@/shared/constants';
+import { hasPermission, ROUTES } from '@/shared/constants';
 import { useSessionStore } from '@/shared/lib/session';
 import { cn } from '@/shared/utils';
 
-import { Icon, type IconName } from '@/shared/components/ui/Icon';
+import { Icon } from '@/shared/components/ui/Icon';
 import { ProjectIcon } from '@/shared/components/ui/ProjectIcon';
 
-interface NavItem {
-  to: string;
-  label: string;
-  icon: IconName;
-  permission?: Permission;
-  /** Custom visibility check (in addition to permission). */
-  show?: (role: string) => boolean;
-}
-
-const WORK: NavItem[] = [
-  { to: ROUTES.DASHBOARD, label: 'Dashboard', icon: 'dashboard', permission: 'dashboard.view' },
-  { to: ROUTES.MY_TASKS, label: 'My tasks', icon: 'task' },
-  { to: ROUTES.NOTIFICATIONS, label: 'Inbox', icon: 'notification' },
-];
-
-const WORKSPACE: NavItem[] = [
-  { to: ROUTES.PROJECTS, label: 'Projects', icon: 'projects', permission: 'project.view' },
-  { to: ROUTES.SPRINTS, label: 'Sprints', icon: 'sprint', permission: 'sprint.view' },
-  { to: ROUTES.BOARD, label: 'Board', icon: 'board', permission: 'board.view' },
-  { to: ROUTES.REPORTS, label: 'Reports', icon: 'analytics', permission: 'report.view' },
-];
-
-const ADMIN: NavItem[] = [
-  { to: ROUTES.USERS, label: 'Users', icon: 'users', permission: 'user.manage' },
-  { to: ROUTES.TEAMS, label: 'Teams', icon: 'team', permission: 'team.manage' },
-  { to: ROUTES.AUDIT_LOG, label: 'Audit log', icon: 'shield', permission: 'auditLog.view' },
-  { to: ROUTES.SETTINGS, label: 'Settings', icon: 'settings', permission: 'settings.manage' },
-];
+import { ADMIN, WORK, WORKSPACE, type NavItem } from '../navigation';
 
 const EASE: Transition = { duration: 0.22, ease: [0.4, 0, 0.2, 1] };
 
