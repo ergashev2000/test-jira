@@ -1,10 +1,12 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { PrinterIcon } from '@hugeicons/core-free-icons';
 import { useQuery } from '@tanstack/react-query';
 import { Button, DatePicker, Segmented, Select } from 'antd';
 
 import { useCurrentProject } from '@/modules/projects';
 import { useTeams } from '@/modules/teams';
 import { fetchSprintLookups, useProjectLookups } from '@/shared/api/lookups';
-import { EmptyState, Icon, PageHeader, UserSelect } from '@/shared/components/ui';
+import { EmptyState, PageHeader, UserSelect } from '@/shared/components/ui';
 import { hasPermission, type Permission } from '@/shared/constants';
 import { useTableParams } from '@/shared/hooks';
 import dayjs from '@/shared/lib/dayjs';
@@ -50,7 +52,7 @@ export const ReportsPage = () => {
 
   return (
     <>
-      <PageHeader title="Reports" extra={<Button size="small" className="no-print" icon={<Icon name="print" size={14} />} onClick={() => window.print()}>Print</Button>}>
+      <PageHeader title="Reports" extra={<Button size="small" className="no-print" icon={<HugeiconsIcon icon={PrinterIcon} size={14} className="hicon" strokeWidth={1.7} />} onClick={() => window.print()}>Print</Button>}>
         <div className="no-print flex flex-wrap items-center gap-2">
           <Segmented size="small" value={type} options={allowed.map(({ value, label }) => ({ value, label }))}
             onChange={(v) => set({ type: v, userId: undefined, teamId: undefined, sprintId: undefined })} />

@@ -1,5 +1,7 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { GlobeIcon, TelegramIcon } from '@hugeicons/core-free-icons';
 import { Tooltip } from 'antd';
-import { Icon } from './Icon';
+
 import type { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -25,12 +27,12 @@ export const SourceBadge = ({ source }: { source: Source }) =>
   source === 'TELEGRAM' ? (
     <Tooltip title="via Telegram">
       <span className="inline-flex items-center gap-1 text-[11px] text-telegram">
-        <Icon name="telegram" /> Telegram
+        <HugeiconsIcon icon={TelegramIcon} size={16} className="hicon" strokeWidth={1.7} /> Telegram
       </span>
     </Tooltip>
   ) : (
     <span className="inline-flex items-center gap-1 text-[11px] text-fg-3">
-      <Icon name="globe" /> {source === 'API' ? 'API' : 'Web'}
+      <HugeiconsIcon icon={GlobeIcon} size={16} className="hicon" strokeWidth={1.7} /> {source === 'API' ? 'API' : 'Web'}
     </span>
   );
 

@@ -1,10 +1,12 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Alert02Icon, CheckmarkCircle02Icon, Clock01Icon, Folder01Icon, Rocket01Icon, Task01Icon } from '@hugeicons/core-free-icons';
 import { useQuery } from '@tanstack/react-query';
 import { Select, Skeleton } from 'antd';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
 import { useProjectLookups } from '@/shared/api/lookups';
-import { ErrorState, Icon, KpiCard, PageHeader, Panel } from '@/shared/components/ui';
+import { ErrorState, KpiCard, PageHeader, Panel } from '@/shared/components/ui';
 import { QUERY_KEYS, REFETCH_INTERVAL, ROUTES } from '@/shared/constants';
 import { useTableParams } from '@/shared/hooks';
 import { useSessionStore } from '@/shared/lib/session';
@@ -58,12 +60,12 @@ export const DashboardPage = () => {
       } />
       <div className="flex flex-col gap-4 p-5">
         <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-          <KpiCard loading={isLoading} icon={<Icon name="projects" size={14} />} title="Active projects" color='var(--c-fg)' value={k?.activeProjects ?? 0}  onClick={go.projects} />
-          <KpiCard loading={isLoading} icon={<Icon name="sprint" size={14} />} title="Active sprints" color='var(--c-fg)' value={k?.activeSprints ?? 0} onClick={go.sprints} />
-          <KpiCard loading={isLoading} icon={<Icon name="task" size={14} />} title="Total tasks" color='var(--c-fg)' value={k?.totalTasks ?? 0} onClick={go.tasks} />
-          <KpiCard loading={isLoading} icon={<Icon name="check" size={14} />} title="Completed today"  value={k?.completedToday ?? 0} color="var(--c-success)" onClick={go.completed} />
-          <KpiCard loading={isLoading} icon={<Icon name="clock" size={14} />} title="Overdue tasks" value={k?.overdue ?? 0} color="var(--c-danger)" onClick={go.overdue} />
-          <KpiCard loading={isLoading} icon={<Icon name="alert" size={14} />} title="Blocked tasks" value={k?.blocked ?? 0} color="var(--c-warn)" onClick={go.blocked} />
+          <KpiCard loading={isLoading} icon={<HugeiconsIcon icon={Folder01Icon} size={14} className="hicon" strokeWidth={1.7} />} title="Active projects" color='var(--c-fg)' value={k?.activeProjects ?? 0}  onClick={go.projects} />
+          <KpiCard loading={isLoading} icon={<HugeiconsIcon icon={Rocket01Icon} size={14} className="hicon" strokeWidth={1.7} />} title="Active sprints" color='var(--c-fg)' value={k?.activeSprints ?? 0} onClick={go.sprints} />
+          <KpiCard loading={isLoading} icon={<HugeiconsIcon icon={Task01Icon} size={14} className="hicon" strokeWidth={1.7} />} title="Total tasks" color='var(--c-fg)' value={k?.totalTasks ?? 0} onClick={go.tasks} />
+          <KpiCard loading={isLoading} icon={<HugeiconsIcon icon={CheckmarkCircle02Icon} size={14} className="hicon" strokeWidth={1.7} />} title="Completed today"  value={k?.completedToday ?? 0} color="var(--c-success)" onClick={go.completed} />
+          <KpiCard loading={isLoading} icon={<HugeiconsIcon icon={Clock01Icon} size={14} className="hicon" strokeWidth={1.7} />} title="Overdue tasks" value={k?.overdue ?? 0} color="var(--c-danger)" onClick={go.overdue} />
+          <KpiCard loading={isLoading} icon={<HugeiconsIcon icon={Alert02Icon} size={14} className="hicon" strokeWidth={1.7} />} title="Blocked tasks" value={k?.blocked ?? 0} color="var(--c-warn)" onClick={go.blocked} />
         </div>
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">

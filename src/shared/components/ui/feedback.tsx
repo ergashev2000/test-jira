@@ -1,5 +1,7 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { ReloadIcon } from '@hugeicons/core-free-icons';
 import { Button, Empty, Result, Skeleton } from 'antd';
-import { Icon } from './Icon';
+
 import type { ReactNode } from 'react';
 
 import { hasPermission, type Permission } from '@/shared/constants';
@@ -19,7 +21,7 @@ export const ErrorState = ({ error, onRetry }: { error: unknown; onRetry?: () =>
     status="error"
     title="Failed to load"
     subTitle={errorMessage(error)}
-    extra={onRetry && <Button icon={<Icon name="reload" />} onClick={onRetry}>Retry</Button>}
+    extra={onRetry && <Button icon={<HugeiconsIcon icon={ReloadIcon} size={16} className="hicon" strokeWidth={1.7} />} onClick={onRetry}>Retry</Button>}
   />
 );
 

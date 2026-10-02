@@ -1,8 +1,9 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Analytics01Icon } from '@hugeicons/core-free-icons';
 import { Alert, App, DatePicker, Form, Input, Modal, Radio, Select, Statistic } from 'antd';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { Icon } from '@/shared/components/ui';
 import { ROUTES } from '@/shared/constants';
 import dayjs, { type Dayjs } from '@/shared/lib/dayjs';
 import { errorMessage, rules } from '@/shared/utils';
@@ -106,7 +107,7 @@ export const CompleteSprintModal = ({ sprint, onClose }: { sprint: SprintRow | n
           </ul>
         </>
       )}
-      <Alert className="!mt-4" type="info" showIcon icon={<Icon name="analytics" />} message="A sprint report snapshot will be created automatically." />
+      <Alert className="!mt-4" type="info" showIcon icon={<HugeiconsIcon icon={Analytics01Icon} size={16} className="hicon" strokeWidth={1.7} />} message="A sprint report snapshot will be created automatically." />
     </Modal>
   );
 };

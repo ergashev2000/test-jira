@@ -1,3 +1,5 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Add01Icon } from '@hugeicons/core-free-icons';
 import {
   DndContext,
   DragOverlay,
@@ -13,7 +15,7 @@ import { Button } from 'antd';
 import { useState } from 'react';
 
 import { useStatusChanger, useTaskDrawer, type TaskRow } from '@/modules/tasks';
-import { Icon, StatusIcon } from '@/shared/components/ui';
+import { StatusIcon } from '@/shared/components/ui';
 import { BOARD_COLUMNS, TASK_STATUS } from '@/shared/constants';
 import type { TaskStatus } from '@/shared/types';
 import { cn } from '@/shared/utils';
@@ -31,7 +33,7 @@ const Column = ({ status, tasks, onAdd, onOpen }: {
         <span className="font-medium text-fg">{TASK_STATUS[status].label}</span>
         <span className="text-fg-3">{tasks.length}</span>
         {onAdd && (
-          <Button size="small" type="text" className="!ml-auto" icon={<Icon name="add" size={14} />} onClick={onAdd} aria-label={`Add to ${TASK_STATUS[status].label}`} />
+          <Button size="small" type="text" className="!ml-auto" icon={<HugeiconsIcon icon={Add01Icon} size={14} className="hicon" strokeWidth={1.7} />} onClick={onAdd} aria-label={`Add to ${TASK_STATUS[status].label}`} />
         )}
       </div>
       <div

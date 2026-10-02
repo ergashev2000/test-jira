@@ -1,5 +1,7 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { LockPasswordIcon, Mail01Icon } from '@hugeicons/core-free-icons';
 import { App, Button, Form, Input, Result } from 'antd';
-import { Icon } from '@/shared/components/ui/Icon';
+
 import { useMutation } from '@tanstack/react-query';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
@@ -35,7 +37,7 @@ export const ForgotPasswordPage = () => {
         <Form.Item name="email" label="Email" rules={[rules.required('Email'), rules.email]}>
           <Input
             size="large"
-            prefix={<Icon name="mail" className="text-fg-3" />}
+            prefix={<HugeiconsIcon icon={Mail01Icon} size={18} className="hicon mr-1 text-fg-3" strokeWidth={1.7} />}
             placeholder="you@company.uz"
             autoFocus
           />
@@ -72,7 +74,11 @@ export const ResetPasswordPage = () => {
         onFinish={(v: { password: string }) => mutation.mutate(v.password)}
       >
         <Form.Item name="password" label="New password" rules={[rules.required('Password'), rules.min(6)]}>
-          <Input.Password size="large" autoFocus />
+          <Input.Password
+            size="large"
+            prefix={<HugeiconsIcon icon={LockPasswordIcon} size={18} className="hicon mr-1 text-fg-3" strokeWidth={1.7} />}
+            autoFocus
+          />
         </Form.Item>
         <Form.Item
           name="confirm"
@@ -88,7 +94,7 @@ export const ResetPasswordPage = () => {
             }),
           ]}
         >
-          <Input.Password size="large" />
+          <Input.Password size="large" prefix={<HugeiconsIcon icon={LockPasswordIcon} size={18} className="hicon mr-1 text-fg-3" strokeWidth={1.7} />} />
         </Form.Item>
         <Button type="primary" htmlType="submit" size="large" block loading={mutation.isPending}>
           Update password

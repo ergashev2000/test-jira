@@ -1,3 +1,5 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { LockPasswordIcon, UserIcon } from '@hugeicons/core-free-icons';
 import { App, Button, Form, Input } from 'antd';
 import { useMutation } from '@tanstack/react-query';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
@@ -32,16 +34,23 @@ export const LoginPage = () => {
 
   return (
     <AuthLayout title="Welcome back" subtitle="Log in to U-management to manage your projects and tasks">
-      <Form
-        form={form}
-        requiredMark={false}
-        onFinish={(v) => mutation.mutate(v)}
-      >
-        <Form.Item name="username" rules={[rules.required('Username')]} className="!mb-5">
-          <Input size="large" placeholder="Username" autoFocus autoComplete="username" />
+      <Form form={form} requiredMark={false} onFinish={(v) => mutation.mutate(v)}>
+        <Form.Item name="username" rules={[rules.required('Username')]} className="mb-5!">
+          <Input
+            size="large"
+            prefix={<HugeiconsIcon icon={UserIcon} size={18} className="hicon mr-1 text-fg-3" strokeWidth={1.7} />}
+            placeholder="Username"
+            autoFocus
+            autoComplete="username"
+          />
         </Form.Item>
-        <Form.Item name="password" rules={[rules.required('Password')]} className="!mb-3">
-          <Input.Password size="large" placeholder="Password" autoComplete="current-password" />
+        <Form.Item name="password" rules={[rules.required('Password')]} className="mb-3!">
+          <Input.Password
+            size="large"
+            prefix={<HugeiconsIcon icon={LockPasswordIcon} size={18} className="hicon mr-1 text-fg-3" strokeWidth={1.7} />}
+            placeholder="Password"
+            autoComplete="current-password"
+          />
         </Form.Item>
         <div className="mb-8 flex justify-end">
           <Link to={ROUTES.FORGOT_PASSWORD} className="!text-fg-3 hover:!text-fg-2">

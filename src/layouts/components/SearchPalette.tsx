@@ -1,3 +1,5 @@
+import { HugeiconsIcon, type IconSvgElement } from '@hugeicons/react';
+import { ArrowRight01Icon, Moon02Icon, Rocket01Icon, Search01Icon, Sun03Icon, UserGroupIcon } from '@hugeicons/core-free-icons';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Modal } from 'antd';
 import { useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
@@ -10,7 +12,6 @@ import { useSessionStore } from '@/shared/lib/session';
 import { useThemeStore } from '@/shared/lib/theme';
 import { cn, TASK_KEY_RE } from '@/shared/utils';
 
-import { Icon, type IconName } from '@/shared/components/ui/Icon';
 import { PriorityIcon, StatusIcon } from '@/shared/components/ui/icons';
 import { Spinner } from '@/shared/components/ui/Loader';
 import { ProjectIcon } from '@/shared/components/ui/ProjectIcon';
@@ -50,9 +51,9 @@ const Highlight = ({ text, tokens }: { text: string; tokens: string[] }) => {
   );
 };
 
-const NavIcon = ({ name }: { name: IconName }) => (
+const NavIcon = ({ icon }: { icon: IconSvgElement }) => (
   <span className="flex size-7 items-center justify-center rounded-md border border-line bg-surface-2 text-fg-2">
-    <Icon name={name} size={14} />
+    <HugeiconsIcon icon={icon} size={14} className="hicon" strokeWidth={1.7} />
   </span>
 );
 
@@ -112,7 +113,7 @@ export const SearchPalette = ({ open, onClose }: { open: boolean; onClose: () =>
     }
     for (const s of data?.sprints ?? []) {
       list.push({
-        id: `sprint:${s.id}`, group: 'Sprints', icon: <NavIcon name="sprint" />,
+        id: `sprint:${s.id}`, group: 'Sprints', icon: <NavIcon icon={Rocket01Icon} />,
         title: s.name, meta: `${s.projectName} · ${SPRINT_STATUS[s.status].label}`, hint: s.goal || undefined,
         run: go(ROUTES.project(s.projectKey, 'sprints')),
       });
@@ -128,7 +129,7 @@ export const SearchPalette = ({ open, onClose }: { open: boolean; onClose: () =>
     if (can('user.manage') || can('team.manage')) {
       for (const t of data?.teams ?? []) {
         list.push({
-          id: `team:${t.id}`, group: 'Teams', icon: <NavIcon name="team" />,
+          id: `team:${t.id}`, group: 'Teams', icon: <NavIcon icon={UserGroupIcon} />,
           title: t.name, meta: `${t.memberCount} members`,
           trailing: <UserAvatar userId={t.leadId} size={18} />,
           run: go(can('user.manage') ? `${ROUTES.USERS}?teamId=${t.id}` : ROUTES.TEAMS),
@@ -147,13 +148,13 @@ export const SearchPalette = ({ open, onClose }: { open: boolean; onClose: () =>
     const pages = [...WORK, ...WORKSPACE, ...ADMIN, ...ACCOUNT]
       .filter((p) => (!p.permission || can(p.permission)) && matches(p.label));
     for (const p of pages) {
-      list.push({ id: `page:${p.to}`, group: 'Pages', icon: <NavIcon name={p.icon} />, title: p.label, meta: 'Go to page', run: go(p.to) });
+      list.push({ id: `page:${p.to}`, group: 'Pages', icon: <NavIcon icon={p.icon} />, title: p.label, meta: 'Go to page', run: go(p.to) });
     }
 
     const themeLabel = themeMode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
     if (matches(`${themeLabel} theme`)) {
       list.push({
-        id: 'action:theme', group: 'Actions', icon: <NavIcon name={themeMode === 'dark' ? 'sun' : 'moon'} />,
+        id: 'action:theme', group: 'Actions', icon: <NavIcon icon={themeMode === 'dark' ? Sun03Icon : Moon02Icon} />,
         title: themeLabel, run: () => { toggleTheme(); close(); },
       });
     }
@@ -197,7 +198,7 @@ export const SearchPalette = ({ open, onClose }: { open: boolean; onClose: () =>
       afterOpenChange={(o) => o && inputRef.current?.focus()}
     >
       <div className="flex h-14 items-center gap-3 border-b border-line px-4">
-        <Icon name="search" size={18} className="shrink-0 text-fg-3" />
+        <HugeiconsIcon icon={Search01Icon} size={18} className="hicon shrink-0 text-fg-3" strokeWidth={1.7} />
         <input
           ref={inputRef}
           value={value}
@@ -213,7 +214,7 @@ export const SearchPalette = ({ open, onClose }: { open: boolean; onClose: () =>
       <div ref={listRef} className="max-h-[min(60vh,520px)] overflow-y-auto p-2">
         {items.length === 0 && !isFetching && !typing && (
           <div className="flex flex-col items-center gap-1 py-12 text-center">
-            <Icon name="search" size={22} className="mb-2 text-fg-3" />
+            <HugeiconsIcon icon={Search01Icon} size={22} className="hicon mb-2 text-fg-3" strokeWidth={1.7} />
             <span className="text-fg">No results for “{q}”</span>
             <span className="text-xs text-fg-3">Try a task key like CRM-110, a person’s name or a label.</span>
           </div>
@@ -244,7 +245,7 @@ export const SearchPalette = ({ open, onClose }: { open: boolean; onClose: () =>
                   {item.hint && <span className="truncate text-xs text-fg-3"><Highlight text={item.hint} tokens={tokens} /></span>}
                 </span>
                 {item.trailing}
-                {i === current && <Icon name="arrowRight" size={14} className="shrink-0 text-fg-3" />}
+                {i === current && <HugeiconsIcon icon={ArrowRight01Icon} size={14} className="hicon shrink-0 text-fg-3" strokeWidth={1.7} />}
               </button>
             </div>
           );

@@ -1,7 +1,9 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Add01Icon, Cancel01Icon } from '@hugeicons/core-free-icons';
 import { App, Button, Modal, Popconfirm, Table, Tag } from 'antd';
 import { useState } from 'react';
 
-import { Icon, QueryState, UserAvatar, UserSelect } from '@/shared/components/ui';
+import { QueryState, UserAvatar, UserSelect } from '@/shared/components/ui';
 import { ROLES } from '@/shared/constants';
 import type { Role } from '@/shared/types';
 import { errorMessage, formatDate } from '@/shared/utils';
@@ -27,7 +29,7 @@ export const ProjectMembersTab = () => {
       <div className="mb-3 flex items-center">
         <span className="text-fg-2">{project.memberIds.length + 1} people</span>
         {project.canManageMembers && (
-          <Button className="!ml-auto" size="small" type="primary" icon={<Icon name="add" size={14} />} onClick={() => { setSelected([]); setOpen(true); }}>
+          <Button className="!ml-auto" size="small" type="primary" icon={<HugeiconsIcon icon={Add01Icon} size={14} className="hicon" strokeWidth={1.7} />} onClick={() => { setSelected([]); setOpen(true); }}>
             Add members
           </Button>
         )}
@@ -48,7 +50,7 @@ export const ProjectMembersTab = () => {
                   description={m.activeTasks ? `⚠ ${m.activeTasks} active task(s) in this project stay assigned to them.` : 'They will lose access to this project.'}
                   okButtonProps={{ danger: true }} okText="Remove"
                   onConfirm={() => remove.mutateAsync({ id: project.id, userId: m.userId }).then(() => message.success('Member removed')).catch((e) => message.error(errorMessage(e)))}>
-                  <Button size="small" type="text" danger icon={<Icon name="close" size={14} />} />
+                  <Button size="small" type="text" danger icon={<HugeiconsIcon icon={Cancel01Icon} size={14} className="hicon" strokeWidth={1.7} />} />
                 </Popconfirm>) },
             ]} />
         )}

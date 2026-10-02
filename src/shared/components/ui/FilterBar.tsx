@@ -1,5 +1,7 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Cancel01Icon, Search01Icon } from '@hugeicons/core-free-icons';
 import { Button, DatePicker, Input, Select, Switch } from 'antd';
-import { Icon } from './Icon';
+
 import { useEffect, useState } from 'react';
 
 import { useDebounce, useTableParams } from '@/shared/hooks';
@@ -28,7 +30,7 @@ const SearchInput = ({ value, placeholder, width, onChange }: {
   return (
     <Input
       allowClear
-      prefix={<Icon name="search" className="text-fg-3" />}
+      prefix={<HugeiconsIcon icon={Search01Icon} size={16} className="hicon text-fg-3" strokeWidth={1.7} />}
       placeholder={placeholder ?? 'Search…'}
       value={text}
       onChange={(e) => setText(e.target.value)}
@@ -101,7 +103,7 @@ export const FilterBar = ({ filters, keep = [], extra }: { filters: FilterDef[];
         }
       })}
       {active && (
-        <Button type="text" icon={<Icon name="close" />} onClick={() => clear(keep)}>
+        <Button type="text" icon={<HugeiconsIcon icon={Cancel01Icon} size={16} className="hicon" strokeWidth={1.7} />} onClick={() => clear(keep)}>
           Clear filters
         </Button>
       )}

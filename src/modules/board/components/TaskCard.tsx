@@ -1,8 +1,10 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Calendar03Icon } from '@hugeicons/core-free-icons';
 import { useDraggable } from '@dnd-kit/core';
 import { Tooltip } from 'antd';
 
 import type { TaskRow } from '@/modules/tasks';
-import { BlockedBadge, DeadlineText, Icon, PriorityIcon, TaskTypeIcon, UserAvatar } from '@/shared/components/ui';
+import { BlockedBadge, DeadlineText, PriorityIcon, TaskTypeIcon, UserAvatar } from '@/shared/components/ui';
 import { cn, isOverdue } from '@/shared/utils';
 
 interface Props {
@@ -32,7 +34,7 @@ export const TaskCardView = ({ task, overlay }: Omit<Props, 'onOpen'>) => (
       </Tooltip>
       {task.deadline && (
         <span className={cn('flex h-5 items-center gap-1 rounded border px-1.5 text-[11px]', isOverdue(task) ? 'border-danger/40' : 'border-line')}>
-          <Icon name="calendar" size={11} />
+          <HugeiconsIcon icon={Calendar03Icon} size={11} className="hicon" strokeWidth={1.7} />
           <DeadlineText task={task} className="!text-[11px]" />
         </span>
       )}

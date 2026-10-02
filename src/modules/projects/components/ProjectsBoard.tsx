@@ -1,7 +1,9 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Calendar03Icon, Rocket01Icon } from '@hugeicons/core-free-icons';
 import { Progress } from 'antd';
 import { useNavigate } from 'react-router-dom';
 
-import { Icon, ProjectIcon, UserAvatar } from '@/shared/components/ui';
+import { ProjectIcon, UserAvatar } from '@/shared/components/ui';
 import { PROJECT_STATUS, ROUTES } from '@/shared/constants';
 import type { ProjectStatus } from '@/shared/types';
 import { formatDate } from '@/shared/utils';
@@ -24,11 +26,11 @@ const Card = ({ p }: { p: ProjectListItem }) => {
         <UserAvatar userId={p.managerId} size={18} />
       </div>
       {p.endDate && (
-        <span className="flex items-center gap-1.5 text-xs text-fg-2"><Icon name="calendar" size={13} />{formatDate(p.endDate)}</span>
+        <span className="flex items-center gap-1.5 text-xs text-fg-2"><HugeiconsIcon icon={Calendar03Icon} size={13} className="hicon" strokeWidth={1.7} />{formatDate(p.endDate)}</span>
       )}
       <div className="flex items-center gap-2 text-xs text-fg-3">
         <span>{p.totalTasks} tasks</span>
-        {p.activeSprint && <span className="flex items-center gap-1"><Icon name="sprint" size={12} />{p.activeSprint.name}</span>}
+        {p.activeSprint && <span className="flex items-center gap-1"><HugeiconsIcon icon={Rocket01Icon} size={12} className="hicon" strokeWidth={1.7} />{p.activeSprint.name}</span>}
         <Progress percent={p.progress} size="small" showInfo={false} className="!m-0 flex-1" strokeColor="#165dff" />
         <span className="tabular-nums">{p.progress}%</span>
       </div>

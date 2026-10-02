@@ -1,7 +1,9 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Rocket01Icon } from '@hugeicons/core-free-icons';
 import { Progress, Tag } from 'antd';
 import { Link } from 'react-router-dom';
 
-import { EmptyState, Icon, Panel, QueryState, StatusIcon, UserAvatar } from '@/shared/components/ui';
+import { EmptyState, Panel, QueryState, StatusIcon, UserAvatar } from '@/shared/components/ui';
 import { BOARD_COLUMNS, ROUTES, TASK_STATUS } from '@/shared/constants';
 import dayjs from '@/shared/lib/dayjs';
 import { formatDate, fromNow } from '@/shared/utils';
@@ -49,7 +51,7 @@ export const ProjectOverviewTab = () => {
         <Panel title="Active sprint" extra={sprint && <Link to={ROUTES.project(project.key, 'board')}>Open board</Link>}>
           {sprint ? (
             <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2 font-medium"><Icon name="sprint" size={15} />{sprint.name}</div>
+              <div className="flex items-center gap-2 font-medium"><HugeiconsIcon icon={Rocket01Icon} size={15} className="hicon" strokeWidth={1.7} />{sprint.name}</div>
               <div className="text-xs text-fg-2">Ends {formatDate(sprint.endDate)} · <Tag color={daysLeft < 2 ? 'red' : 'default'}>{daysLeft >= 0 ? `${daysLeft} days left` : 'Past due'}</Tag></div>
             </div>
           ) : (

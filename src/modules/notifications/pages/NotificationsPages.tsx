@@ -1,8 +1,10 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { GlobeIcon, Settings02Icon, TelegramIcon } from '@hugeicons/core-free-icons';
 import { Alert, App, Button, Pagination, Segmented, Select, Switch, Table } from 'antd';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { EmptyState, Icon, PageHeader, QueryState } from '@/shared/components/ui';
+import { EmptyState, PageHeader, QueryState } from '@/shared/components/ui';
 import { ROUTES } from '@/shared/constants';
 import { useTableParams } from '@/shared/hooks';
 import type { NotificationSetting, NotificationType } from '@/shared/types';
@@ -30,7 +32,7 @@ export const NotificationsPage = () => {
       <PageHeader title="Notifications" extra={
         <>
           <Button size="small" loading={markAll.isPending} onClick={() => markAll.mutate()}>Mark all as read</Button>
-          <Button size="small" type="text" icon={<Icon name="settings" size={15} />} onClick={() => navigate(ROUTES.NOTIFICATION_SETTINGS)}>Settings</Button>
+          <Button size="small" type="text" icon={<HugeiconsIcon icon={Settings02Icon} size={15} className="hicon" strokeWidth={1.7} />} onClick={() => navigate(ROUTES.NOTIFICATION_SETTINGS)}>Settings</Button>
         </>
       }>
         <div className="flex flex-wrap gap-2">
@@ -85,10 +87,10 @@ export const NotificationSettingsPage = () => {
             <Table<Row> className="app-table" size="middle" rowKey="event" dataSource={rows} pagination={false}
               columns={[
                 { title: 'Event', dataIndex: 'event', render: (e: NotificationType) => (
-                  <span className="flex items-center gap-2"><Icon name={NOTIFICATION_META[e].icon} size={15} color={NOTIFICATION_META[e].color} />{NOTIFICATION_META[e].label}</span>) },
-                { title: <span className="flex items-center gap-1"><Icon name="telegram" size={14} />Telegram</span>, dataIndex: 'telegram', width: 120,
+                  <span className="flex items-center gap-2"><HugeiconsIcon icon={NOTIFICATION_META[e].icon} size={15} color={NOTIFICATION_META[e].color} className="hicon" strokeWidth={1.7} />{NOTIFICATION_META[e].label}</span>) },
+                { title: <span className="flex items-center gap-1"><HugeiconsIcon icon={TelegramIcon} size={14} className="hicon" strokeWidth={1.7} />Telegram</span>, dataIndex: 'telegram', width: 120,
                   render: (v: boolean, r) => <Switch size="small" checked={linked && v} disabled={!linked} onChange={(x) => toggle(r.event, 'telegram', x)} /> },
-                { title: <span className="flex items-center gap-1"><Icon name="globe" size={14} />Web</span>, dataIndex: 'web', width: 100,
+                { title: <span className="flex items-center gap-1"><HugeiconsIcon icon={GlobeIcon} size={14} className="hicon" strokeWidth={1.7} />Web</span>, dataIndex: 'web', width: 100,
                   render: (v: boolean, r) => <Switch size="small" checked={v} onChange={(x) => toggle(r.event, 'web', x)} /> },
               ]} />
           )}

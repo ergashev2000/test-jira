@@ -1,5 +1,6 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { UserIcon } from '@hugeicons/core-free-icons';
 import { Avatar, Tooltip } from 'antd';
-import { Icon } from './Icon';
 
 import { useUserMap } from '@/shared/api/lookups';
 import { cn, colorFromId, initials } from '@/shared/utils';
@@ -19,7 +20,7 @@ export const UserAvatar = ({ userId, size = 20, showName, className, noTooltip }
 
   if (!userId || !user) {
     const empty = (
-      <Avatar size={size} icon={<Icon name="user" />} className="!border !border-dashed !border-line !bg-transparent !text-fg-3" />
+      <Avatar size={size} icon={<HugeiconsIcon icon={UserIcon} size={16} className="hicon" strokeWidth={1.7} />} className="!border !border-dashed !border-line !bg-transparent !text-fg-3" />
     );
     return showName ? (
       <span className={cn('inline-flex items-center gap-2 text-fg-3', className)}>

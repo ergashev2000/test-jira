@@ -1,7 +1,8 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Moon02Icon, Sun03Icon } from '@hugeicons/core-free-icons';
 import { ConfigProvider, theme, type ThemeConfig } from 'antd';
 import type { ReactNode } from 'react';
 
-import { Icon } from '@/shared/components/ui/Icon';
 import { useThemeStore, type ThemeMode } from '@/shared/lib/theme';
 
 const AUTH_PRIMARY = '#165dff';
@@ -46,13 +47,13 @@ export const AuthLayout = ({
           aria-label={mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
           className="absolute top-5 right-5 z-10 flex size-10 cursor-pointer items-center justify-center rounded-full border border-line bg-surface text-fg-2 transition-colors hover:text-fg"
         >
-          <Icon name={mode === 'dark' ? 'sun' : 'moon'} size={18} />
+          <HugeiconsIcon icon={mode === 'dark' ? Sun03Icon : Moon02Icon} size={18} className="hicon" strokeWidth={1.7} />
         </button>
 
         <div className="auth-hero pointer-events-none relative hidden flex-2 lg:block">
           <img
             src="/login-image.svg"
-            alt=""
+            alt="login image"
             width={1600}
             height={1600}
             className="absolute inset-0 size-full object-cover object-left"

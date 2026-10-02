@@ -1,8 +1,10 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { CheckmarkCircle02Icon } from '@hugeicons/core-free-icons';
 import { useQuery } from '@tanstack/react-query';
 import { Progress, Table, Tag } from 'antd';
 import type { ReactNode } from 'react';
 
-import { EmptyState, Icon, Panel, PriorityTag, QueryState, StatusTag, UserAvatar } from '@/shared/components/ui';
+import { EmptyState, Panel, PriorityTag, QueryState, StatusTag, UserAvatar } from '@/shared/components/ui';
 import { QUERY_KEYS } from '@/shared/constants';
 import type { DailyTaskStatus } from '@/shared/types';
 import { formatTime } from '@/shared/utils';
@@ -52,7 +54,7 @@ export const DailyReportView = ({ userId, date }: { userId: string; date: string
           <div className="flex flex-wrap items-center gap-3 text-xs text-fg-2">
             <UserAvatar userId={r.userId} showName />
             {r.confirmedAt
-              ? <span className="flex items-center gap-1"><Icon name="check" size={13} className="text-success" />Plan confirmed at {formatTime(r.confirmedAt)} via {r.confirmedVia === 'TELEGRAM' ? 'Telegram' : 'Web'}</span>
+              ? <span className="flex items-center gap-1"><HugeiconsIcon icon={CheckmarkCircle02Icon} size={13} className="hicon text-success" strokeWidth={1.7} />Plan confirmed at {formatTime(r.confirmedAt)} via {r.confirmedVia === 'TELEGRAM' ? 'Telegram' : 'Web'}</span>
               : <span className="text-warn">Daily plan not confirmed</span>}
           </div>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">

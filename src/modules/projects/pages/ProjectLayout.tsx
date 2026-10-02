@@ -1,8 +1,10 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Edit02Icon } from '@hugeicons/core-free-icons';
 import { Alert, Button, Result, Skeleton, Tabs, Tag } from 'antd';
 import { useState } from 'react';
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom';
 
-import { ErrorState, Icon, PageHeader, ProjectIcon, UserAvatar, UserAvatarGroup } from '@/shared/components/ui';
+import { ErrorState, PageHeader, ProjectIcon, UserAvatar, UserAvatarGroup } from '@/shared/components/ui';
 import { PROJECT_STATUS, ROUTES } from '@/shared/constants';
 import { ApiError } from '@/shared/lib/mock';
 
@@ -47,7 +49,7 @@ export const ProjectLayout = () => {
             <UserAvatar userId={project.managerId} size={22} />
             <UserAvatarGroup userIds={project.memberIds} size={22} />
             {project.canEdit && (
-              <Button size="small" icon={<Icon name="edit" size={14} />} onClick={() => setEditing(true)}>Edit</Button>
+              <Button size="small" icon={<HugeiconsIcon icon={Edit02Icon} size={14} className="hicon" strokeWidth={1.7} />} onClick={() => setEditing(true)}>Edit</Button>
             )}
           </>
         }

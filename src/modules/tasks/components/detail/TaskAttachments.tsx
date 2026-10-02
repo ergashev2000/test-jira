@@ -1,5 +1,6 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { CloudUploadIcon, Download01Icon, File01Icon, Pdf01Icon, Zip01Icon } from '@hugeicons/core-free-icons';
 import { App, Button, Image, Upload } from 'antd';
-import { Icon } from '@/shared/components/ui/Icon';
 
 import { useAppSettings } from '@/modules/settings';
 import { useUserMap } from '@/shared/api/lookups';
@@ -13,8 +14,8 @@ const FileIcon = ({ a }: { a: TaskAttachment }) => {
   if (a.mimeType.startsWith('image/')) {
     return <Image src={a.url} width={36} height={36} className="rounded object-cover" preview={{ mask: false }} />;
   }
-  const name: 'pdf' | 'zip' | 'file' = a.fileName.endsWith('.pdf') ? 'pdf' : a.fileName.endsWith('.zip') ? 'zip' : 'file';
-  return <span className="flex h-9 w-9 items-center justify-center rounded bg-surface-2 text-base text-fg-2"><Icon name={name} /></span>;
+  const icon = a.fileName.endsWith('.pdf') ? Pdf01Icon : a.fileName.endsWith('.zip') ? Zip01Icon : File01Icon;
+  return <span className="flex h-9 w-9 items-center justify-center rounded bg-surface-2 text-base text-fg-2"><HugeiconsIcon icon={icon} size={16} className="hicon" strokeWidth={1.7} /></span>;
 };
 
 export const TaskAttachments = ({ taskId, disabled }: { taskId: string; disabled?: boolean }) => {
@@ -43,7 +44,7 @@ export const TaskAttachments = ({ taskId, disabled }: { taskId: string; disabled
           className="!bg-transparent"
         >
           <div className="flex items-center justify-center gap-3 py-1 text-fg-2">
-            <Icon name="upload" className="text-lg" />
+            <HugeiconsIcon icon={CloudUploadIcon} size={16} className="hicon text-lg" strokeWidth={1.7} />
             <span className="text-xs">Drop files or click to upload · {types.join(', ')} · max {maxMb} MB</span>
           </div>
         </Upload.Dragger>
@@ -61,7 +62,7 @@ export const TaskAttachments = ({ taskId, disabled }: { taskId: string; disabled
                       {formatFileSize(a.fileSize)} · {users.get(a.uploadedById)?.fullName} · {fromNow(a.createdAt)}
                     </div>
                   </div>
-                  <Button type="text" size="small" icon={<Icon name="download" />} href={a.url} download={a.fileName} />
+                  <Button type="text" size="small" icon={<HugeiconsIcon icon={Download01Icon} size={16} className="hicon" strokeWidth={1.7} />} href={a.url} download={a.fileName} />
                 </li>
               ))}
             </ul>

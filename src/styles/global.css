@@ -77,6 +77,13 @@
     cursor: pointer;
   }
 
+  /* Inline Hugeicons: sit on the text baseline and never shrink in flex rows */
+  .hicon {
+    display: inline-block;
+    flex-shrink: 0;
+    vertical-align: -0.15em;
+  }
+
   /* Blurred backdrop behind modals and drawers */
   .ant-modal-mask,
   .ant-drawer-mask {

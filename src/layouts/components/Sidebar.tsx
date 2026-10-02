@@ -1,3 +1,5 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { ArrowDown01Icon, Home01Icon, KanbanIcon, ListViewIcon, Rocket01Icon } from '@hugeicons/core-free-icons';
 import { Popover, Tooltip } from 'antd';
 import { AnimatePresence, motion, type Transition } from 'framer-motion';
 import { useState, type ReactNode } from 'react';
@@ -8,7 +10,6 @@ import { hasPermission, ROUTES } from '@/shared/constants';
 import { useSessionStore } from '@/shared/lib/session';
 import { cn } from '@/shared/utils';
 
-import { Icon } from '@/shared/components/ui/Icon';
 import { ProjectIcon } from '@/shared/components/ui/ProjectIcon';
 
 import { ADMIN, WORK, WORKSPACE, type NavItem } from '../navigation';
@@ -39,15 +40,15 @@ const Chevron = ({ open, className }: { open: boolean; className?: string }) => 
     animate={{ rotate: open ? 0 : -90 }}
     transition={EASE}
   >
-    <Icon name="arrowDown" size={12} />
+    <HugeiconsIcon icon={ArrowDown01Icon} size={12} className="hicon" strokeWidth={1.7} />
   </motion.span>
 );
 
 const PROJECT_TABS = [
-  { tab: 'overview', label: 'Overview', icon: 'home' },
-  { tab: 'board', label: 'Board', icon: 'board' },
-  { tab: 'backlog', label: 'Backlog', icon: 'list' },
-  { tab: 'sprints', label: 'Sprints', icon: 'sprint' },
+  { tab: 'overview', label: 'Overview', icon: Home01Icon },
+  { tab: 'board', label: 'Board', icon: KanbanIcon },
+  { tab: 'backlog', label: 'Backlog', icon: ListViewIcon },
+  { tab: 'sprints', label: 'Sprints', icon: Rocket01Icon },
 ] as const;
 
 /** In the collapsed rail an item shows only its icon; the label appears in a tooltip on hover. */
@@ -65,7 +66,7 @@ const Item = ({ item, collapsed }: { item: NavItem; collapsed: boolean }) => {
         )
       }
     >
-      <Icon name={item.icon} size={16} />
+      <HugeiconsIcon icon={item.icon} size={16} className="hicon" strokeWidth={1.7} />
       {!collapsed && <span className="truncate">{item.label}</span>}
     </NavLink>
   );

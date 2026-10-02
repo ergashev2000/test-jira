@@ -1,8 +1,10 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Notification03Icon } from '@hugeicons/core-free-icons';
 import { Badge, Button, Popover } from 'antd';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { EmptyState, Icon } from '@/shared/components/ui';
+import { EmptyState } from '@/shared/components/ui';
 import { ROUTES } from '@/shared/constants';
 
 import { useLatestNotifications, useMarkAllRead, useOpenNotification } from '../hooks/useNotifications';
@@ -38,7 +40,7 @@ export const NotificationBell = () => {
     <Popover open={open} onOpenChange={setOpen} trigger="click" placement="bottomRight" content={content} arrow={false}
       styles={{ body: { padding: 0 } }}>
       <Badge count={data?.unread ?? 0} size="small" offset={[-4, 4]}>
-        <Button type="text" className="header-action" icon={<Icon name="notification" size={17} />} aria-label="Notifications" />
+        <Button type="text" className="header-action" icon={<HugeiconsIcon icon={Notification03Icon} size={17} className="hicon" strokeWidth={1.7} />} aria-label="Notifications" />
       </Badge>
     </Popover>
   );

@@ -1,5 +1,6 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { CheckmarkCircle02Icon, Clock01Icon, TelegramIcon } from '@hugeicons/core-free-icons';
 import { Badge, Tabs } from 'antd';
-import { Icon } from '@/shared/components/ui/Icon';
 
 import { useProjectLookups } from '@/shared/api/lookups';
 import { EmptyState, FilterBar, PageHeader, QueryState } from '@/shared/components/ui';
@@ -25,13 +26,13 @@ const PlanInfo = () => {
   if (isLoading) return null;
   return plan?.confirmedAt ? (
     <span className="flex items-center gap-1.5 text-xs text-fg-2">
-      <Icon name="check" className="text-success" />
+      <HugeiconsIcon icon={CheckmarkCircle02Icon} size={16} className="hicon text-success" strokeWidth={1.7} />
       Today's plan confirmed at {formatTime(plan.confirmedAt)}
-      {plan.confirmedVia === 'TELEGRAM' ? <> via <Icon name="telegram" className="text-telegram" /> Telegram</> : ' via Web'}
+      {plan.confirmedVia === 'TELEGRAM' ? <> via <HugeiconsIcon icon={TelegramIcon} size={16} className="hicon text-telegram" strokeWidth={1.7} /> Telegram</> : ' via Web'}
     </span>
   ) : (
     <span className="flex items-center gap-1.5 text-xs text-warn">
-      <Icon name="clock" /> Today's plan not confirmed yet
+      <HugeiconsIcon icon={Clock01Icon} size={16} className="hicon" strokeWidth={1.7} /> Today's plan not confirmed yet
     </span>
   );
 };

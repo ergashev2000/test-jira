@@ -1,6 +1,7 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Edit02Icon, MoreHorizontalIcon, StopCircleIcon } from '@hugeicons/core-free-icons';
 import { App, Button, Dropdown, Tooltip } from 'antd';
 
-import { Icon } from '@/shared/components/ui';
 import { usePermission } from '@/shared/hooks';
 import { errorMessage, formatDate } from '@/shared/utils';
 
@@ -50,12 +51,12 @@ export const SprintActions = ({ sprint, hasActive, onEdit, onComplete, size = 's
       {sprint.status === 'ACTIVE' && <Button size={size} type="primary" onClick={onComplete}>Complete sprint</Button>}
       <Dropdown trigger={['click']} menu={{
         items: [
-          { key: 'edit', label: 'Edit sprint', icon: <Icon name="edit" size={14} /> },
-          { key: 'cancel', label: 'Cancel sprint', danger: true, icon: <Icon name="stop" size={14} /> },
+          { key: 'edit', label: 'Edit sprint', icon: <HugeiconsIcon icon={Edit02Icon} size={14} className="hicon" strokeWidth={1.7} /> },
+          { key: 'cancel', label: 'Cancel sprint', danger: true, icon: <HugeiconsIcon icon={StopCircleIcon} size={14} className="hicon" strokeWidth={1.7} /> },
         ],
         onClick: ({ key }) => (key === 'edit' ? onEdit() : confirmCancel()),
       }}>
-        <Button size={size} type="text" icon={<Icon name="more" size={16} />} />
+        <Button size={size} type="text" icon={<HugeiconsIcon icon={MoreHorizontalIcon} size={16} className="hicon" strokeWidth={1.7} />} />
       </Dropdown>
     </span>
   );

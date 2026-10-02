@@ -1,8 +1,10 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Copy01Icon, TelegramIcon } from '@hugeicons/core-free-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { App, Button, Popconfirm, Statistic } from 'antd';
 import { useEffect, useState } from 'react';
 
-import { Icon, Panel } from '@/shared/components/ui';
+import { Panel } from '@/shared/components/ui';
 import { QUERY_KEYS } from '@/shared/constants';
 import dayjs from '@/shared/lib/dayjs';
 import { useSessionStore } from '@/shared/lib/session';
@@ -46,7 +48,7 @@ export const TelegramCard = () => {
 
   const tg = user.telegram;
   return (
-    <Panel title={<span className="flex items-center gap-2"><Icon name="telegram" size={16} color="var(--c-telegram)" />Telegram</span>}>
+    <Panel title={<span className="flex items-center gap-2"><HugeiconsIcon icon={TelegramIcon} size={16} color="var(--c-telegram)" className="hicon" strokeWidth={1.7} />Telegram</span>}>
       {tg ? (
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex-1">
@@ -63,8 +65,8 @@ export const TelegramCard = () => {
           <div className="text-fg-2">Open <b className="text-fg">@{code.botUsername}</b> and send:</div>
           <div className="flex items-center gap-2">
             <code className="rounded-md border border-line bg-bg px-3 py-2 font-mono text-lg tracking-widest text-fg">/start {code.code}</code>
-            <Button icon={<Icon name="copy" size={14} />} onClick={() => { copyToClipboard(`/start ${code.code}`); message.success('Copied'); }} />
-            <Button type="primary" icon={<Icon name="telegram" size={14} />} href={`https://t.me/${code.botUsername}?start=${code.code}`} target="_blank">
+            <Button icon={<HugeiconsIcon icon={Copy01Icon} size={14} className="hicon" strokeWidth={1.7} />} onClick={() => { copyToClipboard(`/start ${code.code}`); message.success('Copied'); }} />
+            <Button type="primary" icon={<HugeiconsIcon icon={TelegramIcon} size={14} className="hicon" strokeWidth={1.7} />} href={`https://t.me/${code.botUsername}?start=${code.code}`} target="_blank">
               Open bot
             </Button>
           </div>

@@ -1,3 +1,5 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Rocket01Icon } from '@hugeicons/core-free-icons';
 import { Button, Select } from 'antd';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -5,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCurrentProject } from '@/modules/projects';
 import { SprintFormModal, useSprints } from '@/modules/sprints';
 import { useProjectLookups } from '@/shared/api/lookups';
-import { EmptyState, Icon, PageHeader, ProjectIcon } from '@/shared/components/ui';
+import { EmptyState, PageHeader, ProjectIcon } from '@/shared/components/ui';
 import { ROUTES } from '@/shared/constants';
 import { usePermission, useTableParams } from '@/shared/hooks';
 
@@ -40,7 +42,7 @@ export const ProjectBoardTab = () => {
       projectId={project.id}
       sprintId={active.id}
       canCreate={canCreate && project.status !== 'ARCHIVED'}
-      toolbar={<span className="flex items-center gap-1.5 text-xs text-fg-2"><Icon name="sprint" size={13} />{active.name}</span>}
+      toolbar={<span className="flex items-center gap-1.5 text-xs text-fg-2"><HugeiconsIcon icon={Rocket01Icon} size={13} className="hicon" strokeWidth={1.7} />{active.name}</span>}
     />
   );
 };

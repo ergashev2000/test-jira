@@ -1,9 +1,11 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Add01Icon } from '@hugeicons/core-free-icons';
 import { Button } from 'antd';
 import { useState } from 'react';
 
 import { useCurrentProject } from '@/modules/projects';
 import { useProjectLookups } from '@/shared/api/lookups';
-import { Can, EmptyState, FilterBar, Icon, PageHeader, QueryState } from '@/shared/components/ui';
+import { Can, EmptyState, FilterBar, PageHeader, QueryState } from '@/shared/components/ui';
 import { SPRINT_STATUS_OPTIONS } from '@/shared/constants';
 import { useTableParams } from '@/shared/hooks';
 import type { SprintStatus } from '@/shared/types';
@@ -42,7 +44,7 @@ export const ProjectSprintsTab = () => {
     <div className="p-5">
       <div className="mb-3 flex">
         <Can permission="sprint.manage">
-          <Button className="!ml-auto" size="small" type="primary" icon={<Icon name="add" size={14} />} disabled={project.status === 'ARCHIVED'}
+          <Button className="!ml-auto" size="small" type="primary" icon={<HugeiconsIcon icon={Add01Icon} size={14} className="hicon" strokeWidth={1.7} />} disabled={project.status === 'ARCHIVED'}
             onClick={() => setOpen(true)}>Create sprint</Button>
         </Can>
       </div>

@@ -1,5 +1,7 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { ArrowExpand01Icon, Edit02Icon, Link01Icon, MoreHorizontalIcon, StopCircleIcon } from '@hugeicons/core-free-icons';
 import { App, Button, Dropdown, Tag, Tooltip, Typography } from 'antd';
-import { Icon } from '@/shared/components/ui/Icon';
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -36,8 +38,8 @@ export const TaskHeader = ({ task, inDrawer }: { task: TaskDetail; inDrawer?: bo
   };
 
   const menu = [
-    canCancelDirect(user) && !readOnly && { key: 'cancel', label: 'Cancel task', danger: true, icon: <Icon name="stop" /> },
-    canRequestCancel(user, task) && !readOnly && !task.pendingCancelRequest && { key: 'request', label: 'Request cancel', icon: <Icon name="stop" /> },
+    canCancelDirect(user) && !readOnly && { key: 'cancel', label: 'Cancel task', danger: true, icon: <HugeiconsIcon icon={StopCircleIcon} size={16} className="hicon" strokeWidth={1.7} /> },
+    canRequestCancel(user, task) && !readOnly && !task.pendingCancelRequest && { key: 'request', label: 'Request cancel', icon: <HugeiconsIcon icon={StopCircleIcon} size={16} className="hicon" strokeWidth={1.7} /> },
   ].filter((x): x is Exclude<typeof x, false> => !!x);
 
   return (
@@ -46,7 +48,7 @@ export const TaskHeader = ({ task, inDrawer }: { task: TaskDetail; inDrawer?: bo
         <TaskTypeIcon type={task.type} />
         <span className="font-mono">{task.key}</span>
         <Tooltip title="Copy link">
-          <Button size="small" type="text" icon={<Icon name="link" />} onClick={() => {
+          <Button size="small" type="text" icon={<HugeiconsIcon icon={Link01Icon} size={16} className="hicon" strokeWidth={1.7} />} onClick={() => {
             copyToClipboard(`${window.location.origin}${ROUTES.task(task.key)}`);
             message.success('Link copied');
           }} />
@@ -56,15 +58,15 @@ export const TaskHeader = ({ task, inDrawer }: { task: TaskDetail; inDrawer?: bo
           {!readOnly && canBlock(user, task) && !task.isBlocked && (
             <Button size="small" onClick={() => setModal('block')}>🚧 Block</Button>
           )}
-          {editable && <Button size="small" icon={<Icon name="edit" />} onClick={() => setModal('edit')}>Edit</Button>}
+          {editable && <Button size="small" icon={<HugeiconsIcon icon={Edit02Icon} size={16} className="hicon" strokeWidth={1.7} />} onClick={() => setModal('edit')}>Edit</Button>}
           {inDrawer && (
             <Tooltip title="Open in full page">
-              <Button size="small" type="text" icon={<Icon name="expand" />} onClick={() => navigate(ROUTES.task(task.key))} />
+              <Button size="small" type="text" icon={<HugeiconsIcon icon={ArrowExpand01Icon} size={16} className="hicon" strokeWidth={1.7} />} onClick={() => navigate(ROUTES.task(task.key))} />
             </Tooltip>
           )}
           {menu.length > 0 && (
             <Dropdown trigger={['click']} menu={{ items: menu, onClick: ({ key }) => setModal(key as 'cancel' | 'request') }}>
-              <Button size="small" type="text" icon={<Icon name="more" />} />
+              <Button size="small" type="text" icon={<HugeiconsIcon icon={MoreHorizontalIcon} size={16} className="hicon" strokeWidth={1.7} />} />
             </Dropdown>
           )}
         </div>

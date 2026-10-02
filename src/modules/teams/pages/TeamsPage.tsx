@@ -1,7 +1,9 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Add01Icon, Edit02Icon, UserGroupIcon } from '@hugeicons/core-free-icons';
 import { App, Button, Form, Input, Modal } from 'antd';
 import { useEffect, useState } from 'react';
 
-import { Can, EmptyState, Icon, PageHeader, QueryState, UserAvatar, UserAvatarGroup, UserSelect } from '@/shared/components/ui';
+import { Can, EmptyState, PageHeader, QueryState, UserAvatar, UserAvatarGroup, UserSelect } from '@/shared/components/ui';
 import type { Team } from '@/shared/types';
 import { errorMessage, formatDate, rules } from '@/shared/utils';
 
@@ -44,7 +46,7 @@ export const TeamsPage = () => {
   return (
     <>
       <PageHeader title="Teams" count={query.data?.length}
-        extra={<Can permission="team.manage"><Button type="primary" size="small" icon={<Icon name="add" size={14} />} onClick={() => setModal({ open: true })}>New team</Button></Can>} />
+        extra={<Can permission="team.manage"><Button type="primary" size="small" icon={<HugeiconsIcon icon={Add01Icon} size={14} className="hicon" strokeWidth={1.7} />} onClick={() => setModal({ open: true })}>New team</Button></Can>} />
       <div className="p-5">
         <QueryState query={query} isEmpty={(d) => !d.length} empty={<EmptyState description="No teams yet" />}>
           {(teams) => (
@@ -52,13 +54,13 @@ export const TeamsPage = () => {
               {teams.map((t) => (
                 <div key={t.id} className="flex flex-col gap-4 rounded-xl border border-line bg-surface p-4">
                   <div className="flex items-center gap-2">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/15 text-primary"><Icon name="team" size={16} /></span>
+                    <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/15 text-primary"><HugeiconsIcon icon={UserGroupIcon} size={16} className="hicon" strokeWidth={1.7} /></span>
                     <div className="min-w-0 flex-1">
                       <div className="font-medium text-fg">{t.name}</div>
                       <div className="text-xs text-fg-3">Since {formatDate(t.createdAt)}</div>
                     </div>
                     <Can permission="team.manage">
-                      <Button size="small" type="text" icon={<Icon name="edit" size={14} />} onClick={() => setModal({ open: true, team: t })} />
+                      <Button size="small" type="text" icon={<HugeiconsIcon icon={Edit02Icon} size={14} className="hicon" strokeWidth={1.7} />} onClick={() => setModal({ open: true, team: t })} />
                     </Can>
                   </div>
                   <div className="flex items-center justify-between text-xs text-fg-2">

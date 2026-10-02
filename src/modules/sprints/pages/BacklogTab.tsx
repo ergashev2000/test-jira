@@ -1,9 +1,11 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Add01Icon, MoreHorizontalIcon } from '@hugeicons/core-free-icons';
 import { App, Button, Collapse, Dropdown, Input, Tag } from 'antd';
 import { useState } from 'react';
 
 import { useCurrentProject } from '@/modules/projects';
 import { TaskFormModal, TaskListRow, useCreateTask, useMoveTask, useTaskList, type TaskRow } from '@/modules/tasks';
-import { EmptyState, Icon, QueryState } from '@/shared/components/ui';
+import { EmptyState, QueryState } from '@/shared/components/ui';
 import { SPRINT_STATUS } from '@/shared/constants';
 import { usePermission } from '@/shared/hooks';
 import { errorMessage, formatDate } from '@/shared/utils';
@@ -23,7 +25,7 @@ const MoveMenu = ({ task, targets }: { task: TaskRow; targets: { id: string | nu
       onClick: ({ key }) => move.mutate({ id: task.id, sprintId: key === 'backlog' ? null : key }, {
         onSuccess: () => message.success(`${task.key} moved`), onError: (e) => message.error(errorMessage(e)) }),
     }}>
-      <Button size="small" type="text" icon={<Icon name="more" size={16} />} className="opacity-60 group-hover:opacity-100" />
+      <Button size="small" type="text" icon={<HugeiconsIcon icon={MoreHorizontalIcon} size={16} className="hicon" strokeWidth={1.7} />} className="opacity-60 group-hover:opacity-100" />
     </Dropdown>
   );
 };
@@ -35,7 +37,7 @@ const InlineCreate = ({ projectId, disabled }: { projectId: string; disabled: bo
   if (disabled) return null;
   return (
     <div className="flex items-center gap-2 border-t border-line px-5 py-1.5">
-      <Icon name="add" size={14} className="text-fg-3" />
+      <HugeiconsIcon icon={Add01Icon} size={14} className="hicon text-fg-3" strokeWidth={1.7} />
       <Input variant="borderless" placeholder="Create task — type a title and press Enter" value={title} disabled={create.isPending}
         onChange={(e) => setTitle(e.target.value)}
         onPressEnter={() => title.trim() && create.mutate(
@@ -71,7 +73,7 @@ export const BacklogTab = () => {
       <div className="flex items-center gap-2">
         <span className="text-fg-2">{open.length} open sprint(s) · {all.filter((t) => !t.sprintId).length} in backlog</span>
         <div className="ml-auto flex gap-2">
-          {canCreate && <Button size="small" disabled={archived} icon={<Icon name="add" size={14} />} onClick={() => setCreateOpen(true)}>New task</Button>}
+          {canCreate && <Button size="small" disabled={archived} icon={<HugeiconsIcon icon={Add01Icon} size={14} className="hicon" strokeWidth={1.7} />} onClick={() => setCreateOpen(true)}>New task</Button>}
           {canManageSprints && <Button size="small" type="primary" disabled={archived} onClick={() => setSprintModal({ open: true })}>Create sprint</Button>}
         </div>
       </div>

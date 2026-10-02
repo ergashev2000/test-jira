@@ -1,7 +1,9 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { ArrowRight01Icon, UserCircleIcon, UserMultipleIcon } from '@hugeicons/core-free-icons';
 import { App, Button, DatePicker, Form, Input, Modal, Select } from 'antd';
 import { useEffect, useRef } from 'react';
 
-import { Icon, ProjectIcon, UserSelect } from '@/shared/components/ui';
+import { ProjectIcon, UserSelect } from '@/shared/components/ui';
 import { PROJECT_STATUS, PROJECT_STATUS_OPTIONS } from '@/shared/constants';
 import dayjs, { type Dayjs } from '@/shared/lib/dayjs';
 import type { ProjectStatus } from '@/shared/types';
@@ -75,7 +77,7 @@ export const ProjectFormModal = ({ open, onClose, project, onSaved }: Props) => 
         }}>
         <div className="mb-5 flex items-center gap-2 text-xs text-fg-2">
           <span className="rounded-md border border-line px-2 py-0.5">Workspace</span>
-          <Icon name="arrowRight" size={11} />
+          <HugeiconsIcon icon={ArrowRight01Icon} size={11} className="hicon" strokeWidth={1.7} />
           <span className="text-fg">{project ? `Edit ${project.key}` : 'New project'}</span>
         </div>
 
@@ -103,11 +105,11 @@ export const ProjectFormModal = ({ open, onClose, project, onSaved }: Props) => 
           </Form.Item>
           <Form.Item name="managerId" noStyle rules={[rules.required('Lead')]}>
             <UserSelect size="small" variant="filled" className="chip-select min-w-36" popupMatchSelectWidth={false} allowClear={false}
-              roles={['PROJECT_MANAGER', 'ADMIN', 'SUPER_ADMIN']} placeholder={<span className="flex items-center gap-1"><Icon name="userCircle" size={13} /> Lead</span>} />
+              roles={['PROJECT_MANAGER', 'ADMIN', 'SUPER_ADMIN']} placeholder={<span className="flex items-center gap-1"><HugeiconsIcon icon={UserCircleIcon} size={13} className="hicon" strokeWidth={1.7} /> Lead</span>} />
           </Form.Item>
           <Form.Item name="memberIds" noStyle>
             <UserSelect size="small" variant="filled" mode="multiple" maxTagCount="responsive" className="chip-select min-w-40"
-              popupMatchSelectWidth={260} placeholder={<span className="flex items-center gap-1"><Icon name="users" size={13} /> Members</span>} />
+              popupMatchSelectWidth={260} placeholder={<span className="flex items-center gap-1"><HugeiconsIcon icon={UserMultipleIcon} size={13} className="hicon" strokeWidth={1.7} /> Members</span>} />
           </Form.Item>
           <Form.Item name="startDate" noStyle rules={[rules.required('Start date')]}>
             <DatePicker size="small" variant="filled" className="chip-picker" format="DD.MM.YYYY" placeholder="Start" allowClear={false} />

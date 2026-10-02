@@ -1,10 +1,12 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Rocket01Icon } from '@hugeicons/core-free-icons';
 import { Progress, Table, Tag } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { DonutChart, HBarChart, Legend } from '@/modules/reports';
 import { StatusDropdown, useTaskDrawer } from '@/modules/tasks';
 import { useUserMap } from '@/shared/api/lookups';
-import { ActivityTimeline, EmptyState, Icon, PriorityTag, UserAvatar } from '@/shared/components/ui';
+import { ActivityTimeline, EmptyState, PriorityTag, UserAvatar } from '@/shared/components/ui';
 import { ROUTES } from '@/shared/constants';
 import dayjs from '@/shared/lib/dayjs';
 import { daysFromToday, formatDate, fromNow } from '@/shared/utils';
@@ -16,7 +18,7 @@ export const ActiveSprintCard = ({ s }: { s: DashboardData['activeSprint'] }) =>
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-2">
-        <Icon name="sprint" size={16} className="text-primary" />
+        <HugeiconsIcon icon={Rocket01Icon} size={16} className="hicon text-primary" strokeWidth={1.7} />
         <Link to={ROUTES.project(s.projectKey, 'board')} className="font-medium !text-fg">{s.projectKey} · {s.name}</Link>
         <Tag className="!ml-auto" color={s.daysLeft <= 2 ? 'red' : 'default'}>{s.daysLeft >= 0 ? `${s.daysLeft} days left` : 'Past end date'}</Tag>
       </div>

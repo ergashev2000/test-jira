@@ -1,5 +1,7 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { ArrowRight01Icon, Calendar03Icon, Clock01Icon, Rocket01Icon, Tag01Icon, UserIcon } from '@hugeicons/core-free-icons';
 import { App, Button, DatePicker, Form, Input, InputNumber, Modal, Select, Switch } from 'antd';
-import { Icon } from '@/shared/components/ui/Icon';
+
 import { useEffect, useState } from 'react';
 
 import { useOpenSprints, useProjectLookups } from '@/shared/api/lookups';
@@ -108,7 +110,7 @@ export const TaskFormModal = ({ open, onClose, task, defaults, onCreated }: Prop
               onChange={() => form.setFieldsValue({ sprintId: BACKLOG, assigneeId: null, reviewerId: null })}
             />
           </Form.Item>
-          <Icon name="arrowRight" size={11} />
+          <HugeiconsIcon icon={ArrowRight01Icon} size={11} className="hicon" strokeWidth={1.7} />
           <span className="text-fg">{task ? `Edit ${task.key}` : 'New task'}</span>
         </div>
 
@@ -132,28 +134,28 @@ export const TaskFormModal = ({ open, onClose, task, defaults, onCreated }: Prop
           </Form.Item>
           <Form.Item name="sprintId" noStyle>
             <Select size="small" variant="filled" className="chip-select" popupMatchSelectWidth={false}
-              prefix={<Icon name="sprint" className="text-fg-3" />}
+              prefix={<HugeiconsIcon icon={Rocket01Icon} size={16} className="hicon text-fg-3" strokeWidth={1.7} />}
               options={[{ value: BACKLOG, label: 'Backlog' }, ...sprints.map((s) => ({ value: s.id, label: `${s.name}${s.status === 'ACTIVE' ? ' · active' : ''}` }))]} />
           </Form.Item>
           <Form.Item name="assigneeId" noStyle>
             <UserSelect size="small" variant="filled" className="chip-select min-w-36" popupMatchSelectWidth={false}
-              projectId={projectId} placeholder={<span><Icon name="user" /> Assignee</span>}
+              projectId={projectId} placeholder={<span><HugeiconsIcon icon={UserIcon} size={16} className="hicon" strokeWidth={1.7} /> Assignee</span>}
               includeIds={task?.assigneeId ? [task.assigneeId] : []} />
           </Form.Item>
           <Form.Item name="reviewerId" noStyle>
             <UserSelect size="small" variant="filled" className="chip-select min-w-36" popupMatchSelectWidth={false}
-              projectId={projectId} placeholder={<span><Icon name="user" /> Reviewer</span>} />
+              projectId={projectId} placeholder={<span><HugeiconsIcon icon={UserIcon} size={16} className="hicon" strokeWidth={1.7} /> Reviewer</span>} />
           </Form.Item>
           <Form.Item name="deadline" noStyle>
             <DatePicker size="small" variant="filled" className="chip-picker" format="DD.MM.YYYY" placeholder="Deadline"
-              suffixIcon={<Icon name="calendar" />} status={pastDeadline ? 'warning' : undefined} />
+              suffixIcon={<HugeiconsIcon icon={Calendar03Icon} size={16} className="hicon" strokeWidth={1.7} />} status={pastDeadline ? 'warning' : undefined} />
           </Form.Item>
           <Form.Item name="estimate" noStyle>
             <InputNumber size="small" variant="filled" className="chip-picker !w-28" min={0} step={0.5} placeholder="Estimate"
-              prefix={<Icon name="clock" className="text-fg-3" />} suffix="h" />
+              prefix={<HugeiconsIcon icon={Clock01Icon} size={16} className="hicon text-fg-3" strokeWidth={1.7} />} suffix="h" />
           </Form.Item>
           <Form.Item name="labels" noStyle>
-            <Select size="small" variant="filled" mode="tags" className="chip-select min-w-32" placeholder={<span><Icon name="tag" /> Labels</span>}
+            <Select size="small" variant="filled" mode="tags" className="chip-select min-w-32" placeholder={<span><HugeiconsIcon icon={Tag01Icon} size={16} className="hicon" strokeWidth={1.7} /> Labels</span>}
               tokenSeparators={[',']} options={['frontend', 'backend', 'bug', 'ui', 'qa', 'docs', 'devops'].map((l) => ({ value: l, label: l }))} />
           </Form.Item>
         </div>

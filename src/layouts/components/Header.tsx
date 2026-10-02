@@ -1,3 +1,5 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Logout03Icon, Moon02Icon, Notification03Icon, SidebarLeftIcon, Sun03Icon, UserCircleIcon } from '@hugeicons/core-free-icons';
 import { Button, Dropdown, Tooltip } from 'antd';
 import { useNavigate } from 'react-router-dom';
 
@@ -5,7 +7,7 @@ import { logout } from '@/modules/auth';
 import { NotificationBell } from '@/modules/notifications';
 import { useAppSettings } from '@/modules/settings';
 import { ROLES, ROUTES } from '@/shared/constants';
-import { Icon } from '@/shared/components/ui/Icon';
+
 import { UserAvatar } from '@/shared/components/ui/UserAvatar';
 import { useSessionStore } from '@/shared/lib/session';
 import { useThemeStore } from '@/shared/lib/theme';
@@ -33,7 +35,7 @@ export const Header = ({ collapsed, onToggleSidebar }: Props) => {
         {!collapsed && <span className="truncate text-[13px] font-semibold">{settings?.general.companyName ?? 'U-management'}</span>}
       </div>
       <Tooltip title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
-        <Button type="text" size="small" icon={<Icon name="sidebar" size={16} />} onClick={onToggleSidebar} />
+        <Button type="text" size="small" icon={<HugeiconsIcon icon={SidebarLeftIcon} size={16} className="hicon" strokeWidth={1.7} />} onClick={onToggleSidebar} />
       </Tooltip>
       <div className="flex flex-1 justify-center"><GlobalSearch /></div>
       <Tooltip title={themeMode === 'dark' ? 'Light mode' : 'Dark mode'}>
@@ -41,7 +43,7 @@ export const Header = ({ collapsed, onToggleSidebar }: Props) => {
           type="text"
           className="header-action"
           aria-label={themeMode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-          icon={<Icon name={themeMode === 'dark' ? 'sun' : 'moon'} size={16} />}
+          icon={<HugeiconsIcon icon={themeMode === 'dark' ? Sun03Icon : Moon02Icon} size={16} className="hicon" strokeWidth={1.7} />}
           onClick={toggleTheme}
         />
       </Tooltip>
@@ -52,10 +54,10 @@ export const Header = ({ collapsed, onToggleSidebar }: Props) => {
           items: [
             { key: 'who', type: 'group', label: <div className="py-1"><div className="text-fg">{user.fullName}</div><div className="text-xs text-fg-3">{ROLES[user.role].label}</div></div> },
             { type: 'divider' },
-            { key: 'profile', label: 'Profile', icon: <Icon name="userCircle" size={14} /> },
-            { key: 'notif', label: 'Notification settings', icon: <Icon name="notification" size={14} /> },
+            { key: 'profile', label: 'Profile', icon: <HugeiconsIcon icon={UserCircleIcon} size={14} className="hicon" strokeWidth={1.7} /> },
+            { key: 'notif', label: 'Notification settings', icon: <HugeiconsIcon icon={Notification03Icon} size={14} className="hicon" strokeWidth={1.7} /> },
             { type: 'divider' },
-            { key: 'logout', label: 'Log out', icon: <Icon name="logout" size={14} />, danger: true },
+            { key: 'logout', label: 'Log out', icon: <HugeiconsIcon icon={Logout03Icon} size={14} className="hicon" strokeWidth={1.7} />, danger: true },
           ],
           onClick: ({ key }) => {
             if (key === 'profile') navigate(ROUTES.PROFILE);

@@ -1,8 +1,10 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Add01Icon, Edit02Icon, TelegramIcon } from '@hugeicons/core-free-icons';
 import { App, Badge, Button, Popconfirm, Table, Tag } from 'antd';
 import { useState } from 'react';
 
 import { useTeams } from '@/modules/teams';
-import { FilterBar, Icon, PageHeader, QueryState, UserAvatar } from '@/shared/components/ui';
+import { FilterBar, PageHeader, QueryState, UserAvatar } from '@/shared/components/ui';
 import { ROLE_OPTIONS, ROLES } from '@/shared/constants';
 import { useTableParams } from '@/shared/hooks';
 import { useSessionStore } from '@/shared/lib/session';
@@ -38,7 +40,7 @@ export const UsersPage = () => {
   return (
     <>
       <PageHeader title="Users" count={query.data?.total}
-        extra={<Button type="primary" size="small" icon={<Icon name="add" size={14} />} onClick={() => setDrawer({ open: true })}>New user</Button>}>
+        extra={<Button type="primary" size="small" icon={<HugeiconsIcon icon={Add01Icon} size={14} className="hicon" strokeWidth={1.7} />} onClick={() => setDrawer({ open: true })}>New user</Button>}>
         <FilterBar filters={[
           { type: 'search', key: 'search', placeholder: 'Name, username, email, phone' },
           { type: 'select', key: 'role', placeholder: 'Role', options: ROLE_OPTIONS },
@@ -60,14 +62,14 @@ export const UsersPage = () => {
               { title: 'Team', dataIndex: 'teamName', width: 120, render: (v: string | null) => v ?? <span className="text-fg-3">—</span> },
               { title: 'Role', dataIndex: 'role', width: 140, render: (r: Role) => <Tag color={ROLES[r].color}>{ROLES[r].label}</Tag> },
               { title: 'Telegram', dataIndex: 'telegram', width: 150, render: (t: UserRow['telegram']) => t
-                ? <span className="flex items-center gap-1 text-telegram"><Icon name="telegram" size={13} />@{t.username}</span>
+                ? <span className="flex items-center gap-1 text-telegram"><HugeiconsIcon icon={TelegramIcon} size={13} className="hicon" strokeWidth={1.7} />@{t.username}</span>
                 : <span className="text-fg-3">Not linked</span> },
               { title: 'Status', dataIndex: 'status', width: 100, render: (s: UserStatus) => <Badge status={s === 'ACTIVE' ? 'success' : 'default'} text={s === 'ACTIVE' ? 'Active' : 'Inactive'} /> },
               { title: 'Created', dataIndex: 'createdAt', width: 110, render: (d: string) => formatDate(d) },
               { title: 'Last login', dataIndex: 'lastLoginAt', width: 120, render: (d: string | null) => <span className="text-fg-2">{fromNow(d, 'Never')}</span> },
               { title: '', key: 'actions', fixed: 'right', width: 120, render: (_, u) => !locked(u) && (
                 <span className="flex gap-1">
-                  <Button size="small" type="text" icon={<Icon name="edit" size={14} />} onClick={() => setDrawer({ open: true, user: u })} />
+                  <Button size="small" type="text" icon={<HugeiconsIcon icon={Edit02Icon} size={14} className="hicon" strokeWidth={1.7} />} onClick={() => setDrawer({ open: true, user: u })} />
                   {u.id !== me.id && (
                     <Popconfirm
                       title={u.status === 'ACTIVE' ? `Deactivate ${u.fullName}?` : `Activate ${u.fullName}?`}

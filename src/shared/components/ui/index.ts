@@ -9,5 +9,4 @@ export * from './PageHeader';
 export * from './KpiCard';
 export * from './ActivityTimeline';
 export * from './ProjectIcon';
-export * from './Icon';
 export * from './Loader';
