@@ -46,7 +46,7 @@ export const TelegramCard = () => {
 
   const tg = user.telegram;
   return (
-    <Panel title={<span className="flex items-center gap-2"><Icon name="telegram" size={16} color="#2aabee" />Telegram</span>}>
+    <Panel title={<span className="flex items-center gap-2"><Icon name="telegram" size={16} color="var(--c-telegram)" />Telegram</span>}>
       {tg ? (
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex-1">
@@ -69,7 +69,7 @@ export const TelegramCard = () => {
             </Button>
           </div>
           <div className="flex items-center gap-2 text-xs text-fg-3">
-            Code expires in <Statistic.Countdown value={dayjs(code.expiresAt).valueOf()} format="mm:ss" valueStyle={{ fontSize: 12, color: '#9c9ca3' }}
+            Code expires in <Statistic.Countdown value={dayjs(code.expiresAt).valueOf()} format="mm:ss" valueStyle={{ fontSize: 12, color: 'var(--c-fg-2)' }}
               onFinish={() => setCode({ ...code })} />
             · waiting for confirmation…
           </div>

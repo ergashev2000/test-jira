@@ -2,7 +2,7 @@ import type { CancelReason, TaskStatus, TaskType } from '@/shared/types';
 
 export const TASK_STATUS: Record<TaskStatus, { label: string; color: string; tag: string }> = {
   BACKLOG: { label: 'Backlog', color: '#8a8f98', tag: 'default' },
-  TODO: { label: 'To Do', color: '#d0d1d6', tag: 'blue' },
+  TODO: { label: 'To Do', color: 'var(--c-status-todo)', tag: 'blue' },
   IN_PROGRESS: { label: 'In Progress', color: '#f2c94c', tag: 'gold' },
   REVIEW: { label: 'Review', color: '#a78bfa', tag: 'purple' },
   DONE: { label: 'Done', color: '#4cb782', tag: 'green' },

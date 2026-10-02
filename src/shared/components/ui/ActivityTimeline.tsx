@@ -24,7 +24,7 @@ const StatusInline = ({ s }: { s: string | null }) =>
 export const SourceBadge = ({ source }: { source: Source }) =>
   source === 'TELEGRAM' ? (
     <Tooltip title="via Telegram">
-      <span className="inline-flex items-center gap-1 text-[11px] text-[#2aabee]">
+      <span className="inline-flex items-center gap-1 text-[11px] text-telegram">
         <Icon name="telegram" /> Telegram
       </span>
     </Tooltip>

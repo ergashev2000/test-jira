@@ -59,7 +59,7 @@ export const UserAvatar = ({ userId, size = 20, showName, className, noTooltip }
 export const UserAvatarGroup = ({ userIds, max = 4, size = 22 }: { userIds: string[]; max?: number; size?: number }) => {
   const map = useUserMap();
   return (
-    <Avatar.Group max={{ count: max, style: { backgroundColor: '#26272b', color: '#9b9ca3', fontSize: 11 } }} size={size}>
+    <Avatar.Group max={{ count: max, style: { backgroundColor: 'var(--c-surface-3)', color: 'var(--c-fg-2)', fontSize: 11 } }} size={size}>
       {userIds.map((id) => {
         const u = map.get(id);
         return (

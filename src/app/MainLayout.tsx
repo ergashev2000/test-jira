@@ -10,6 +10,7 @@ import { ROLES, ROUTES } from '@/shared/constants';
 import { Icon } from '@/shared/components/ui/Icon';
 import { UserAvatar } from '@/shared/components/ui/UserAvatar';
 import { useSessionStore } from '@/shared/lib/session';
+import { useThemeStore } from '@/shared/lib/theme';
 import { cn } from '@/shared/utils';
 
 import { GlobalSearch } from '@/shared/components/layout/GlobalSearch';
@@ -22,6 +23,8 @@ export const MainLayout = () => {
   const screens = Grid.useBreakpoint();
   const { data: settings } = useAppSettings();
   const [collapsed, setCollapsed] = useState(false);
+  const themeMode = useThemeStore((s) => s.mode);
+  const toggleTheme = useThemeStore((s) => s.toggle);
 
   useEffect(() => {
     if (screens.xl === false) setCollapsed(true);
@@ -39,6 +42,15 @@ export const MainLayout = () => {
           <Button type="text" size="small" icon={<Icon name="sidebar" size={16} />} onClick={() => setCollapsed(!collapsed)} />
         </Tooltip>
         <div className="flex flex-1 justify-center"><GlobalSearch /></div>
+        <Tooltip title={themeMode === 'dark' ? 'Light mode' : 'Dark mode'}>
+          <Button
+            type="text"
+            size="small"
+            aria-label={themeMode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            icon={<Icon name={themeMode === 'dark' ? 'sun' : 'moon'} size={16} />}
+            onClick={toggleTheme}
+          />
+        </Tooltip>
         <NotificationBell />
         <Dropdown
           trigger={['click']}
@@ -48,12 +60,14 @@ export const MainLayout = () => {
               { type: 'divider' },
               { key: 'profile', label: 'Profile', icon: <Icon name="userCircle" size={14} /> },
               { key: 'notif', label: 'Notification settings', icon: <Icon name="notification" size={14} /> },
+              { key: 'theme', label: themeMode === 'dark' ? 'Light mode' : 'Dark mode', icon: <Icon name={themeMode === 'dark' ? 'sun' : 'moon'} size={14} /> },
               { type: 'divider' },
               { key: 'logout', label: 'Log out', icon: <Icon name="logout" size={14} />, danger: true },
             ],
             onClick: ({ key }) => {
               if (key === 'profile') navigate(ROUTES.PROFILE);
               if (key === 'notif') navigate(ROUTES.NOTIFICATION_SETTINGS);
+              if (key === 'theme') toggleTheme();
               if (key === 'logout') { logout(); navigate(ROUTES.LOGIN, { replace: true }); }
             },
           }}

@@ -36,14 +36,14 @@ export const StatusIcon = ({ status, size = 14 }: { status: TaskStatus; size?: n
       return (
         <svg {...common}>
           <circle cx="7" cy="7" r="7" fill={c} />
-          <path d="M4.2 7.2 6.1 9l3.7-3.9" stroke="#0f0f10" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M4.2 7.2 6.1 9l3.7-3.9" stroke="var(--c-panel)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       );
     case 'CANCELLED':
       return (
         <svg {...common}>
           <circle cx="7" cy="7" r="7" fill={c} />
-          <path d="m4.8 4.8 4.4 4.4m0-4.4-4.4 4.4" stroke="#0f0f10" strokeWidth="1.5" strokeLinecap="round" />
+          <path d="m4.8 4.8 4.4 4.4m0-4.4-4.4 4.4" stroke="var(--c-panel)" strokeWidth="1.5" strokeLinecap="round" />
         </svg>
       );
   }
@@ -56,8 +56,8 @@ export const PriorityIcon = ({ priority, size = 14 }: { priority: Priority; size
     return (
       <svg width={size} height={size} viewBox="0 0 14 14">
         <rect x="1" y="1" width="12" height="12" rx="3" fill={color} />
-        <path d="M7 3.8v4" stroke="#0f0f10" strokeWidth="1.6" strokeLinecap="round" />
-        <circle cx="7" cy="10.2" r="0.9" fill="#0f0f10" />
+        <path d="M7 3.8v4" stroke="var(--c-panel)" strokeWidth="1.6" strokeLinecap="round" />
+        <circle cx="7" cy="10.2" r="0.9" fill="var(--c-panel)" />
       </svg>
     );
   }
@@ -71,7 +71,7 @@ export const PriorityIcon = ({ priority, size = 14 }: { priority: Priority; size
           width="3"
           height={4 + i * 3}
           rx="1"
-          fill={i < weight ? color : '#3a3b40'}
+          fill={i < weight ? color : 'var(--c-line-strong)'}
         />
       ))}
     </svg>

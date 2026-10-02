@@ -11,7 +11,7 @@ interface Props {
   loading?: boolean;
 }
 
-export const KpiCard = ({ icon, title, value, color = '#9b9ca3', onClick, loading }: Props) => (
+export const KpiCard = ({ icon, title, value, color = 'var(--c-fg-2)', onClick, loading }: Props) => (
   <button
     type="button"
     onClick={onClick}
@@ -22,12 +22,12 @@ export const KpiCard = ({ icon, title, value, color = '#9b9ca3', onClick, loadin
     )}
   >
     <div className="flex items-center gap-2 text-xs text-fg-2">
-      <span className="flex h-6 w-6 items-center justify-center rounded-md" style={{ background: `${color}22`, color }}>
+      <span className="flex h-6 w-6 items-center justify-center rounded-md" style={{ background: `color-mix(in srgb, ${color} 14%, transparent)`, color }}>
         {icon}
       </span>
       {title}
     </div>
-    <div className="text-2xl font-semibold tabular-nums" style={{ color: value && color !== '#9b9ca3' ? color : undefined }}>
+    <div className="text-2xl font-semibold tabular-nums" style={{ color: value && color !== 'var(--c-fg-2)' ? color : undefined }}>
       {loading ? <span className="inline-block h-7 w-10 animate-pulse rounded bg-surface-2" /> : value}
     </div>
   </button>

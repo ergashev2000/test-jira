@@ -14,9 +14,9 @@ interface Props {
 export const TaskCardView = ({ task, overlay }: Omit<Props, 'onOpen'>) => (
   <div
     className={cn(
-      'flex flex-col gap-2 rounded-lg border border-line bg-surface p-3 text-left transition-colors hover:border-line-strong hover:bg-surface-2',
+      'flex flex-col gap-2 rounded-lg border border-line bg-card p-3 text-left transition-colors hover:border-line-strong hover:bg-surface-2',
       task.isBlocked && 'border-l-2 border-l-danger',
-      overlay && 'rotate-[1.5deg] cursor-grabbing border-line-strong shadow-2xl shadow-black/60',
+      overlay && 'rotate-[1.5deg] cursor-grabbing border-line-strong shadow-2xl shadow-(color:--c-shadow)',
     )}
   >
     <div className="flex items-center gap-2 text-xs text-fg-3">

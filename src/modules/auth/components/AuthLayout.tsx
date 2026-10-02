@@ -1,25 +1,13 @@
 import { ConfigProvider, theme, type ThemeConfig } from 'antd';
-import { useState, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 import { Icon } from '@/shared/components/ui/Icon';
+import { useThemeStore, type ThemeMode } from '@/shared/lib/theme';
 
-type AuthMode = 'light' | 'dark';
-
-const MODE_KEY = 'auth-theme';
 const AUTH_PRIMARY = '#1d5cf5';
 
-const readMode = (): AuthMode => {
-  try {
-    const saved = localStorage.getItem(MODE_KEY);
-    if (saved === 'light' || saved === 'dark') return saved;
-  } catch {
-    // storage unavailable — fall back to system preference
-  }
-  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-};
-
 /** Standalone antd theme for auth screens; `inherit: false` keeps the app's dark tokens out of light mode. */
-const authTheme = (mode: AuthMode): ThemeConfig => ({
+const authTheme = (mode: ThemeMode): ThemeConfig => ({
   inherit: false,
   algorithm: mode === 'dark' ? theme.darkAlgorithm : theme.defaultAlgorithm,
   token: {
@@ -46,17 +34,8 @@ export const AuthLayout = ({
   subtitle?: string;
   children: ReactNode;
 }) => {
-  const [mode, setMode] = useState<AuthMode>(readMode);
-
-  const toggleMode = () => {
-    const next = mode === 'dark' ? 'light' : 'dark';
-    setMode(next);
-    try {
-      localStorage.setItem(MODE_KEY, next);
-    } catch {
-      // ignore — mode just won't persist
-    }
-  };
+  const mode = useThemeStore((s) => s.mode);
+  const toggleMode = useThemeStore((s) => s.toggle);
 
   return (
     <ConfigProvider theme={authTheme(mode)}>

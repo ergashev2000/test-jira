@@ -72,7 +72,7 @@ export const ProfilePage = () => {
               </div>
             </Form>
           ) : (
-            <Descriptions column={{ xs: 1, sm: 2 }} size="small" colon={false} styles={{ label: { color: '#66666d' } }}>
+            <Descriptions column={{ xs: 1, sm: 2 }} size="small" colon={false} styles={{ label: { color: 'var(--c-fg-3)' } }}>
               <Descriptions.Item label="Email">{user.email}</Descriptions.Item>
               <Descriptions.Item label="Phone">{formatPhone(user.phone)}</Descriptions.Item>
               <Descriptions.Item label="Position">{user.position}</Descriptions.Item>

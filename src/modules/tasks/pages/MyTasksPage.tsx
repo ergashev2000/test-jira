@@ -27,7 +27,7 @@ const PlanInfo = () => {
     <span className="flex items-center gap-1.5 text-xs text-fg-2">
       <Icon name="check" className="text-success" />
       Today's plan confirmed at {formatTime(plan.confirmedAt)}
-      {plan.confirmedVia === 'TELEGRAM' ? <> via <Icon name="telegram" className="text-[#2aabee]" /> Telegram</> : ' via Web'}
+      {plan.confirmedVia === 'TELEGRAM' ? <> via <Icon name="telegram" className="text-telegram" /> Telegram</> : ' via Web'}
     </span>
   ) : (
     <span className="flex items-center gap-1.5 text-xs text-warn">
@@ -65,7 +65,8 @@ export const MyTasksPage = () => {
               <span className="flex items-center gap-2">
                 {t.label}
                 <Badge count={counts?.[t.key] ?? 0} showZero size="small"
-                  color={t.key === 'overdue' || t.key === 'blocked' ? (counts?.[t.key] ? '#eb5757' : '#2a2a2f') : '#2a2a2f'} />
+                  color={(t.key === 'overdue' || t.key === 'blocked') && counts?.[t.key] ? 'var(--c-danger)' : 'var(--c-surface-3)'}
+                  styles={{ indicator: { color: (t.key === 'overdue' || t.key === 'blocked') && counts?.[t.key] ? '#fff' : 'var(--c-fg-2)', boxShadow: 'none' } }} />
               </span>
             ),
           }))}

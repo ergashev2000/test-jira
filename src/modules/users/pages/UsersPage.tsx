@@ -60,7 +60,7 @@ export const UsersPage = () => {
               { title: 'Team', dataIndex: 'teamName', width: 120, render: (v: string | null) => v ?? <span className="text-fg-3">—</span> },
               { title: 'Role', dataIndex: 'role', width: 140, render: (r: Role) => <Tag color={ROLES[r].color}>{ROLES[r].label}</Tag> },
               { title: 'Telegram', dataIndex: 'telegram', width: 150, render: (t: UserRow['telegram']) => t
-                ? <span className="flex items-center gap-1 text-[#2aabee]"><Icon name="telegram" size={13} />@{t.username}</span>
+                ? <span className="flex items-center gap-1 text-telegram"><Icon name="telegram" size={13} />@{t.username}</span>
                 : <span className="text-fg-3">Not linked</span> },
               { title: 'Status', dataIndex: 'status', width: 100, render: (s: UserStatus) => <Badge status={s === 'ACTIVE' ? 'success' : 'default'} text={s === 'ACTIVE' ? 'Active' : 'Inactive'} /> },
               { title: 'Created', dataIndex: 'createdAt', width: 110, render: (d: string) => formatDate(d) },

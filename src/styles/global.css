@@ -11,6 +11,7 @@
   --color-surface: var(--c-surface);
   --color-surface-2: var(--c-surface-2);
   --color-surface-3: var(--c-surface-3);
+  --color-card: var(--c-card);
   --color-line: var(--c-line);
   --color-line-strong: var(--c-line-strong);
   --color-fg: var(--c-fg);
@@ -20,6 +21,7 @@
   --color-danger: var(--c-danger);
   --color-warn: var(--c-warn);
   --color-success: var(--c-success);
+  --color-telegram: var(--c-telegram);
   --font-sans: var(--font-sans);
 }
 
@@ -51,7 +53,7 @@
     height: 10px;
   }
   ::-webkit-scrollbar-thumb {
-    background: #2a2a2f;
+    background: var(--c-scrollbar);
     border-radius: 8px;
     border: 2px solid transparent;
     background-clip: padding-box;
