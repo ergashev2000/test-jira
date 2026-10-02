@@ -1,1 +1,1 @@
-export type { UserRow } from './api/usersApi';
+export type { User, UserStatus } from './types/user.types';

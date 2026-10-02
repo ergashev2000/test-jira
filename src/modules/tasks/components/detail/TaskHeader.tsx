@@ -5,9 +5,9 @@ import { App, Button, Dropdown, Tag, Tooltip, Typography } from 'antd';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { useCurrentUser } from '@/shared/hooks';
 import { ReasonModal, TaskTypeIcon, type ReasonValues } from '@/shared/components/ui';
 import { ROUTES } from '@/shared/constants';
-import { useSessionStore } from '@/shared/lib/session';
 import type { CancelReason } from '@/shared/types';
 import { canBlock, canCancelDirect, canEditTask, canRequestCancel, copyToClipboard, errorMessage } from '@/shared/utils';
 
@@ -17,7 +17,7 @@ import type { TaskDetail } from '../../types/task.types';
 import { TaskFormModal } from '../TaskFormModal';
 
 export const TaskHeader = ({ task, inDrawer }: { task: TaskDetail; inDrawer?: boolean }) => {
-  const user = useSessionStore((s) => s.user)!;
+  const user = useCurrentUser();
   const { message } = App.useApp();
   const navigate = useNavigate();
   const [modal, setModal] = useState<'block' | 'cancel' | 'request' | 'edit' | null>(null);

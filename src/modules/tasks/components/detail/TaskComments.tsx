@@ -1,16 +1,16 @@
 import { App, Button, Input, Tooltip } from 'antd';
 import { useState } from 'react';
 
+import { useCurrentUser } from '@/shared/hooks';
 import { EmptyState, QueryState, UserAvatar } from '@/shared/components/ui';
 import { useUserMap } from '@/shared/api/lookups';
-import { useSessionStore } from '@/shared/lib/session';
 import type { TaskComment } from '@/shared/types';
 import { errorMessage, formatDateTime, fromNow } from '@/shared/utils';
 
 import { useAddComment, useComments, useEditComment } from '../../hooks/useTaskActions';
 
 const CommentItem = ({ c }: { c: TaskComment }) => {
-  const me = useSessionStore((s) => s.user)!;
+  const me = useCurrentUser();
   const users = useUserMap();
   const { message } = App.useApp();
   const edit = useEditComment();
@@ -50,7 +50,7 @@ const CommentItem = ({ c }: { c: TaskComment }) => {
 };
 
 export const TaskComments = ({ taskId }: { taskId: string }) => {
-  const me = useSessionStore((s) => s.user)!;
+  const me = useCurrentUser();
   const { message } = App.useApp();
   const query = useComments(taskId);
   const add = useAddComment();

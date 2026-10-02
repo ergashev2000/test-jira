@@ -2,7 +2,8 @@ import { useMutation } from '@tanstack/react-query';
 import { App, Button, Descriptions, Form, Input, Modal, Tag } from 'antd';
 import { useState } from 'react';
 
-import { useTeams } from '@/modules/teams';
+import { useTeamLookups } from '@/shared/api/lookups';
+import { useCurrentUser } from '@/shared/hooks';
 import { PageHeader, Panel, UserAvatar } from '@/shared/components/ui';
 import { ROLES } from '@/shared/constants';
 import { useSessionStore } from '@/shared/lib/session';
@@ -30,10 +31,10 @@ const PasswordModal = ({ open, onClose }: { open: boolean; onClose: () => void }
 };
 
 export const ProfilePage = () => {
-  const user = useSessionStore((s) => s.user)!;
+  const user = useCurrentUser();
   const setUser = useSessionStore((s) => s.setUser);
   const { message } = App.useApp();
-  const { data: teams = [] } = useTeams();
+  const { data: teams = [] } = useTeamLookups();
   const [editing, setEditing] = useState(false);
   const [pwOpen, setPwOpen] = useState(false);
   const [form] = Form.useForm<{ fullName: string; phone: string }>();

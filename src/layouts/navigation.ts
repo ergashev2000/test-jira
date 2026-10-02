@@ -1,5 +1,5 @@
 import type { IconSvgElement } from '@hugeicons/react';
-import { Analytics01Icon, DashboardSquare01Icon, Folder01Icon, KanbanIcon, Notification03Icon, Rocket01Icon, Settings02Icon, Shield01Icon, Task01Icon, UserCircleIcon, UserGroupIcon, UserMultipleIcon } from '@hugeicons/core-free-icons';
+import { Analytics01Icon, DashboardSquare01Icon, Folder01Icon, KanbanIcon, Notification03Icon, Rocket01Icon, Settings02Icon, Shield01Icon, Task01Icon, UserCircleIcon, UserGroupIcon, UserMultipleIcon, UserShield01Icon } from '@hugeicons/core-free-icons';
 import { ROUTES, type Permission } from '@/shared/constants';
 
 /** Navigation shared by the sidebar and the command palette. */
@@ -27,6 +27,7 @@ export const WORKSPACE: NavItem[] = [
 
 export const ADMIN: NavItem[] = [
   { to: ROUTES.USERS, label: 'Users', icon: UserMultipleIcon, permission: 'user.manage' },
+  { to: ROUTES.ROLES, label: 'Roles', icon: UserShield01Icon, permission: 'user.manage' },
   { to: ROUTES.TEAMS, label: 'Teams', icon: UserGroupIcon, permission: 'team.manage' },
   { to: ROUTES.AUDIT_LOG, label: 'Audit log', icon: Shield01Icon, permission: 'auditLog.view' },
   { to: ROUTES.SETTINGS, label: 'Settings', icon: Settings02Icon, permission: 'settings.manage' },

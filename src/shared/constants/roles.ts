@@ -8,6 +8,10 @@ export const ROLES: Record<Role, { label: string; color: string }> = {
   EMPLOYEE: { label: 'Employee', color: 'default' },
 };
 
+/** Highest role wins when the backend returns several (ROLES is ordered by rank). */
+export const primaryRole = (roles: string[]): Role =>
+  (Object.keys(ROLES) as Role[]).find((r) => roles.some((x) => x.toUpperCase() === r)) ?? 'EMPLOYEE';
+
 export const ROLE_OPTIONS = (Object.keys(ROLES) as Role[]).map((r) => ({ value: r, label: ROLES[r].label }));
 
 /** Roles that direct work: can approve, cancel immediately, manage blockers of anyone. */

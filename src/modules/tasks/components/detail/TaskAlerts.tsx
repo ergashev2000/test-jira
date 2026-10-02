@@ -1,15 +1,15 @@
 import { Alert, App, Button, Popconfirm, Space } from 'antd';
 
+import { useCurrentUser } from '@/shared/hooks';
 import { useUserMap } from '@/shared/api/lookups';
 import { CANCEL_REASONS } from '@/shared/constants';
-import { useSessionStore } from '@/shared/lib/session';
 import { canBlock, errorMessage, fromNow, isManager } from '@/shared/utils';
 
 import { useResolveBlocker, useReviewCancel } from '../../hooks/useTaskActions';
 import type { TaskDetail } from '../../types/task.types';
 
 export const TaskAlerts = ({ task }: { task: TaskDetail }) => {
-  const user = useSessionStore((s) => s.user)!;
+  const user = useCurrentUser();
   const users = useUserMap();
   const { message } = App.useApp();
   const resolve = useResolveBlocker();

@@ -48,6 +48,7 @@ export const router = createBrowserRouter([
       { path: 'board', element: guard('board.view', page(boardPages, 'GlobalBoardPage')) },
       { path: 'tasks/:taskKey', element: page(() => import('@/modules/tasks/pages/TaskPage'), 'TaskPage') },
       { path: 'users', element: guard('user.manage', page(() => import('@/modules/users/pages/UsersPage'), 'UsersPage')) },
+      { path: 'roles', element: guard('user.manage', page(() => import('@/modules/roles/pages/RolesPage'), 'RolesPage')) },
       { path: 'teams', element: guard('team.manage', page(() => import('@/modules/teams/pages/TeamsPage'), 'TeamsPage')) },
       { path: 'reports', element: guard('report.view', page(reportsPages, 'ReportsPage')) },
       { path: 'notifications', element: <NotificationsPage /> },

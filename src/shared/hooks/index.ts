@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { hasPermission, type Permission } from '@/shared/constants';
 import { useSessionStore } from '@/shared/lib/session';
 
+export { useCurrentUser } from './useCurrentUser';
 export { useTableParams } from './useTableParams';
 
 export const useDebounce = <T,>(value: T, delay = 300) => {

@@ -6,10 +6,10 @@ import { useNavigate } from 'react-router-dom';
 import { logout } from '@/modules/auth';
 import { NotificationBell } from '@/modules/notifications';
 import { useAppSettings } from '@/modules/settings';
+import { useCurrentUser } from '@/shared/hooks';
 import { ROLES, ROUTES } from '@/shared/constants';
 
 import { UserAvatar } from '@/shared/components/ui/UserAvatar';
-import { useSessionStore } from '@/shared/lib/session';
 import { useThemeStore } from '@/shared/lib/theme';
 import { cn } from '@/shared/utils';
 
@@ -22,7 +22,7 @@ interface Props {
 
 /** Top bar: workspace · sidebar toggle · search · theme · inbox · user menu. */
 export const Header = ({ collapsed, onToggleSidebar }: Props) => {
-  const user = useSessionStore((s) => s.user)!;
+  const user = useCurrentUser();
   const navigate = useNavigate();
   const { data: settings } = useAppSettings();
   const themeMode = useThemeStore((s) => s.mode);

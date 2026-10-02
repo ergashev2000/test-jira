@@ -7,7 +7,7 @@ import { ApiError } from './mock/mockRequest';
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? '/api';
 
-export const http = axios.create({ baseURL: BASE_URL, timeout: 20_000 });
+export const api = axios.create({ baseURL: BASE_URL, timeout: 20_000 });
 
 const AUTH_ENDPOINTS = ['/auth/login/', '/auth/refresh/'];
 const isAuthEndpoint = (url?: string) => !!url && AUTH_ENDPOINTS.some((e) => url.includes(e));
@@ -70,13 +70,13 @@ const refreshAccessToken = (): Promise<string> => {
   return refreshing;
 };
 
-http.interceptors.request.use((config) => {
+api.interceptors.request.use((config) => {
   const token = useSessionStore.getState().token;
   if (token && !isAuthEndpoint(config.url)) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-http.interceptors.response.use(
+api.interceptors.response.use(
   (r) => r,
   async (error: unknown) => {
     if (!axios.isAxiosError(error) || !error.config) return Promise.reject(toApiError(error));
@@ -88,7 +88,7 @@ http.interceptors.response.use(
       try {
         const access = await refreshAccessToken();
         original.headers.Authorization = `Bearer ${access}`;
-        return http(original as AxiosRequestConfig);
+        return api(original as AxiosRequestConfig);
       } catch {
         forceLogout();
         return Promise.reject(new ApiError(401, STATUS_FALLBACK[401]));

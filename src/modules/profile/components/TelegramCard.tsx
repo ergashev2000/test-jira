@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { App, Button, Popconfirm, Statistic } from 'antd';
 import { useEffect, useState } from 'react';
 
+import { useCurrentUser } from '@/shared/hooks';
 import { Panel } from '@/shared/components/ui';
 import { QUERY_KEYS } from '@/shared/constants';
 import dayjs from '@/shared/lib/dayjs';
@@ -15,7 +16,7 @@ import { disconnectTelegram, generateTelegramCode, getTelegramLinkStatus, type T
 export const TelegramCard = () => {
   const { message } = App.useApp();
   const qc = useQueryClient();
-  const user = useSessionStore((s) => s.user)!;
+  const user = useCurrentUser();
   const setUser = useSessionStore((s) => s.setUser);
   const [code, setCode] = useState<TelegramCode | null>(null);
   const expired = !!code && dayjs().isAfter(code.expiresAt);

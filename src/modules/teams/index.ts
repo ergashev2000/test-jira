@@ -1,1 +1,1 @@
-export { useTeams } from './hooks/useTeams';
+export type { Team } from './types/team.types';

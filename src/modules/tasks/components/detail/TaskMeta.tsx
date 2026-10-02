@@ -2,11 +2,11 @@ import { App, DatePicker, InputNumber, Select } from 'antd';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
+import { useCurrentUser } from '@/shared/hooks';
 import { useOpenSprints } from '@/shared/api/lookups';
 import { DeadlineText, PriorityIcon, PriorityTag, ProjectIcon, UserAvatar, UserSelect } from '@/shared/components/ui';
 import { PRIORITY_OPTIONS, ROUTES } from '@/shared/constants';
 import dayjs from '@/shared/lib/dayjs';
-import { useSessionStore } from '@/shared/lib/session';
 import type { Priority } from '@/shared/types';
 import { canEditTask, errorMessage, formatDateTime, isOverdue } from '@/shared/utils';
 
@@ -25,7 +25,7 @@ const BACKLOG = '__backlog__';
 
 /** Right-hand property panel; every field is inline-editable for leads/managers. */
 export const TaskMeta = ({ task }: { task: TaskDetail }) => {
-  const user = useSessionStore((s) => s.user)!;
+  const user = useCurrentUser();
   const { message } = App.useApp();
   const update = useUpdateTask();
   const { data: sprints = [] } = useOpenSprints(task.projectId);

@@ -1,6 +1,7 @@
-import { http } from '@/shared/lib/axios';
+import { primaryRole } from '@/shared/constants';
+import { api } from '@/shared/lib/axios';
 import { ApiError, mockRequest } from '@/shared/lib/mock';
-import type { Role, User } from '@/shared/types';
+import type { User } from '@/shared/types';
 
 export interface LoginPayload {
   username: string;
@@ -34,12 +35,6 @@ interface ApiLoginResponse {
   user: ApiUser;
 }
 
-/** Highest role wins when the backend returns several. */
-const ROLE_PRIORITY: Role[] = ['SUPER_ADMIN', 'ADMIN', 'PROJECT_MANAGER', 'TEAM_LEAD', 'EMPLOYEE'];
-
-const toRole = (roles: string[]): Role =>
-  ROLE_PRIORITY.find((r) => roles.some((x) => x.toUpperCase() === r)) ?? 'EMPLOYEE';
-
 export const fromApiUser = (u: ApiUser): User => ({
   id: String(u.id),
   fullName: u.full_name || u.username,
@@ -48,7 +43,7 @@ export const fromApiUser = (u: ApiUser): User => ({
   phone: u.phone,
   position: u.position,
   teamId: u.team === null ? null : String(typeof u.team === 'object' ? u.team.id : u.team),
-  role: toRole(u.roles),
+  role: primaryRole(u.roles),
   status: u.status.toUpperCase() === 'ACTIVE' ? 'ACTIVE' : 'INACTIVE',
   telegram: null,
   createdAt: u.created_at,
@@ -57,13 +52,13 @@ export const fromApiUser = (u: ApiUser): User => ({
 
 // POST /auth/login/  →  { access, refresh, user }
 export const login = async ({ username, password }: LoginPayload): Promise<LoginResponse> => {
-  const { data } = await http.post<ApiLoginResponse>('/auth/login/', { username: username.trim(), password });
+  const { data } = await api.post<ApiLoginResponse>('/auth/login/', { username: username.trim(), password });
   return { token: data.access, refresh: data.refresh, user: fromApiUser(data.user) };
 };
 
 // GET /auth/me/  — same user shape as the login response
 export const fetchMe = async (): Promise<User> => {
-  const { data } = await http.get<ApiUser>('/auth/me/');
+  const { data } = await api.get<ApiUser>('/auth/me/');
   return fromApiUser(data);
 };
 

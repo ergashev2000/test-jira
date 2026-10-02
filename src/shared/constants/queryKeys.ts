@@ -31,8 +31,19 @@ export const QUERY_KEYS = {
     all: ['users'] as const,
     list: (params: object) => ['users', 'list', params] as const,
     options: ['users', 'options'] as const,
+    teamOptions: ['users', 'team-options'] as const,
   },
-  teams: { all: ['teams'] as const },
+  roles: {
+    list: ['roles', 'list'] as const,
+    permissions: ['roles', 'permissions'] as const,
+  },
+  teams: {
+    all: ['teams'] as const,
+    list: (params: object) => ['teams', 'list', params] as const,
+    members: (id: number) => ['teams', 'members', id] as const,
+    userOptions: (search: string) => ['teams', 'user-options', search] as const,
+    lookups: ['teams', 'lookups'] as const,
+  },
   reports: {
     all: ['reports'] as const,
     daily: (userId: string, date: string) => ['reports', 'daily', userId, date] as const,

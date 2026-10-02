@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { QUERY_KEYS } from '@/shared/constants';
 import { actor, db, mockRequest, visibleProjects } from '@/shared/lib/mock';
-import type { Project, Sprint, User } from '@/shared/types';
+import type { Project, Sprint, Team, User } from '@/shared/types';
 
 /**
  * Lightweight reference data used by shared selects/avatars across modules.
@@ -50,6 +50,16 @@ export const useOpenSprints = (projectId?: string) =>
     enabled: !!projectId,
     select: (list) => list.filter((s) => s.status === 'ACTIVE' || s.status === 'PLANNED'),
   });
+
+// GET /api/lookups/teams  — mock; Reports/Profile still run on mock data.
+export const fetchTeamLookups = () =>
+  mockRequest(() => {
+    actor();
+    return db.teams as Team[];
+  }, 200);
+
+export const useTeamLookups = () =>
+  useQuery({ queryKey: QUERY_KEYS.teams.lookups, queryFn: fetchTeamLookups, staleTime: 30_000 });
 
 export const useUserLookups = () =>
   useQuery({ queryKey: QUERY_KEYS.users.options, queryFn: fetchUserLookups, staleTime: 60_000 });

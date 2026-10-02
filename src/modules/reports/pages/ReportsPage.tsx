@@ -4,11 +4,10 @@ import { useQuery } from '@tanstack/react-query';
 import { Button, DatePicker, Segmented, Select } from 'antd';
 
 import { useCurrentProject } from '@/modules/projects';
-import { useTeams } from '@/modules/teams';
-import { fetchSprintLookups, useProjectLookups } from '@/shared/api/lookups';
+import { fetchSprintLookups, useProjectLookups, useTeamLookups } from '@/shared/api/lookups';
 import { EmptyState, PageHeader, UserSelect } from '@/shared/components/ui';
 import { hasPermission, type Permission } from '@/shared/constants';
-import { useTableParams } from '@/shared/hooks';
+import { useCurrentUser, useTableParams } from '@/shared/hooks';
 import dayjs from '@/shared/lib/dayjs';
 import { useSessionStore } from '@/shared/lib/session';
 
@@ -25,8 +24,8 @@ const TYPES: { value: ReportType; label: string; permission: Permission }[] = [
 
 export const ReportsPage = () => {
   const { get, set } = useTableParams();
-  const user = useSessionStore((s) => s.user)!;
-  const { data: teams = [] } = useTeams();
+  const user = useCurrentUser();
+  const { data: teams = [] } = useTeamLookups();
   const { data: projects = [] } = useProjectLookups();
   const allowed = TYPES.filter((t) => hasPermission(user.role, t.permission));
   const type = allowed.find((t) => t.value === get('type'))?.value ?? 'daily';

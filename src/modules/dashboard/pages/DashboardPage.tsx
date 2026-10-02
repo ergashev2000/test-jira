@@ -8,8 +8,7 @@ import { Link } from 'react-router-dom';
 import { useProjectLookups } from '@/shared/api/lookups';
 import { ErrorState, KpiCard, PageHeader, Panel } from '@/shared/components/ui';
 import { QUERY_KEYS, REFETCH_INTERVAL, ROUTES } from '@/shared/constants';
-import { useTableParams } from '@/shared/hooks';
-import { useSessionStore } from '@/shared/lib/session';
+import { useCurrentUser, useTableParams } from '@/shared/hooks';
 
 import { getDashboard, type DashboardData } from '../api/dashboardApi';
 import {
@@ -34,7 +33,7 @@ const Widget = ({ title, extra, data, loading, className, children }: {
 
 export const DashboardPage = () => {
   const { get, set } = useTableParams();
-  const user = useSessionStore((s) => s.user)!;
+  const user = useCurrentUser();
   const projectId = get('projectId');
   const { data: projects = [] } = useProjectLookups();
   const go = useKpiNavigate();
