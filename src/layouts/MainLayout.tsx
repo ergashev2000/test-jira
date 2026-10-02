@@ -22,7 +22,7 @@ export const MainLayout = () => {
     <div className="flex h-full flex-col bg-bg">
       <Header collapsed={collapsed} onToggleSidebar={() => setCollapsed(!collapsed)} />
       <div className="flex min-h-0 flex-1">
-        <aside className={cn('shrink-0 transition-all', collapsed ? 'w-14' : 'w-[240px]')}>
+        <aside className={cn('shrink-0 transition-all', collapsed ? 'w-14' : 'w-60')}>
           <Sidebar collapsed={collapsed} />
         </aside>
         <main className="mr-2 mb-2 min-w-0 flex-1 overflow-auto rounded-xl border border-line bg-panel">
