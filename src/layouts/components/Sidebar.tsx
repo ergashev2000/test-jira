@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { AnimatePresence, motion, type Transition } from 'framer-motion';
+import { useState, type ReactNode } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 
 import { useProjectLookups } from '@/shared/api/lookups';
@@ -6,8 +7,8 @@ import { hasPermission, ROUTES, type Permission } from '@/shared/constants';
 import { useSessionStore } from '@/shared/lib/session';
 import { cn } from '@/shared/utils';
 
-import { Icon, type IconName } from '../ui/Icon';
-import { ProjectIcon } from '../ui/ProjectIcon';
+import { Icon, type IconName } from '@/shared/components/ui/Icon';
+import { ProjectIcon } from '@/shared/components/ui/ProjectIcon';
 
 interface NavItem {
   to: string;
@@ -38,6 +39,31 @@ const ADMIN: NavItem[] = [
   { to: ROUTES.SETTINGS, label: 'Settings', icon: 'settings', permission: 'settings.manage' },
 ];
 
+const EASE: Transition = { duration: 0.22, ease: [0.4, 0, 0.2, 1] };
+
+/** Height-animated accordion body; `initial={false}` skips the animation on first render. */
+const Collapsible = ({ open, children }: { open: boolean; children: ReactNode }) => (
+  <AnimatePresence initial={false}>
+    {open && (
+      <motion.div
+        initial={{ height: 0, opacity: 0 }}
+        animate={{ height: 'auto', opacity: 1 }}
+        exit={{ height: 0, opacity: 0 }}
+        transition={EASE}
+        className="overflow-hidden"
+      >
+        {children}
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
+
+const Chevron = ({ open, className }: { open: boolean; className?: string }) => (
+  <motion.span className={cn('inline-flex', className)} initial={false} animate={{ rotate: open ? 0 : -90 }} transition={EASE}>
+    <Icon name="arrowDown" size={12} />
+  </motion.span>
+);
+
 const Item = ({ item, collapsed }: { item: NavItem; collapsed: boolean }) => (
   <NavLink
     to={item.to}
@@ -54,17 +80,19 @@ const Item = ({ item, collapsed }: { item: NavItem; collapsed: boolean }) => (
   </NavLink>
 );
 
-const Section = ({ title, children, collapsed }: { title: string; children: React.ReactNode; collapsed: boolean }) => {
+const Section = ({ title, children, collapsed }: { title: string; children: ReactNode; collapsed: boolean }) => {
   const [open, setOpen] = useState(true);
   if (collapsed) return <div className="flex flex-col gap-0.5 border-t border-line pt-2">{children}</div>;
   return (
-    <div className="flex flex-col gap-0.5">
+    <div className="flex flex-col">
       <button type="button" onClick={() => setOpen(!open)}
         className="flex h-7 cursor-pointer items-center gap-1 border-0 bg-transparent px-2 text-xs text-fg-3 hover:text-fg-2">
         {title}
-        <Icon name="arrowDown" size={12} className={cn('transition-transform', !open && '-rotate-90')} />
+        <Chevron open={open} />
       </button>
-      {open && children}
+      <Collapsible open={open}>
+        <div className="flex flex-col gap-0.5 pt-0.5">{children}</div>
+      </Collapsible>
     </div>
   );
 };
@@ -83,17 +111,17 @@ const ProjectsNav = ({ collapsed }: { collapsed: boolean }) => {
             className="flex h-8 w-full cursor-pointer items-center gap-2.5 rounded-md border-0 bg-transparent px-2 text-left text-[13px] text-fg-2 hover:bg-surface-2 hover:text-fg">
             <ProjectIcon projectKey={p.key} size={15} />
             <span className="flex-1 truncate">{p.name}</span>
-            <Icon name="arrowDown" size={12} className={cn('text-fg-3 transition-transform', expanded !== p.key && '-rotate-90')} />
+            <Chevron open={expanded === p.key} className="text-fg-3" />
           </button>
-          {expanded === p.key && (
-            <div className="ml-4 flex flex-col gap-0.5 border-l border-line pl-2">
+          <Collapsible open={expanded === p.key}>
+            <div className="ml-4 flex flex-col gap-0.5 border-l border-line py-0.5 pl-2">
               {(['overview', 'board', 'backlog', 'sprints'] as const).map((tab) => (
                 <Item key={tab} collapsed={false}
                   item={{ to: ROUTES.project(p.key, tab), label: tab[0].toUpperCase() + tab.slice(1),
                     icon: tab === 'overview' ? 'home' : tab === 'board' ? 'board' : tab === 'backlog' ? 'list' : 'sprint' }} />
               ))}
             </div>
-          )}
+          </Collapsible>
         </div>
       ))}
     </Section>

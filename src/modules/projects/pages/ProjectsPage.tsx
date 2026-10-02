@@ -41,7 +41,7 @@ export const ProjectsPage = () => {
       s ? <span className="flex items-center gap-1.5 text-fg-2"><Icon name="sprint" size={13} />{s.name}</span> : <span className="text-fg-3">—</span> },
     { title: 'Progress', dataIndex: 'progress', width: 170, render: (_: unknown, p: ProjectListItem) => (
       <Tooltip title={`${p.doneTasks} of ${p.totalTasks} done (cancelled excluded)`}>
-        <Progress percent={p.progress} size="small" strokeColor="#5e6ad2" className="!m-0" />
+        <Progress percent={p.progress} size="small" strokeColor="#165dff" className="!m-0" />
       </Tooltip>) },
     { title: 'Status', dataIndex: 'status', width: 110, render: (s: ProjectStatus) => <Tag color={PROJECT_STATUS[s].color}>{PROJECT_STATUS[s].label}</Tag> },
     { title: 'Created', dataIndex: 'createdAt', width: 110, render: (d: string) => <span className="text-fg-2">{formatDate(d)}</span> },

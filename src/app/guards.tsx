@@ -1,14 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
-import { Button, Result, Spin } from 'antd';
+import { Button, Result } from 'antd';
 import { useEffect, type ReactNode } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 import { fetchMe, logout, useAuthStore } from '@/modules/auth';
+import { PageLoader } from '@/shared/components/ui/Loader';
 import { hasPermission, QUERY_KEYS, ROUTES, type Permission } from '@/shared/constants';
-
-const FullScreenSpin = () => (
-  <div className="flex h-full items-center justify-center bg-bg"><Spin size="large" /></div>
-);
 
 /** Requires a token; restores the user on reload via GET /auth/me. */
 export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
@@ -25,7 +22,7 @@ export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
     const redirect = encodeURIComponent(location.pathname + location.search);
     return <Navigate to={`${ROUTES.LOGIN}?redirect=${redirect}`} replace />;
   }
-  if (!user) return <FullScreenSpin />;
+  if (!user) return <PageLoader />;
   return <>{children}</>;
 };
 

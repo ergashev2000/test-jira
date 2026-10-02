@@ -81,7 +81,7 @@ export const BacklogTab = () => {
             {open.length > 0 && (
               <Collapse
                 defaultActiveKey={open.map((s) => s.id)}
-                className="!rounded-lg !border-line !bg-surface"
+                className="!rounded-xl !border-line !bg-surface"
                 items={open.map((s) => {
                   const list = all.filter((t) => t.sprintId === s.id);
                   return {
@@ -100,7 +100,7 @@ export const BacklogTab = () => {
                 })}
               />
             )}
-            <section className="overflow-hidden rounded-lg border border-line bg-surface">
+            <section className="overflow-hidden rounded-xl border border-line bg-surface">
               <header className="flex h-11 items-center gap-2 border-b border-line px-5">
                 <span className="font-medium">Backlog</span>
                 <span className="text-xs text-fg-3">{all.filter((t) => !t.sprintId).length}</span>

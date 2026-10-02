@@ -22,7 +22,7 @@ export const ActiveSprintCard = ({ s }: { s: DashboardData['activeSprint'] }) =>
       </div>
       <p className="m-0 text-fg-2">{s.goal}</p>
       <div className="text-xs text-fg-3">{formatDate(s.startDate)} — {formatDate(s.endDate)}</div>
-      <Progress percent={s.progress} strokeColor="#5e6ad2" />
+      <Progress percent={s.progress} strokeColor="#165dff" />
     </div>
   );
 };
@@ -34,7 +34,7 @@ export const SprintProgressChart = ({ p }: { p: DashboardData['sprintProgress'] 
   const data = [
     { name: `Completed ${pct(p.completed)}`, value: p.completed, color: '#4cb782' },
     { name: `In progress ${pct(p.inProgress)}`, value: p.inProgress, color: '#f2c94c' },
-    { name: `To do ${pct(p.todo)}`, value: p.todo, color: '#5e6ad2' },
+    { name: `To do ${pct(p.todo)}`, value: p.todo, color: '#165dff' },
     { name: `Blocked ${pct(p.blocked)}`, value: p.blocked, color: '#eb5757' },
   ];
   return <div className="grid grid-cols-[1fr_150px] items-center gap-3"><DonutChart data={data} height={170} center={pct(p.completed)} /><Legend data={data} /></div>;
@@ -73,7 +73,7 @@ export const TeamTable = ({ rows }: { rows: DashboardData['team'] }) => (
 export const WorkloadChart = ({ rows }: { rows: DashboardData['workload'] }) => {
   const users = useUserMap();
   if (!rows.length) return <EmptyState description="No active tasks" />;
-  return <HBarChart data={rows.map((w) => ({ name: users.get(w.userId)?.fullName ?? '—', value: w.active, color: w.active >= 10 ? '#eb5757' : '#5e6ad2' }))} />;
+  return <HBarChart data={rows.map((w) => ({ name: users.get(w.userId)?.fullName ?? '—', value: w.active, color: w.active >= 10 ? '#eb5757' : '#165dff' }))} />;
 };
 
 export const BlockersTable = ({ rows }: { rows: DashboardData['blockers'] }) => {

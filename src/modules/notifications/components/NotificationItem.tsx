@@ -3,8 +3,8 @@ import type { AppNotification, NotificationType } from '@/shared/types';
 import { cn, fromNow } from '@/shared/utils';
 
 export const NOTIFICATION_META: Record<NotificationType, { icon: IconName; color: string; label: string }> = {
-  TASK_ASSIGNED: { icon: 'user', color: '#5e6ad2', label: 'Task assigned' },
-  TASK_REASSIGNED: { icon: 'users', color: '#5e6ad2', label: 'Task reassigned' },
+  TASK_ASSIGNED: { icon: 'user', color: '#165dff', label: 'Task assigned' },
+  TASK_REASSIGNED: { icon: 'users', color: '#165dff', label: 'Task reassigned' },
   DEADLINE_APPROACHING: { icon: 'clock', color: '#f2994a', label: 'Deadline approaching' },
   TASK_OVERDUE: { icon: 'alertCircle', color: '#eb5757', label: 'Task overdue' },
   TASK_BLOCKED: { icon: 'alert', color: '#eb5757', label: 'Task blocked' },

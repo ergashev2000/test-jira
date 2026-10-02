@@ -10,14 +10,14 @@ import type { ProjectListItem } from '../types/project.types';
 
 const COLUMNS: ProjectStatus[] = ['PLANNING', 'ACTIVE', 'ON_HOLD', 'COMPLETED', 'ARCHIVED'];
 const COLORS: Record<ProjectStatus, string> = {
-  PLANNING: '#8a8f98', ACTIVE: '#f2c94c', ON_HOLD: '#f2994a', COMPLETED: '#5e6ad2', ARCHIVED: '#6b6f76',
+  PLANNING: '#8a8f98', ACTIVE: '#f2c94c', ON_HOLD: '#f2994a', COMPLETED: '#165dff', ARCHIVED: '#6b6f76',
 };
 
 const Card = ({ p }: { p: ProjectListItem }) => {
   const navigate = useNavigate();
   return (
     <button type="button" onClick={() => navigate(ROUTES.project(p.key))}
-      className="flex w-full cursor-pointer flex-col gap-2 rounded-lg border border-line bg-surface p-3 text-left transition-colors hover:border-line-strong hover:bg-surface-2">
+      className="flex w-full cursor-pointer flex-col gap-2 rounded-xl border border-line bg-surface p-3 text-left transition-colors hover:border-line-strong hover:bg-surface-2">
       <div className="flex items-center gap-2">
         <ProjectIcon projectKey={p.key} />
         <span className="flex-1 truncate text-[13px] font-medium text-fg">{p.name}</span>
@@ -29,7 +29,7 @@ const Card = ({ p }: { p: ProjectListItem }) => {
       <div className="flex items-center gap-2 text-xs text-fg-3">
         <span>{p.totalTasks} tasks</span>
         {p.activeSprint && <span className="flex items-center gap-1"><Icon name="sprint" size={12} />{p.activeSprint.name}</span>}
-        <Progress percent={p.progress} size="small" showInfo={false} className="!m-0 flex-1" strokeColor="#5e6ad2" />
+        <Progress percent={p.progress} size="small" showInfo={false} className="!m-0 flex-1" strokeColor="#165dff" />
         <span className="tabular-nums">{p.progress}%</span>
       </div>
     </button>
@@ -42,7 +42,7 @@ export const ProjectsBoard = ({ items }: { items: ProjectListItem[] }) => (
     {COLUMNS.map((s) => {
       const list = items.filter((p) => p.status === s);
       return (
-        <div key={s} className="flex w-[300px] shrink-0 flex-col rounded-lg bg-bg/40">
+        <div key={s} className="flex w-[300px] shrink-0 flex-col rounded-xl bg-bg/40">
           <div className="flex h-10 items-center gap-2 px-2 text-[13px]">
             <span className="h-2.5 w-2.5 rounded-full border-2" style={{ borderColor: COLORS[s] }} />
             <span className="font-medium text-fg">{PROJECT_STATUS[s].label}</span>

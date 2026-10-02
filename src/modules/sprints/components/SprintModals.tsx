@@ -85,8 +85,8 @@ export const CompleteSprintModal = ({ sprint, onClose }: { sprint: SprintRow | n
     <Modal open={!!sprint} title={`Complete ${sprint?.name ?? ''}`} onCancel={onClose} onOk={submit} okText="Complete sprint"
       confirmLoading={complete.isPending} okButtonProps={{ disabled: preview.isLoading || (mode === 'NEXT' && !next) }} destroyOnHidden>
       <div className="mb-4 grid grid-cols-2 gap-3">
-        <div className="rounded-lg border border-line p-3"><Statistic title="Completed" value={preview.data?.completed ?? 0} valueStyle={{ color: '#4cb782' }} /></div>
-        <div className="rounded-lg border border-line p-3"><Statistic title="Unfinished" value={preview.data?.unfinished ?? 0} valueStyle={{ color: '#f2994a' }} /></div>
+        <div className="rounded-xl border border-line p-3"><Statistic title="Completed" value={preview.data?.completed ?? 0} valueStyle={{ color: '#4cb782' }} /></div>
+        <div className="rounded-xl border border-line p-3"><Statistic title="Unfinished" value={preview.data?.unfinished ?? 0} valueStyle={{ color: '#f2994a' }} /></div>
       </div>
       {!!preview.data?.unfinished && (
         <>

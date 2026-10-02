@@ -9,10 +9,10 @@ import { QUERY_KEYS, ROUTES } from '@/shared/constants';
 import { useDebounce } from '@/shared/hooks';
 import { TASK_KEY_RE } from '@/shared/utils';
 
-import { Icon } from '../ui/Icon';
-import { ProjectIcon } from '../ui/ProjectIcon';
-import { StatusIcon } from '../ui/icons';
-import { UserAvatar } from '../ui/UserAvatar';
+import { Icon } from '@/shared/components/ui/Icon';
+import { ProjectIcon } from '@/shared/components/ui/ProjectIcon';
+import { StatusIcon } from '@/shared/components/ui/icons';
+import { UserAvatar } from '@/shared/components/ui/UserAvatar';
 
 const Group = ({ title }: { title: string }) => <span className="text-[11px] uppercase tracking-wide text-fg-3">{title}</span>;
 
@@ -55,7 +55,7 @@ export const GlobalSearch = () => {
 
   return (
     <AutoComplete
-      className="w-full max-w-[460px]"
+      className="w-full max-w-[560px]"
       value={value}
       options={options}
       onChange={setValue}
@@ -65,9 +65,8 @@ export const GlobalSearch = () => {
     >
       <Input
         ref={inputRef}
-        size="small"
-        variant="filled"
-        prefix={<Icon name="search" size={14} className="text-fg-3" />}
+        className="header-search"
+        prefix={<Icon name="search" size={16} className="mr-1 text-fg-3" />}
         suffix={<kbd className="rounded border border-line px-1 text-[10px] text-fg-3">Ctrl K</kbd>}
         placeholder="Search tasks, projects, people…"
         onPressEnter={() => {

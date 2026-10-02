@@ -17,7 +17,7 @@ export const KpiCard = ({ icon, title, value, color = 'var(--c-fg-2)', onClick, 
     onClick={onClick}
     disabled={!onClick}
     className={cn(
-      'group flex w-full flex-col gap-3 rounded-lg border border-line bg-surface p-4 text-left transition-colors',
+      'group flex w-full flex-col gap-3 rounded-xl border border-line bg-surface p-4 text-left transition-colors',
       onClick && 'cursor-pointer hover:border-line-strong hover:bg-surface-2',
     )}
   >
@@ -47,7 +47,7 @@ export const Panel = ({
   className?: string;
   bodyClassName?: string;
 }) => (
-  <section className={cn('flex flex-col rounded-lg border border-line bg-surface', className)}>
+  <section className={cn('flex flex-col rounded-xl border border-line bg-surface', className)}>
     {(title || extra) && (
       <header className="flex min-h-11 items-center gap-2 border-b border-line px-4">
         <h3 className="m-0 text-[13px] font-medium text-fg">{title}</h3>

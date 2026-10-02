@@ -23,7 +23,7 @@ const CommentItem = ({ c }: { c: TaskComment }) => {
   return (
     <div className="flex gap-3">
       <UserAvatar userId={c.authorId} size={24} />
-      <div className="min-w-0 flex-1 rounded-lg border border-line bg-surface px-3 py-2">
+      <div className="min-w-0 flex-1 rounded-xl border border-line bg-surface px-3 py-2">
         <div className="mb-1 flex items-center gap-2 text-xs">
           <span className="font-medium text-fg">{users.get(c.authorId)?.fullName}</span>
           <Tooltip title={formatDateTime(c.createdAt)}><span className="text-fg-3">{fromNow(c.createdAt)}</span></Tooltip>
@@ -68,7 +68,7 @@ export const TaskComments = ({ taskId }: { taskId: string }) => {
       </QueryState>
       <div className="flex gap-3">
         <UserAvatar userId={me.id} size={24} />
-        <div className="flex-1 rounded-lg border border-line bg-surface p-2 focus-within:border-line-strong">
+        <div className="flex-1 rounded-xl border border-line bg-surface p-2 focus-within:border-line-strong">
           <Input.TextArea
             variant="borderless"
             autoSize={{ minRows: 2, maxRows: 8 }}

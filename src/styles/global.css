@@ -77,6 +77,41 @@
     cursor: pointer;
   }
 
+  /* Blurred backdrop behind modals and drawers */
+  .ant-modal-mask,
+  .ant-drawer-mask {
+    background-color: var(--c-mask);
+    backdrop-filter: blur(6px);
+  }
+
+  /* Top-bar actions (theme toggle, inbox, profile): white chips in light, card surface in dark */
+  .header-action {
+    height: 36px;
+    min-width: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--c-line);
+    border-radius: 8px;
+    background: var(--c-card);
+    color: var(--c-fg-2);
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .header-action:hover {
+    background: var(--c-surface-2);
+    border-color: var(--c-line-strong);
+    color: var(--c-fg);
+  }
+
+  /* Global search: same height and surface as the top-bar actions */
+  .header-search.ant-input-affix-wrapper {
+    height: 36px;
+    border-radius: 8px;
+    background: var(--c-card);
+    border-color: var(--c-line);
+  }
+
   /* Borderless "ghost" inputs used in Linear-style create modals */
   .ghost-input.ant-input,
   .ghost-input .ant-input,

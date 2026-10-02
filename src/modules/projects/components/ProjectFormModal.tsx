@@ -21,7 +21,7 @@ interface Props {
 
 const StatusDot = ({ s }: { s: ProjectStatus }) => (
   <span className="flex items-center gap-1.5">
-    <span className="h-2 w-2 rounded-full" style={{ background: { PLANNING: '#8a8f98', ACTIVE: '#f2c94c', ON_HOLD: '#f2994a', COMPLETED: '#5e6ad2', ARCHIVED: '#6b6f76' }[s] }} />
+    <span className="h-2 w-2 rounded-full" style={{ background: { PLANNING: '#8a8f98', ACTIVE: '#f2c94c', ON_HOLD: '#f2994a', COMPLETED: '#165dff', ARCHIVED: '#6b6f76' }[s] }} />
     {PROJECT_STATUS[s].label}
   </span>
 );

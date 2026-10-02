@@ -3,6 +3,8 @@ import { theme, type ThemeConfig } from 'antd';
 import type { ThemeMode } from '@/shared/lib/theme';
 
 /** Linear-inspired palettes. Colors mirror styles/variables.css. */
+const PRIMARY = '#165dff';
+
 const PALETTE = {
   dark: {
     success: '#4cb782',
@@ -21,8 +23,8 @@ const PALETTE = {
     textQuaternary: '#4a4a50',
     fillTertiary: 'rgba(255,255,255,0.04)',
     fillSecondary: 'rgba(255,255,255,0.06)',
-    link: '#8b93e6',
-    linkHover: '#a9afee',
+    link: '#4080ff',
+    linkHover: '#6aa1ff',
     shadow: '0 8px 30px rgba(0,0,0,0.5)',
     hover: '#1c1c1f',
     selected: '#232327',
@@ -45,8 +47,8 @@ const PALETTE = {
     textQuaternary: '#b4b4bc',
     fillTertiary: 'rgba(16,16,24,0.035)',
     fillSecondary: 'rgba(16,16,24,0.06)',
-    link: '#5e6ad2',
-    linkHover: '#4f5bc4',
+    link: '#165dff',
+    linkHover: '#4080ff',
     shadow: '0 8px 30px rgba(16,16,24,0.12)',
     hover: '#f4f4f6',
     selected: '#ececf1',
@@ -59,8 +61,8 @@ export const getAppTheme = (mode: ThemeMode): ThemeConfig => {
   return {
     algorithm: mode === 'dark' ? theme.darkAlgorithm : theme.defaultAlgorithm,
     token: {
-      colorPrimary: '#5e6ad2',
-      colorInfo: '#5e6ad2',
+      colorPrimary: PRIMARY,
+      colorInfo: PRIMARY,
       colorSuccess: p.success,
       colorWarning: p.warning,
       colorError: p.error,
@@ -81,7 +83,7 @@ export const getAppTheme = (mode: ThemeMode): ThemeConfig => {
       fontFamily: "'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif",
       fontSize: 13,
       borderRadius: 6,
-      borderRadiusLG: 10,
+      borderRadiusLG: 12,
       controlHeight: 32,
       controlHeightSM: 26,
       boxShadowSecondary: p.shadow,
@@ -99,7 +101,17 @@ export const getAppTheme = (mode: ThemeMode): ThemeConfig => {
       Modal: { contentBg: p.bgContainer, headerBg: p.bgContainer, footerBg: p.bgContainer },
       Drawer: { colorBgElevated: p.drawerBg },
       Tabs: { itemColor: p.textSecondary, itemSelectedColor: p.text, inkBarColor: p.text, itemHoverColor: p.text, horizontalMargin: '0' },
-      Button: { primaryShadow: 'none', defaultShadow: 'none', dangerShadow: 'none', defaultBg: p.bgElevated, defaultBorderColor: p.border },
+      Button: {
+        primaryShadow: 'none',
+        defaultShadow: 'none',
+        dangerShadow: 'none',
+        defaultBg: p.bgElevated,
+        defaultBorderColor: p.border,
+        controlHeight: 34,
+        paddingInline: 16,
+        borderRadius: 8,
+        fontWeight: 500,
+      },
       Select: { optionSelectedBg: p.selected, optionActiveBg: p.hover },
       Menu: { itemBg: 'transparent', darkItemBg: 'transparent' },
       Tag: { defaultBg: p.hover },

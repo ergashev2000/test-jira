@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { Icon } from '@/shared/components/ui/Icon';
 import { useThemeStore, type ThemeMode } from '@/shared/lib/theme';
 
-const AUTH_PRIMARY = '#1d5cf5';
+const AUTH_PRIMARY = '#165dff';
 
 /** Standalone antd theme for auth screens; `inherit: false` keeps the app's dark tokens out of light mode. */
 const authTheme = (mode: ThemeMode): ThemeConfig => ({

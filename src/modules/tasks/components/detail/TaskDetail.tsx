@@ -58,7 +58,7 @@ export const TaskDetailView = ({ taskKey, inDrawer }: { taskKey: string; inDrawe
             ]}
           />
         </div>
-        <aside className="h-fit rounded-lg border border-line bg-surface px-3 py-2 lg:sticky lg:top-0">
+        <aside className="h-fit rounded-xl border border-line bg-surface px-3 py-2 lg:sticky lg:top-0">
           <TaskMeta task={task} />
         </aside>
       </div>

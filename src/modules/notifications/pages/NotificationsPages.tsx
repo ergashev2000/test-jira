@@ -44,7 +44,7 @@ export const NotificationsPage = () => {
         <QueryState query={query} isEmpty={(d) => !d.items.length} empty={<EmptyState description="No notifications" />}>
           {(d) => (
             <>
-              <div className="overflow-hidden rounded-lg border border-line bg-surface">
+              <div className="overflow-hidden rounded-xl border border-line bg-surface">
                 {d.items.map((n) => <NotificationItem key={n.id} n={n} onClick={() => open(n)} />)}
               </div>
               <Pagination className="!mt-4 text-right" size="small" current={page} pageSize={pageSize} total={d.total}

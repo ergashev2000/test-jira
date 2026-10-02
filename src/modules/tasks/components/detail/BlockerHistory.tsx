@@ -17,7 +17,7 @@ export const BlockerHistory = ({ taskId }: { taskId: string }) => {
       {(list) => (
         <div className="flex flex-col gap-2">
           {list.map((b) => (
-            <div key={b.id} className="rounded-lg border border-line bg-surface p-3">
+            <div key={b.id} className="rounded-xl border border-line bg-surface p-3">
               <div className="mb-1 flex items-center gap-2">
                 {b.resolvedAt ? <Tag color="green">Resolved</Tag> : <Tag color="red">Active</Tag>}
                 <span className="text-[13px] text-fg">{b.reason}</span>

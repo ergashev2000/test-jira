@@ -50,7 +50,7 @@ export const TeamsPage = () => {
           {(teams) => (
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
               {teams.map((t) => (
-                <div key={t.id} className="flex flex-col gap-4 rounded-lg border border-line bg-surface p-4">
+                <div key={t.id} className="flex flex-col gap-4 rounded-xl border border-line bg-surface p-4">
                   <div className="flex items-center gap-2">
                     <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/15 text-primary"><Icon name="team" size={16} /></span>
                     <div className="min-w-0 flex-1">

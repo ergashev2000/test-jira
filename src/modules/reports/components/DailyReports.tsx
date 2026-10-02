@@ -25,7 +25,7 @@ const DAILY: Record<DailyTaskStatus, { label: string; color: string }> = {
 };
 
 const Stat = ({ label, value, color, children }: { label: ReactNode; value: ReactNode; color?: string; children?: ReactNode }) => (
-  <div className="rounded-lg border border-line bg-surface p-3">
+  <div className="rounded-xl border border-line bg-surface p-3">
     <div className="text-xs text-fg-2">{label}</div>
     <div className="mt-1 text-2xl font-semibold tabular-nums" style={{ color }}>{value}</div>
     {children}
@@ -58,7 +58,7 @@ export const DailyReportView = ({ userId, date }: { userId: string; date: string
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
             {GROUPS.map((g) => <Stat key={g.key} label={`${g.emoji} ${g.label}`} value={r.groups[g.key].length} color={r.groups[g.key].length ? g.color : undefined} />)}
             <Stat label="Progress" value={`${r.progress.done}/${r.progress.total}`}>
-              <Progress percent={r.progress.percent} size="small" strokeColor="#5e6ad2" />
+              <Progress percent={r.progress.percent} size="small" strokeColor="#165dff" />
             </Stat>
           </div>
           {GROUPS.filter((g) => r.groups[g.key].length).map((g) => (
@@ -83,7 +83,7 @@ export const TeamDailyReportView = ({ teamId, date }: { teamId: string; date: st
       {(r) => (
         <div className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            <Stat label="Team progress" value={`${r.progress}%`}><Progress percent={r.progress} showInfo={false} size="small" strokeColor="#5e6ad2" /></Stat>
+            <Stat label="Team progress" value={`${r.progress}%`}><Progress percent={r.progress} showInfo={false} size="small" strokeColor="#165dff" /></Stat>
             <Stat label="✅ Done / planned" value={`${r.done}/${r.planned}`} />
             <Stat label="🚧 Blockers" value={r.blockers.length} color={r.blockers.length ? '#eb5757' : undefined} />
             <Stat label="Members" value={r.rows.length} />

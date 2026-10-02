@@ -11,7 +11,7 @@ import { getProjectReport, getSprintReport } from '../api/reportsApi';
 import { DonutChart, HBarChart, Legend } from './charts';
 
 const Stat = ({ label, value, color }: { label: string; value: number | string; color?: string }) => (
-  <div className="rounded-lg border border-line bg-surface p-3">
+  <div className="rounded-xl border border-line bg-surface p-3">
     <div className="text-xs text-fg-2">{label}</div>
     <div className="mt-1 text-2xl font-semibold tabular-nums" style={{ color }}>{value}</div>
   </div>
@@ -31,8 +31,8 @@ export const SprintReportView = ({ sprintId }: { sprintId: string }) => {
           </div>
           {sprint.goal && <Alert type="info" message={<span><b>Goal:</b> {sprint.goal}</span>} />}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[220px_1fr]">
-            <div className="flex items-center justify-center rounded-lg border border-line bg-surface p-4">
-              <Progress type="circle" percent={report.completionPercent} strokeColor="#5e6ad2" size={150}
+            <div className="flex items-center justify-center rounded-xl border border-line bg-surface p-4">
+              <Progress type="circle" percent={report.completionPercent} strokeColor="#165dff" size={150}
                 format={(p) => <span className="text-fg"><div className="text-3xl font-semibold">{p}%</div><div className="text-xs text-fg-2">completion</div></span>} />
             </div>
             <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
@@ -77,12 +77,12 @@ export const ProjectReportView = ({ projectId }: { projectId: string }) => {
                   { title: 'Sprint', dataIndex: 'name' },
                   { title: 'Status', dataIndex: 'status', render: (s: SprintStatus) => <Tag color={SPRINT_STATUS[s].color}>{SPRINT_STATUS[s].label}</Tag> },
                   { title: 'Dates', key: 'd', render: (_, s) => <span className="text-xs text-fg-2">{formatDate(s.startDate)} — {formatDate(s.endDate)}</span> },
-                  { title: 'Completion', dataIndex: 'completion', width: 150, render: (c: number) => <Progress percent={c} size="small" strokeColor="#5e6ad2" /> },
+                  { title: 'Completion', dataIndex: 'completion', width: 150, render: (c: number) => <Progress percent={c} size="small" strokeColor="#165dff" /> },
                 ]} />
             </Panel>
             <Panel title="Member workload (active tasks)">
               {r.workload.length ? (
-                <HBarChart data={r.workload.map((w) => ({ name: users.get(w.userId)?.fullName ?? w.userId, value: w.active, color: w.active >= 10 ? '#eb5757' : '#5e6ad2' }))} />
+                <HBarChart data={r.workload.map((w) => ({ name: users.get(w.userId)?.fullName ?? w.userId, value: w.active, color: w.active >= 10 ? '#eb5757' : '#165dff' }))} />
               ) : <EmptyState description="No active tasks" />}
             </Panel>
             <Panel title={`Active blockers · ${r.blockers.length}`}>

@@ -38,7 +38,7 @@ export const NotificationBell = () => {
     <Popover open={open} onOpenChange={setOpen} trigger="click" placement="bottomRight" content={content} arrow={false}
       styles={{ body: { padding: 0 } }}>
       <Badge count={data?.unread ?? 0} size="small" offset={[-4, 4]}>
-        <Button type="text" size="small" icon={<Icon name="notification" size={17} />} aria-label="Notifications" />
+        <Button type="text" className="header-action" icon={<Icon name="notification" size={17} />} aria-label="Notifications" />
       </Badge>
     </Popover>
   );

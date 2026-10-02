@@ -13,7 +13,7 @@ import { BacklogTab, ProjectSprintsTab, SprintsPage } from '@/modules/sprints';
 import { MyTasksPage, TaskPage } from '@/modules/tasks';
 import { TeamsPage } from '@/modules/teams';
 import { UsersPage } from '@/modules/users';
-import { MainLayout } from './MainLayout';
+import { MainLayout } from '@/layouts';
 import type { Permission } from '@/shared/constants';
 
 import { DashboardGuard, Forbidden, HomeRedirect, NotFound, ProtectedRoute, RoleGuard } from './guards';

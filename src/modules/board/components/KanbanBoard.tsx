@@ -37,7 +37,7 @@ const Column = ({ status, tasks, onAdd, onOpen }: {
       <div
         ref={setNodeRef}
         className={cn(
-          'flex min-h-40 flex-1 flex-col gap-2 rounded-lg p-1.5 transition-colors',
+          'flex min-h-40 flex-1 flex-col gap-2 rounded-xl p-1.5 transition-colors',
           isOver ? 'bg-primary/10 ring-1 ring-primary/40' : 'bg-bg/40',
         )}
       >

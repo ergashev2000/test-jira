@@ -25,7 +25,7 @@ export const ProjectOverviewTab = () => {
             <div><div className="text-fg-3">Start</div><div className="mt-1 text-fg">{formatDate(project.startDate)}</div></div>
             <div><div className="text-fg-3">Target</div><div className="mt-1 text-fg">{formatDate(project.endDate)}</div></div>
             <div><div className="text-fg-3">Lead</div><div className="mt-1"><UserAvatar userId={project.managerId} showName size={18} /></div></div>
-            <div><div className="text-fg-3">Progress</div><Progress percent={project.progress} size="small" strokeColor="#5e6ad2" /></div>
+            <div><div className="text-fg-3">Progress</div><Progress percent={project.progress} size="small" strokeColor="#165dff" /></div>
           </div>
         </Panel>
         <Panel title="Tasks by status">
