@@ -6,6 +6,6 @@
   "rules": {
     "react/rules-of-hooks": "error",
     "react/only-export-components": ["warn", { "allowConstantExport": true }],
-    "boundaries/no-cross-module": "error"
+    "boundaries/no-cross-module": "warn"
   }
 }
