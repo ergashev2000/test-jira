@@ -1,6 +1,5 @@
 export * from './types/task.types';
 export { MyTasksPage } from './pages/MyTasksPage';
-export { TaskPage } from './pages/TaskPage';
 export { TaskDrawer } from './components/TaskDrawer';
 export { TaskFormModal } from './components/TaskFormModal';
 export { TaskTable } from './components/TaskTable';

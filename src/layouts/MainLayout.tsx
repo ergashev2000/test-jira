@@ -8,7 +8,6 @@ import { cn } from '@/shared/utils';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 
-/** App shell: top bar, sidebar, inset content panel. */
 export const MainLayout = () => {
   const screens = Grid.useBreakpoint();
   const [collapsed, setCollapsed] = useState(false);

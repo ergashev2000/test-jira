@@ -1,24 +1,20 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 
-import { AuditLogPage } from '@/modules/audit-log';
 import { ForgotPasswordPage, LoginPage, ResetPasswordPage } from '@/modules/auth';
-import { GlobalBoardPage, ProjectBoardTab } from '@/modules/board';
-import { DashboardPage } from '@/modules/dashboard';
 import { NotificationSettingsPage, NotificationsPage } from '@/modules/notifications';
-import { ProfilePage } from '@/modules/profile';
 import { ProjectActivityTab, ProjectLayout, ProjectMembersTab, ProjectOverviewTab, ProjectsPage } from '@/modules/projects';
-import { ProjectReportsTab, ReportsPage } from '@/modules/reports';
-import { SettingsPage } from '@/modules/settings';
-import { BacklogTab, ProjectSprintsTab, SprintsPage } from '@/modules/sprints';
-import { MyTasksPage, TaskPage } from '@/modules/tasks';
-import { TeamsPage } from '@/modules/teams';
-import { UsersPage } from '@/modules/users';
+import { MyTasksPage } from '@/modules/tasks';
 import { MainLayout } from '@/layouts';
 import type { Permission } from '@/shared/constants';
 
-import { DashboardGuard, Forbidden, HomeRedirect, NotFound, ProtectedRoute, RoleGuard } from './guards';
+import { DashboardGuard, Forbidden, HomeRedirect, NotFound, ProtectedRoute, RoleGuard, RouteError } from './guards';
+import { lazyPage as page } from './lazyPage';
 
 const guard = (permission: Permission, element: React.ReactNode) => <RoleGuard permission={permission}>{element}</RoleGuard>;
+
+const boardPages = () => import('@/modules/board/pages/BoardPages');
+const reportsPages = () => import('@/modules/reports/pages/ReportsPage');
+const sprintsPages = () => import('@/modules/sprints/pages/SprintsPages');
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -27,9 +23,11 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: <ProtectedRoute><MainLayout /></ProtectedRoute>,
+    errorElement: <RouteError />,
     children: [
       { index: true, element: <HomeRedirect /> },
-      { path: 'dashboard', element: <DashboardGuard><DashboardPage /></DashboardGuard> },
+      // Lazy: pulls in recharts.
+      { path: 'dashboard', element: <DashboardGuard>{page(() => import('@/modules/dashboard/pages/DashboardPage'), 'DashboardPage')}</DashboardGuard> },
       { path: 'my-tasks', element: <MyTasksPage /> },
       { path: 'projects', element: guard('project.view', <ProjectsPage />) },
       {
@@ -38,25 +36,25 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <Navigate to="overview" replace /> },
           { path: 'overview', element: <ProjectOverviewTab /> },
-          { path: 'board', element: <ProjectBoardTab /> },
-          { path: 'backlog', element: <BacklogTab /> },
-          { path: 'sprints', element: <ProjectSprintsTab /> },
+          { path: 'board', element: page(boardPages, 'ProjectBoardTab') },
+          { path: 'backlog', element: page(() => import('@/modules/sprints/pages/BacklogTab'), 'BacklogTab') },
+          { path: 'sprints', element: page(sprintsPages, 'ProjectSprintsTab') },
           { path: 'members', element: <ProjectMembersTab /> },
-          { path: 'reports', element: <ProjectReportsTab /> },
+          { path: 'reports', element: page(reportsPages, 'ProjectReportsTab') },
           { path: 'activity', element: <ProjectActivityTab /> },
         ],
       },
-      { path: 'sprints', element: guard('sprint.view', <SprintsPage />) },
-      { path: 'board', element: guard('board.view', <GlobalBoardPage />) },
-      { path: 'tasks/:taskKey', element: <TaskPage /> },
-      { path: 'users', element: guard('user.manage', <UsersPage />) },
-      { path: 'teams', element: guard('team.manage', <TeamsPage />) },
-      { path: 'reports', element: guard('report.view', <ReportsPage />) },
+      { path: 'sprints', element: guard('sprint.view', page(sprintsPages, 'SprintsPage')) },
+      { path: 'board', element: guard('board.view', page(boardPages, 'GlobalBoardPage')) },
+      { path: 'tasks/:taskKey', element: page(() => import('@/modules/tasks/pages/TaskPage'), 'TaskPage') },
+      { path: 'users', element: guard('user.manage', page(() => import('@/modules/users/pages/UsersPage'), 'UsersPage')) },
+      { path: 'teams', element: guard('team.manage', page(() => import('@/modules/teams/pages/TeamsPage'), 'TeamsPage')) },
+      { path: 'reports', element: guard('report.view', page(reportsPages, 'ReportsPage')) },
       { path: 'notifications', element: <NotificationsPage /> },
       { path: 'notifications/settings', element: <NotificationSettingsPage /> },
-      { path: 'audit-log', element: guard('auditLog.view', <AuditLogPage />) },
-      { path: 'settings', element: guard('settings.manage', <SettingsPage />) },
-      { path: 'profile', element: <ProfilePage /> },
+      { path: 'audit-log', element: guard('auditLog.view', page(() => import('@/modules/audit-log/pages/AuditLogPage'), 'AuditLogPage')) },
+      { path: 'settings', element: guard('settings.manage', page(() => import('@/modules/settings/pages/SettingsPage'), 'SettingsPage')) },
+      { path: 'profile', element: page(() => import('@/modules/profile/pages/ProfilePage'), 'ProfilePage') },
       { path: '403', element: <Forbidden /> },
       { path: '*', element: <NotFound /> },
     ],

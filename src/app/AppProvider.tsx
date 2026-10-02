@@ -12,7 +12,6 @@ import { useThemeStore } from '@/shared/lib/theme';
 
 import { getAppTheme } from './theme';
 
-/** QueryClient + antd theme (layered under Tailwind utilities) + antd App context for message/modal. */
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const mode = useThemeStore((s) => s.mode);
   const appTheme = useMemo(() => getAppTheme(mode), [mode]);

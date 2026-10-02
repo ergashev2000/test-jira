@@ -2,7 +2,6 @@ import { theme, type ThemeConfig } from 'antd';
 
 import type { ThemeMode } from '@/shared/lib/theme';
 
-/** Linear-inspired palettes. Colors mirror styles/variables.css. */
 const PRIMARY = '#165dff';
 
 const PALETTE = {
