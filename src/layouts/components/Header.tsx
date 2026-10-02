@@ -30,7 +30,7 @@ export const Header = ({ collapsed, onToggleSidebar }: Props) => {
     <header className="flex h-12 shrink-0 items-center gap-2 px-3">
       <div className={cn('flex items-center gap-2 transition-all', collapsed ? 'w-10' : 'w-[216px]')}>
         <img src="/logo.svg" alt="logo image" className='size-6'/>
-        {!collapsed && <span className="truncate text-[13px] font-semibold">{settings?.general.companyName ?? 'Workspace'}</span>}
+        {!collapsed && <span className="truncate text-[13px] font-semibold">{settings?.general.companyName ?? 'U-management'}</span>}
       </div>
       <Tooltip title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
         <Button type="text" size="small" icon={<Icon name="sidebar" size={16} />} onClick={onToggleSidebar} />

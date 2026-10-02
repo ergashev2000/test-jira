@@ -39,7 +39,7 @@ export const LoginPage = () => {
   if (token) return <Navigate to={sp.get('redirect') || ROUTES.HOME} replace />;
 
   return (
-    <AuthLayout title="Welcome back" subtitle="Log in to Tasker to manage your projects and tasks">
+    <AuthLayout title="Welcome back" subtitle="Log in to U-management to manage your projects and tasks">
       <Form
         form={form}
         requiredMark={false}

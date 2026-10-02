@@ -16,6 +16,17 @@ export const setSessionFromToken = (token: string | null) => {
   currentUserId = token?.startsWith(TOKEN_PREFIX) ? token.slice(TOKEN_PREFIX.length) : null;
 };
 
+/**
+ * Transition bridge: a user authenticated by the real backend becomes the mock actor,
+ * so modules that still run on the mock API keep working. Upserted into the mock DB.
+ */
+export const bindActor = (user: User) => {
+  const i = db.users.findIndex((u) => u.id === user.id);
+  if (i >= 0) db.users[i] = { ...db.users[i], ...user };
+  else db.users.push(structuredClone(user));
+  currentUserId = user.id;
+};
+
 export const actor = (): User => {
   const user = db.users.find((u) => u.id === currentUserId);
   if (!user) throw new ApiError(401, 'Session expired. Please log in again.');
