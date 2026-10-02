@@ -51,8 +51,10 @@ export const AuthLayout = ({
 
         <div className="auth-hero pointer-events-none relative hidden flex-2 lg:block">
           <img
-            src="/login-image.webp"
+            src="/login-image.svg"
             alt=""
+            width={1600}
+            height={1600}
             className="absolute inset-0 size-full object-cover object-left"
           />
         </div>

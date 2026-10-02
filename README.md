@@ -3,15 +3,15 @@
 Project & task management web app — projects, sprints, a Kanban board, daily reports and Telegram notifications,
 with role-based access for the whole team.
 
-> **Status: frontend MVP.** The backend is not ready yet, so the app runs on an in-memory **mock API** that
-> enforces the same business rules a real server would. Data resets on every page reload.
+> **Status: backend integration in progress.** Authentication (login, current user, token refresh) runs on the real
+> backend. All other modules still use an in-memory **mock API** that enforces the same business rules; mock data
+> resets on every page reload.
 
 ---
 
 ## Contents
 
 - [Quick start](#quick-start)
-- [Demo accounts](#demo-accounts)
 - [Features](#features)
 - [Tech stack](#tech-stack)
 - [Project structure](#project-structure)
@@ -30,24 +30,12 @@ Requirements: **Node.js 20.19+ or 22.12+** (required by Vite 8), npm.
 
 ```bash
 npm install
-cp .env.example .env   # optional — defaults work out of the box
+cp .env.example .env   # set VITE_API_URL to your backend
 npm run dev            # http://localhost:5173
 ```
 
-Log in with any [demo account](#demo-accounts) — password **`123456`**.
-
-## Demo accounts
-
-Each role sees a different app: menu items, pages and actions are filtered by permission.
-
-| Username     | Role            | Good for checking                                  |
-| ------------ | --------------- | -------------------------------------------------- |
-| `superadmin` | SUPER_ADMIN     | Everything, incl. settings and audit log           |
-| `admin`      | ADMIN           | User / team management                             |
-| `bekzod`     | PROJECT_MANAGER | Projects, sprints, approvals                       |
-| `akmal`      | TEAM_LEAD       | Team workload, blockers, reviews                   |
-| `shohrux`    | EMPLOYEE        | Daily work: my tasks, status changes, cancel requests |
-| `otabek`     | EMPLOYEE        | **Inactive** account — login is rejected           |
+Log in with an account that exists on the backend. Each role sees a different app: menu items, pages and actions are
+filtered by permission. `SUPER_ADMIN` / `ADMIN` see all mock projects; other roles only see projects they are members of.
 
 ## Features
 
@@ -141,6 +129,19 @@ activity, an audit-log entry and notifications.
 (e.g. `// GET /api/search?q=`). To connect the backend, replace the `mockRequest(...)` body with a call to the shared
 axios client (`http` from `shared/lib/axios`). Hooks, pages and components do not change.
 
+**Current integration state:**
+
+| Area            | Source  | Notes                                                                                  |
+| --------------- | ------- | -------------------------------------------------------------------------------------- |
+| Login           | Backend | `POST /auth/login/` → `access` / `refresh` JWT + user (mapped in `fromApiUser`)         |
+| Current user    | Backend | `GET /auth/me/` on app load — the persisted user renders instantly, then is refreshed   |
+| Token refresh   | Backend | Any 401 → one shared `POST /auth/refresh/`, then the failed requests are replayed       |
+| Session storage | Browser | Tokens in cookies via js-cookie (`pm.access`, `pm.refresh`; expire with the JWT), user in `localStorage` (`pm.user`) |
+| Everything else | Mock    | The backend user is bridged into the mock DB (`bindActor`) so all pages keep working   |
+
+The backend returns errors as `{ error: { status_code, detail } }`; the axios interceptor turns them into `ApiError`s
+with a readable message, so UI error handling is the same for mock and real calls.
+
 ## Theming & styling
 
 - **One palette, two modes.** Colors are CSS variables in [`variables.css`](src/styles/variables.css):
@@ -163,8 +164,7 @@ See [`.env.example`](.env.example).
 
 | Variable                 | Default | Description                                                                                 |
 | ------------------------ | ------- | ------------------------------------------------------------------------------------------- |
-| `VITE_API_URL`           | `/api`  | Base URL for the axios client (`shared/lib/axios`).                                         |
-| `VITE_USE_MOCK`          | `true`  | Reserved for the backend switch. **Not wired yet** — API functions always use the mock.     |
+| `VITE_API_URL`           | `/api`  | Backend base URL, e.g. `http://192.168.1.151:8000/api/v1`. Required for login.               |
 | `VITE_MOCK_TELEGRAM_SIM` | `true`  | Dev only: every 45 s moves one of `shohrux`'s tasks forward, as if done via the Telegram bot. |
 
 ## Scripts & quality gates
@@ -181,7 +181,6 @@ commit; warnings do not.
 
 ## Known limitations
 
-- No real backend yet — data is lost on reload.
-- `VITE_USE_MOCK` has no effect until the API layer is switched (see above).
+- Only auth is on the backend; mock data (projects, tasks…) is lost on reload.
 - No automated tests yet.
 - UI copy is English only (antd locale `en_US`).

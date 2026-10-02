@@ -1,87 +1,105 @@
+import Cookies from 'js-cookie';
 import { create } from 'zustand';
 
 import type { User } from '@/shared/types';
 
-import { bindActor, setSessionFromToken, TOKEN_PREFIX } from './mock/session';
+import { bindActor, unbindActor } from './mock/session';
 
-const TOKEN_KEY = 'pm.token';
-const REFRESH_KEY = 'pm.refresh';
+const ACCESS_COOKIE = 'pm.access';
+const REFRESH_COOKIE = 'pm.refresh';
 const USER_KEY = 'pm.user';
-const KEYS = [TOKEN_KEY, REFRESH_KEY, USER_KEY];
 
 interface SessionState {
   token: string | null;
   refreshToken: string | null;
   user: User | null;
-  setSession: (token: string, user: User, remember?: boolean, refreshToken?: string | null) => void;
+  setSession: (token: string, refreshToken: string, user: User) => void;
+  /** Swaps tokens after a refresh (the backend may rotate the refresh token too). */
+  setTokens: (token: string, refreshToken?: string | null) => void;
   setUser: (user: User) => void;
   clear: () => void;
 }
 
-/** Backend (JWT) sessions have no GET /me yet, so the user is persisted next to the token. */
-const isBackendToken = (token: string | null) => !!token && !token.startsWith(TOKEN_PREFIX);
-
-/** Reads from whichever storage holds the token (sessionStorage, or localStorage with "Remember me"). */
-const readStored = () => {
+/** JWT `exp` (seconds) → Date, so a cookie never outlives its token. */
+const jwtExpiry = (token: string): Date | undefined => {
   try {
-    const store = sessionStorage.getItem(TOKEN_KEY) ? sessionStorage : localStorage;
-    const token = store.getItem(TOKEN_KEY);
-    const rawUser = isBackendToken(token) ? store.getItem(USER_KEY) : null;
-    return { token, refreshToken: store.getItem(REFRESH_KEY), user: rawUser ? (JSON.parse(rawUser) as User) : null };
+    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))) as { exp?: number };
+    return payload.exp ? new Date(payload.exp * 1000) : undefined;
   } catch {
-    return { token: null, refreshToken: null, user: null };
+    return undefined;
   }
 };
 
-/** Points the mock API at the session user (mock token → seeded user, backend token → bridged user). */
-const syncMockActor = (token: string | null, user: User | null) => {
-  if (isBackendToken(token) && user) bindActor(user);
-  else setSessionFromToken(token);
+const setTokenCookie = (name: string, token: string) =>
+  Cookies.set(name, token, {
+    expires: jwtExpiry(token),
+    path: '/',
+    sameSite: 'strict',
+    secure: window.location.protocol === 'https:',
+  });
+
+const readUser = (): User | null => {
+  try {
+    const raw = localStorage.getItem(USER_KEY);
+    return raw ? (JSON.parse(raw) as User) : null;
+  } catch {
+    return null;
+  }
 };
 
-const initial = readStored();
-syncMockActor(initial.token, initial.user);
+const writeUser = (user: User | null) => {
+  try {
+    if (user) localStorage.setItem(USER_KEY, JSON.stringify(user));
+    else localStorage.removeItem(USER_KEY);
+  } catch {
+    /* storage unavailable */
+  }
+};
 
 /**
- * Session store (zustand, no persist middleware). Mock sessions keep only the token and
- * re-fetch the user; backend sessions also keep the refresh token and the user.
+ * The access cookie expires with the access token (~30 min); the session lives as long as the
+ * refresh token, and the axios interceptor issues a new access token on the next 401.
  */
-export const useSessionStore = create<SessionState>((set, get) => ({
-  token: initial.token,
+const initial = {
+  token: Cookies.get(ACCESS_COOKIE) ?? null,
+  refreshToken: Cookies.get(REFRESH_COOKIE) ?? null,
+  user: readUser(),
+};
+const signedIn = !!(initial.token || initial.refreshToken);
+if (!signedIn) writeUser(null);
+// Modules not yet on the backend run on the mock API, which needs the signed-in user as its actor.
+if (signedIn && initial.user) bindActor(initial.user);
+
+/** Signed in while either token is alive — an expired access token is renewed with the refresh token. */
+export const isSignedIn = (s: Pick<SessionState, 'token' | 'refreshToken'>) => !!(s.token || s.refreshToken);
+
+/** Session store: JWT tokens in cookies (js-cookie), the user profile in localStorage. */
+export const useSessionStore = create<SessionState>((set) => ({
+  token: signedIn ? initial.token : null,
   refreshToken: initial.refreshToken,
-  user: initial.user,
-  setSession: (token, user, remember = false, refreshToken = null) => {
-    try {
-      KEYS.forEach((k) => { sessionStorage.removeItem(k); localStorage.removeItem(k); });
-      const store = remember ? localStorage : sessionStorage;
-      store.setItem(TOKEN_KEY, token);
-      if (refreshToken) store.setItem(REFRESH_KEY, refreshToken);
-      if (isBackendToken(token)) store.setItem(USER_KEY, JSON.stringify(user));
-    } catch {
-      /* storage unavailable */
-    }
-    syncMockActor(token, user);
+  user: signedIn ? initial.user : null,
+  setSession: (token, refreshToken, user) => {
+    setTokenCookie(ACCESS_COOKIE, token);
+    setTokenCookie(REFRESH_COOKIE, refreshToken);
+    writeUser(user);
+    bindActor(user);
     set({ token, refreshToken, user });
   },
+  setTokens: (token, refreshToken) => {
+    setTokenCookie(ACCESS_COOKIE, token);
+    if (refreshToken) setTokenCookie(REFRESH_COOKIE, refreshToken);
+    set((s) => ({ token, refreshToken: refreshToken ?? s.refreshToken }));
+  },
   setUser: (user) => {
-    const { token } = get();
-    if (isBackendToken(token)) {
-      try {
-        (sessionStorage.getItem(TOKEN_KEY) ? sessionStorage : localStorage).setItem(USER_KEY, JSON.stringify(user));
-      } catch {
-        /* storage unavailable */
-      }
-      bindActor(user);
-    }
+    writeUser(user);
+    bindActor(user);
     set({ user });
   },
   clear: () => {
-    try {
-      KEYS.forEach((k) => { sessionStorage.removeItem(k); localStorage.removeItem(k); });
-    } catch {
-      /* storage unavailable */
-    }
-    setSessionFromToken(null);
+    Cookies.remove(ACCESS_COOKIE, { path: '/' });
+    Cookies.remove(REFRESH_COOKIE, { path: '/' });
+    writeUser(null);
+    unbindActor();
     set({ token: null, refreshToken: null, user: null });
   },
 }));

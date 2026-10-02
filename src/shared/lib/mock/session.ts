@@ -5,26 +5,21 @@ import { db } from './mockDb';
 import { ApiError } from './mockRequest';
 
 /**
- * Mock "backend session": the token maps to a user id, exactly like a
- * backend would decode a JWT. API functions call `actor()` to authorise.
+ * Mock "backend session" for modules not yet on the real API: the user authenticated by the
+ * backend becomes the actor that mock handlers authorise against (`actor()`).
  */
 let currentUserId: string | null = null;
 
-export const TOKEN_PREFIX = 'mock-token.';
-
-export const setSessionFromToken = (token: string | null) => {
-  currentUserId = token?.startsWith(TOKEN_PREFIX) ? token.slice(TOKEN_PREFIX.length) : null;
-};
-
-/**
- * Transition bridge: a user authenticated by the real backend becomes the mock actor,
- * so modules that still run on the mock API keep working. Upserted into the mock DB.
- */
+/** Upserts the backend user into the mock DB and makes it the current actor. */
 export const bindActor = (user: User) => {
   const i = db.users.findIndex((u) => u.id === user.id);
   if (i >= 0) db.users[i] = { ...db.users[i], ...user };
   else db.users.push(structuredClone(user));
   currentUserId = user.id;
+};
+
+export const unbindActor = () => {
+  currentUserId = null;
 };
 
 export const actor = (): User => {

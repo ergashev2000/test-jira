@@ -1,20 +1,18 @@
-import axios from 'axios';
+import axios, { type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios';
 
+import { queryClient } from '@/shared/lib/react-query';
 import { useSessionStore } from '@/shared/lib/session';
 
 import { ApiError } from './mock/mockRequest';
 
-/** `false` → modules that are already wired to the backend use `http`; the rest still run on the mock API. */
-export const USE_MOCK = import.meta.env.VITE_USE_MOCK !== 'false';
+const BASE_URL = import.meta.env.VITE_API_URL ?? '/api';
 
-/** Real HTTP client. Base URL comes from VITE_API_URL (e.g. http://host:8000/api/v1). */
-export const http = axios.create({ baseURL: import.meta.env.VITE_API_URL ?? '/api', timeout: 20_000 });
+export const http = axios.create({ baseURL: BASE_URL, timeout: 20_000 });
 
-http.interceptors.request.use((config) => {
-  const token = useSessionStore.getState().token;
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
+const AUTH_ENDPOINTS = ['/auth/login/', '/auth/refresh/'];
+const isAuthEndpoint = (url?: string) => !!url && AUTH_ENDPOINTS.some((e) => url.includes(e));
+
+type RetriableConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
 const STATUS_FALLBACK: Record<number, string> = {
   400: 'Please check the entered data',
@@ -24,11 +22,6 @@ const STATUS_FALLBACK: Record<number, string> = {
   500: 'Server error. Please try again later.',
 };
 
-/**
- * Pulls a human-readable message out of the backend error envelope:
- * `{ error: { status_code, detail: "…" | { detail: "…" } | { field: ["…"] } } }`
- * (plain DRF `{ detail }` / field errors are handled too).
- */
 const extractMessage = (data: unknown): string | null => {
   if (typeof data === 'string') return data || null;
   if (Array.isArray(data)) return data.length ? extractMessage(data[0]) : null;
@@ -40,23 +33,69 @@ const extractMessage = (data: unknown): string | null => {
       if (msg) return msg;
     }
   }
-  // Field errors: { username: ["This field is required."] } → "username: This field is required."
-  const [field, value] = Object.entries(obj).find(([k]) => k !== 'status_code') ?? [];
+  const [field, value] = Object.entries(obj).find(([k]) => !['status_code', 'code'].includes(k)) ?? [];
   const msg = field ? extractMessage(value) : null;
   return msg && field ? `${field}: ${msg}` : msg;
 };
 
+const toApiError = (error: unknown): unknown => {
+  if (!axios.isAxiosError(error)) return error;
+  if (!error.response) return new ApiError(0, 'Cannot reach the server. Check your connection and try again.');
+  const { status, data } = error.response;
+  return new ApiError(status, extractMessage(data) ?? STATUS_FALLBACK[status] ?? `Request failed (${status})`);
+};
+
+const forceLogout = () => {
+  useSessionStore.getState().clear();
+  queryClient.clear();
+};
+
+
+let refreshing: Promise<string> | null = null;
+
+const refreshAccessToken = (): Promise<string> => {
+  refreshing ??= (async () => {
+    const { refreshToken, setTokens } = useSessionStore.getState();
+    if (!refreshToken) throw new ApiError(401, STATUS_FALLBACK[401]);
+    const { data } = await axios.post<{ access: string; refresh?: string }>(
+      `${BASE_URL}/auth/refresh/`,
+      { refresh: refreshToken },
+      { timeout: 20_000 },
+    );
+    setTokens(data.access, data.refresh ?? null);
+    return data.access;
+  })().finally(() => {
+    refreshing = null;
+  });
+  return refreshing;
+};
+
+http.interceptors.request.use((config) => {
+  const token = useSessionStore.getState().token;
+  if (token && !isAuthEndpoint(config.url)) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
 http.interceptors.response.use(
   (r) => r,
-  (error: unknown) => {
-    if (!axios.isAxiosError(error)) return Promise.reject(error);
-    if (!error.response) {
-      return Promise.reject(new ApiError(0, 'Cannot reach the server. Check your connection and try again.'));
+  async (error: unknown) => {
+    if (!axios.isAxiosError(error) || !error.config) return Promise.reject(toApiError(error));
+    const original = error.config as RetriableConfig;
+    const status = error.response?.status;
+
+    if (status === 401 && !isAuthEndpoint(original.url) && !original._retry) {
+      original._retry = true;
+      try {
+        const access = await refreshAccessToken();
+        original.headers.Authorization = `Bearer ${access}`;
+        return http(original as AxiosRequestConfig);
+      } catch {
+        forceLogout();
+        return Promise.reject(new ApiError(401, STATUS_FALLBACK[401]));
+      }
     }
-    const { status, data } = error.response;
-    // 401 on login means wrong credentials, not an expired session — keep the user on the form.
-    const isLogin = error.config?.url?.includes('/auth/login');
-    if (status === 401 && !isLogin) useSessionStore.getState().clear();
-    return Promise.reject(new ApiError(status, extractMessage(data) ?? STATUS_FALLBACK[status] ?? `Request failed (${status})`));
+
+    if (status === 401 && !isAuthEndpoint(original.url)) forceLogout();
+    return Promise.reject(toApiError(error));
   },
 );

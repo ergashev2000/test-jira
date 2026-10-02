@@ -6,19 +6,29 @@ import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { fetchMe, logout, useAuthStore } from '@/modules/auth';
 import { PageLoader } from '@/shared/components/ui/Loader';
 import { hasPermission, QUERY_KEYS, ROUTES, type Permission } from '@/shared/constants';
+import { ApiError } from '@/shared/lib/mock';
+import { isSignedIn } from '@/shared/lib/session';
 
 /** Requires a token; restores the user on reload via GET /auth/me. */
 export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
-  const { token, user, setUser } = useAuthStore();
+  const { user, setUser } = useAuthStore();
+  const signedIn = useAuthStore(isSignedIn);
   const location = useLocation();
-  const me = useQuery({ queryKey: QUERY_KEYS.me, queryFn: fetchMe, enabled: !!token && !user, retry: false });
+  // The persisted user renders at once; GET /auth/me/ refreshes it in the background
+  // (an expired access token is renewed by the axios interceptor).
+  const me = useQuery({ queryKey: QUERY_KEYS.me, queryFn: fetchMe, enabled: signedIn, retry: false });
 
   useEffect(() => {
     if (me.data) setUser(me.data);
-    if (me.isError) logout();
-  }, [me.data, me.isError, setUser]);
+  }, [me.data, setUser]);
 
-  if (!token) {
+  useEffect(() => {
+    // Log out only when the session is really gone — a network error keeps the persisted user.
+    const status = me.error instanceof ApiError ? me.error.status : null;
+    if (me.isError && (!user || status === 401 || status === 403)) logout();
+  }, [me.isError, me.error, user]);
+
+  if (!signedIn) {
     const redirect = encodeURIComponent(location.pathname + location.search);
     return <Navigate to={`${ROUTES.LOGIN}?redirect=${redirect}`} replace />;
   }
