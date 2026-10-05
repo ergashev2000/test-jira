@@ -7,7 +7,7 @@ import type { AppNotification } from '@/shared/types';
 
 import {
   getNotificationSettings,
-  latestNotifications,
+  getUnreadCount,
   listNotifications,
   markAllRead,
   markRead,
@@ -15,8 +15,16 @@ import {
   type NotificationListParams,
 } from '../api/notificationsApi';
 
+/** Bell popover: the 10 newest + unread badge. */
 export const useLatestNotifications = () =>
-  useQuery({ queryKey: QUERY_KEYS.notifications.latest, queryFn: latestNotifications, refetchInterval: REFETCH_INTERVAL });
+  useQuery({
+    queryKey: QUERY_KEYS.notifications.latest,
+    queryFn: async () => {
+      const [list, unread] = await Promise.all([listNotifications({ page_size: 10 }), getUnreadCount()]);
+      return { items: list.results, unread };
+    },
+    refetchInterval: REFETCH_INTERVAL,
+  });
 
 export const useNotificationList = (p: NotificationListParams) =>
   useQuery({ queryKey: QUERY_KEYS.notifications.list(p), queryFn: () => listNotifications(p), refetchInterval: REFETCH_INTERVAL, placeholderData: (x) => x });
@@ -40,10 +48,10 @@ export const useOpenNotification = () => {
   const mark = useMarkRead();
   return useCallback(
     (n: AppNotification) => {
-      if (!n.isRead) mark.mutate(n.id);
-      if (n.entityType === 'TASK') navigate(`${pathname}?task=${n.entityId}`);
-      else if (n.entityType === 'SPRINT' || n.entityType === 'PROJECT') navigate(ROUTES.project(n.entityId, 'board'));
-      else navigate(`${ROUTES.REPORTS}?type=${n.entityId === 'team-daily' ? 'team-daily' : 'daily'}`);
+      if (!n.is_read) mark.mutate(n.id);
+      if (n.entity_type === 'task') navigate(`${pathname}?task=${n.entity_id}`);
+      else if (n.entity_type === 'sprint' || n.entity_type === 'project') navigate(ROUTES.project(n.entity_id, 'board'));
+      else navigate(`${ROUTES.REPORTS}?type=${n.entity_id === 'team-daily' ? 'team-daily' : 'daily'}`);
     },
     [mark, navigate, pathname],
   );

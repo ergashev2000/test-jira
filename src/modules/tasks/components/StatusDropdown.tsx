@@ -9,13 +9,13 @@ import { canChangeStatus } from '@/shared/utils';
 
 import { useStatusChanger } from '../hooks/useTaskUi';
 
-type TaskLike = Pick<Task, 'id' | 'key' | 'status' | 'assigneeId' | 'reviewerId'>;
+type TaskLike = Pick<Task, 'id' | 'key' | 'status' | 'assignee' | 'reviewer'>;
 
 /** Clickable status chip → menu of statuses. Read-only chip if user can't change it. */
 export const StatusDropdown = ({ task, children, disabled }: { task: TaskLike; children?: ReactNode; disabled?: boolean }) => {
   const user = useSessionStore((s) => s.user);
   const { change } = useStatusChanger();
-  const allowed = !disabled && !!user && task.status !== 'CANCELLED' && canChangeStatus(user, task);
+  const allowed = !disabled && !!user && task.status !== 'cancelled' && canChangeStatus(user, task);
   const trigger = children ?? <StatusTag status={task.status} />;
 
   if (!allowed) return <>{trigger}</>;

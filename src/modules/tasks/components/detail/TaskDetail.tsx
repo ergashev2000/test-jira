@@ -1,7 +1,7 @@
 import { Result, Skeleton, Tabs } from 'antd';
 
 import { ActivityTimeline, ErrorState, QueryState } from '@/shared/components/ui';
-import { ApiError } from '@/shared/lib/mock';
+import { ApiError } from '@/shared/lib/apiError';
 
 import { useTaskActivity } from '../../hooks/useTaskActions';
 import { useTaskDetail } from '../../hooks/useTasks';
@@ -12,9 +12,9 @@ import { TaskComments } from './TaskComments';
 import { TaskHeader } from './TaskHeader';
 import { TaskMeta } from './TaskMeta';
 
-const Activity = ({ taskId }: { taskId: string }) => {
+const Activity = ({ taskId }: { taskId: number }) => {
   const query = useTaskActivity(taskId);
-  return <QueryState query={query}>{(items) => <ActivityTimeline items={items} />}</QueryState>;
+  return <QueryState query={query}>{(d) => <ActivityTimeline items={d.results} />}</QueryState>;
 };
 
 /** Shared by the Drawer (?task=KEY) and the full page (/tasks/:key). */
@@ -47,7 +47,7 @@ export const TaskDetailView = ({ taskKey, inDrawer }: { taskKey: string; inDrawe
           </section>
           <section>
             <h4 className="mb-2 text-xs font-medium text-fg-3">Attachments</h4>
-            <TaskAttachments taskId={task.id} disabled={task.projectArchived} />
+            <TaskAttachments taskId={task.id} disabled={task.project.status === 'archived'} />
           </section>
           <Tabs
             size="small"
@@ -58,7 +58,7 @@ export const TaskDetailView = ({ taskKey, inDrawer }: { taskKey: string; inDrawe
             ]}
           />
         </div>
-        <aside className="h-fit rounded-lg border border-line bg-surface px-3 py-2 lg:sticky lg:top-0">
+        <aside className="h-fit rounded-xl border border-line bg-surface px-3 py-2 lg:sticky lg:top-0">
           <TaskMeta task={task} />
         </aside>
       </div>

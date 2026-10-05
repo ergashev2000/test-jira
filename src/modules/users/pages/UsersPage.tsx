@@ -1,90 +1,62 @@
-import { App, Badge, Button, Popconfirm, Table, Tag } from 'antd';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Add01Icon } from '@hugeicons/core-free-icons';
+import { App, Button } from 'antd';
 import { useState } from 'react';
 
-import { useTeams } from '@/modules/teams';
-import { FilterBar, Icon, PageHeader, QueryState, UserAvatar } from '@/shared/components/ui';
-import { ROLE_OPTIONS, ROLES } from '@/shared/constants';
-import { useTableParams } from '@/shared/hooks';
-import { useSessionStore } from '@/shared/lib/session';
-import type { Role, UserStatus } from '@/shared/types';
-import { errorMessage, formatDate, formatPhone, fromNow } from '@/shared/utils';
+import { DataTable, FilterBar, PageHeader } from '@/shared/components/ui';
+import { ROLE_OPTIONS } from '@/shared/constants';
+import { useCurrentUser, useTableParams } from '@/shared/hooks';
+import type { Role } from '@/shared/types';
+import { errorMessage } from '@/shared/utils';
 
-import type { UserRow } from '../api/usersApi';
 import { UserDrawer } from '../components/UserDrawer';
-import { useSetUserStatus, useUserList } from '../hooks/useUsers';
+import { getUserColumns } from '../components/userColumns';
+import { useSetUserActive, useTeams, useUser, useUserList } from '../hooks/useUsers';
+import type { User, UserStatus } from '../types/user.types';
 
 export const UsersPage = () => {
-  const { get, page, pageSize, pagination } = useTableParams();
+  const { get, page, pageSize, ordering } = useTableParams();
   const { message } = App.useApp();
-  const me = useSessionStore((s) => s.user)!;
+  const me = useCurrentUser();
   const { data: teams = [] } = useTeams();
-  const [drawer, setDrawer] = useState<{ open: boolean; user?: UserRow }>({ open: false });
-  const setStatus = useSetUserStatus();
+  const [drawer, setDrawer] = useState<{ open: boolean; user?: User }>({ open: false });
+  const setActive = useSetUserActive();
+  const detail = useUser(drawer.open ? drawer.user?.id : undefined);
   const query = useUserList({
-    page, pageSize, search: get('search'), role: get('role') as Role | undefined, teamId: get('teamId'),
-    status: get('status') as UserStatus | undefined, telegram: get('telegram') as 'linked' | 'not_linked' | undefined,
+    page, page_size: pageSize, ordering: ordering ?? '-created_at', search: get('search'), role: get('role') as Role | undefined,
+    status: get('status') as UserStatus | undefined, team: get('team') ? Number(get('team')) : undefined,
   });
 
-  const locked = (u: UserRow) => u.role === 'SUPER_ADMIN' && me.role !== 'SUPER_ADMIN';
-
-  const toggle = (u: UserRow) => {
-    const next: UserStatus = u.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
-    setStatus.mutate({ id: u.id, status: next }, {
-      onSuccess: () => message.success(next === 'ACTIVE' ? `${u.fullName} activated` : `${u.fullName} deactivated`),
+  const toggleActive = (u: User) => {
+    const active = u.status !== 'active';
+    const name = u.full_name || u.username;
+    setActive.mutate({ id: u.id, active }, {
+      onSuccess: () => message.success(active ? `${name} activated` : `${name} deactivated`),
       onError: (e) => message.error(errorMessage(e)),
     });
   };
 
+  const columns = getUserColumns({
+    meId: me.id,
+    isLocked: (u) => u.roles.includes('SUPER_ADMIN') && !me.roles.includes('SUPER_ADMIN'),
+    onEdit: (user) => setDrawer({ open: true, user }),
+    onToggleStatus: toggleActive,
+    pendingId: setActive.isPending ? setActive.variables?.id : undefined,
+  });
+
   return (
     <>
-      <PageHeader title="Users" count={query.data?.total}
-        extra={<Button type="primary" size="small" icon={<Icon name="add" size={14} />} onClick={() => setDrawer({ open: true })}>New user</Button>}>
+      <PageHeader title="Users" count={query.data?.count}
+        extra={<Button type="primary" size="small" icon={<HugeiconsIcon icon={Add01Icon} size={14} className="hicon" strokeWidth={1.7} />} onClick={() => setDrawer({ open: true })}>New user</Button>}>
         <FilterBar filters={[
           { type: 'search', key: 'search', placeholder: 'Name, username, email, phone' },
           { type: 'select', key: 'role', placeholder: 'Role', options: ROLE_OPTIONS },
-          { type: 'select', key: 'teamId', placeholder: 'Team', options: teams.map((t) => ({ value: t.id, label: t.name })) },
-          { type: 'select', key: 'status', placeholder: 'Status', options: [{ value: 'ACTIVE', label: 'Active' }, { value: 'INACTIVE', label: 'Inactive' }] },
-          { type: 'select', key: 'telegram', placeholder: 'Telegram', options: [{ value: 'linked', label: 'Linked' }, { value: 'not_linked', label: 'Not linked' }] },
+          { type: 'select', key: 'team', placeholder: 'Team', options: teams.map((t) => ({ value: String(t.id), label: t.name })) },
+          { type: 'select', key: 'status', placeholder: 'Status', options: [{ value: 'active', label: 'Active' }, { value: 'inactive', label: 'Inactive' }] },
         ]} />
       </PageHeader>
-      <QueryState query={query}>
-        {(data) => (
-          <Table<UserRow> className="app-table" size="middle" rowKey="id" dataSource={data.items} loading={query.isFetching}
-            scroll={{ x: 1500 }} pagination={{ ...pagination, total: data.total }}
-            columns={[
-              { title: 'Full name', dataIndex: 'fullName', fixed: 'left', width: 210, render: (_, u) => <UserAvatar userId={u.id} showName /> },
-              { title: 'Username', dataIndex: 'username', width: 120, render: (v: string) => <span className="text-fg-2">@{v}</span> },
-              { title: 'Email', dataIndex: 'email', width: 200 },
-              { title: 'Phone', dataIndex: 'phone', width: 160, render: (v: string) => formatPhone(v) },
-              { title: 'Position', dataIndex: 'position', width: 170 },
-              { title: 'Team', dataIndex: 'teamName', width: 120, render: (v: string | null) => v ?? <span className="text-fg-3">—</span> },
-              { title: 'Role', dataIndex: 'role', width: 140, render: (r: Role) => <Tag color={ROLES[r].color}>{ROLES[r].label}</Tag> },
-              { title: 'Telegram', dataIndex: 'telegram', width: 150, render: (t: UserRow['telegram']) => t
-                ? <span className="flex items-center gap-1 text-[#2aabee]"><Icon name="telegram" size={13} />@{t.username}</span>
-                : <span className="text-fg-3">Not linked</span> },
-              { title: 'Status', dataIndex: 'status', width: 100, render: (s: UserStatus) => <Badge status={s === 'ACTIVE' ? 'success' : 'default'} text={s === 'ACTIVE' ? 'Active' : 'Inactive'} /> },
-              { title: 'Created', dataIndex: 'createdAt', width: 110, render: (d: string) => formatDate(d) },
-              { title: 'Last login', dataIndex: 'lastLoginAt', width: 120, render: (d: string | null) => <span className="text-fg-2">{fromNow(d, 'Never')}</span> },
-              { title: '', key: 'actions', fixed: 'right', width: 120, render: (_, u) => !locked(u) && (
-                <span className="flex gap-1">
-                  <Button size="small" type="text" icon={<Icon name="edit" size={14} />} onClick={() => setDrawer({ open: true, user: u })} />
-                  {u.id !== me.id && (
-                    <Popconfirm
-                      title={u.status === 'ACTIVE' ? `Deactivate ${u.fullName}?` : `Activate ${u.fullName}?`}
-                      description={u.status === 'ACTIVE' ? (
-                        <div className="max-w-64">User's task and audit history will be kept.
-                          {u.activeTasks > 0 && <div className="mt-1 text-warn">⚠ This user has {u.activeTasks} active tasks. Reassign them?</div>}
-                        </div>) : 'The user will be able to log in again.'}
-                      okText={u.status === 'ACTIVE' ? 'Deactivate' : 'Activate'} okButtonProps={{ danger: u.status === 'ACTIVE' }}
-                      onConfirm={() => toggle(u)}>
-                      <Button size="small" type="text">{u.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}</Button>
-                    </Popconfirm>
-                  )}
-                </span>) },
-            ]} />
-        )}
-      </QueryState>
-      <UserDrawer open={drawer.open} user={drawer.user} onClose={() => setDrawer({ open: false })} />
+      <DataTable<User> query={query} columns={columns} scroll={{ x: 1400 }} emptyText="No users found" />
+      <UserDrawer open={drawer.open} user={detail.data ?? drawer.user} onClose={() => setDrawer({ open: false })} />
     </>
   );
 };

@@ -1,5 +1,7 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { ArrowRight01Icon } from '@hugeicons/core-free-icons';
 import type { ReactNode } from 'react';
-import { Icon } from './Icon';
+
 import { Link } from 'react-router-dom';
 
 export interface Crumb {
@@ -30,7 +32,7 @@ export const PageHeader = ({ title, icon, breadcrumb, count, extra, children }: 
             ) : (
               c.label
             )}
-            <Icon name="arrowRight" size={11} className="text-fg-3" />
+            <HugeiconsIcon icon={ArrowRight01Icon} size={11} className="hicon text-fg-3" strokeWidth={1.7} />
           </span>
         ))}
         {icon}

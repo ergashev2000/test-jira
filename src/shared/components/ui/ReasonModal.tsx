@@ -1,8 +1,7 @@
 import { Form, Input, Modal, Radio } from 'antd';
 import { useEffect } from 'react';
 
-import { CANCEL_REASONS } from '@/shared/constants';
-import type { CancelReason } from '@/shared/types';
+import { CANCEL_REASONS, type CancelReason } from '@/shared/constants';
 import { rules } from '@/shared/utils';
 
 export interface ReasonValues {

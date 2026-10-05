@@ -1,5 +1,7 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { LockPasswordIcon, Mail01Icon } from '@hugeicons/core-free-icons';
 import { App, Button, Form, Input, Result } from 'antd';
-import { Icon } from '@/shared/components/ui/Icon';
+
 import { useMutation } from '@tanstack/react-query';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
@@ -27,9 +29,18 @@ export const ForgotPasswordPage = () => {
 
   return (
     <AuthLayout title="Reset your password" subtitle="Enter your email and we'll send you a reset link">
-      <Form layout="vertical" requiredMark={false} onFinish={(v: { email: string }) => mutation.mutate(v.email)}>
+      <Form
+        layout="vertical"
+        requiredMark={false}
+        onFinish={(v: { email: string }) => mutation.mutate(v.email)}
+      >
         <Form.Item name="email" label="Email" rules={[rules.required('Email'), rules.email]}>
-          <Input size="large" prefix={<Icon name="mail" className="text-fg-3" />} placeholder="you@company.uz" autoFocus />
+          <Input
+            size="large"
+            prefix={<HugeiconsIcon icon={Mail01Icon} size={18} className="hicon mr-1 text-fg-3" strokeWidth={1.7} />}
+            placeholder="you@company.uz"
+            autoFocus
+          />
         </Form.Item>
         <Button type="primary" htmlType="submit" size="large" block loading={mutation.isPending}>
           Send reset link
@@ -47,7 +58,7 @@ export const ResetPasswordPage = () => {
   const { message } = App.useApp();
   const navigate = useNavigate();
   const mutation = useMutation({
-    mutationFn: (password: string) => resetPassword(sp.get('token') ?? '', password),
+    mutationFn: (password: string) => resetPassword({ uid: sp.get('uid') ?? '', token: sp.get('token') ?? '', new_password: password }),
     onSuccess: () => {
       message.success('Password updated. You can log in now.');
       navigate(ROUTES.LOGIN);
@@ -57,9 +68,17 @@ export const ResetPasswordPage = () => {
 
   return (
     <AuthLayout title="Set a new password">
-      <Form layout="vertical" requiredMark={false} onFinish={(v: { password: string }) => mutation.mutate(v.password)}>
+      <Form
+        layout="vertical"
+        requiredMark={false}
+        onFinish={(v: { password: string }) => mutation.mutate(v.password)}
+      >
         <Form.Item name="password" label="New password" rules={[rules.required('Password'), rules.min(6)]}>
-          <Input.Password size="large" autoFocus />
+          <Input.Password
+            size="large"
+            prefix={<HugeiconsIcon icon={LockPasswordIcon} size={18} className="hicon mr-1 text-fg-3" strokeWidth={1.7} />}
+            autoFocus
+          />
         </Form.Item>
         <Form.Item
           name="confirm"
@@ -69,11 +88,13 @@ export const ResetPasswordPage = () => {
             rules.required('Confirmation'),
             ({ getFieldValue }) => ({
               validator: (_, v) =>
-                !v || v === getFieldValue('password') ? Promise.resolve() : Promise.reject(new Error('Passwords do not match')),
+                !v || v === getFieldValue('password')
+                  ? Promise.resolve()
+                  : Promise.reject(new Error('Passwords do not match')),
             }),
           ]}
         >
-          <Input.Password size="large" />
+          <Input.Password size="large" prefix={<HugeiconsIcon icon={LockPasswordIcon} size={18} className="hicon mr-1 text-fg-3" strokeWidth={1.7} />} />
         </Form.Item>
         <Button type="primary" htmlType="submit" size="large" block loading={mutation.isPending}>
           Update password

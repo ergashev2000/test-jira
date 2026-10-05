@@ -1,5 +1,7 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Cancel01Icon, Search01Icon } from '@hugeicons/core-free-icons';
 import { Button, DatePicker, Input, Select, Switch } from 'antd';
-import { Icon } from './Icon';
+
 import { useEffect, useState } from 'react';
 
 import { useDebounce, useTableParams } from '@/shared/hooks';
@@ -11,7 +13,7 @@ import { UserSelect } from './UserSelect';
 export type FilterDef =
   | { type: 'search'; key: string; placeholder?: string; width?: number }
   | { type: 'select'; key: string; placeholder: string; options: Option[]; multiple?: boolean; width?: number }
-  | { type: 'user'; key: string; placeholder: string; multiple?: boolean; projectId?: string; onlyActive?: boolean; width?: number }
+  | { type: 'user'; key: string; placeholder: string; multiple?: boolean; projectId?: number; onlyActive?: boolean; width?: number }
   | { type: 'switch'; key: string; label: string }
   | { type: 'dateRange'; from: string; to: string };
 
@@ -28,7 +30,7 @@ const SearchInput = ({ value, placeholder, width, onChange }: {
   return (
     <Input
       allowClear
-      prefix={<Icon name="search" className="text-fg-3" />}
+      prefix={<HugeiconsIcon icon={Search01Icon} size={16} className="hicon text-fg-3" strokeWidth={1.7} />}
       placeholder={placeholder ?? 'Search…'}
       value={text}
       onChange={(e) => setText(e.target.value)}
@@ -72,8 +74,8 @@ export const FilterBar = ({ filters, keep = [], extra }: { filters: FilterDef[];
                 placeholder={f.placeholder}
                 projectId={f.projectId}
                 onlyActive={f.onlyActive ?? false}
-                value={f.multiple ? getArray(f.key) : get(f.key)}
-                onChange={(v) => set({ [f.key]: v as string | string[] | undefined })}
+                value={f.multiple ? getArray(f.key).map(Number) : get(f.key) ? Number(get(f.key)) : undefined}
+                onChange={(v) => set({ [f.key]: Array.isArray(v) ? v.map(String) : v == null ? undefined : String(v) })}
                 style={{ minWidth: f.width ?? 180 }}
               />
             );
@@ -101,7 +103,7 @@ export const FilterBar = ({ filters, keep = [], extra }: { filters: FilterDef[];
         }
       })}
       {active && (
-        <Button type="text" icon={<Icon name="close" />} onClick={() => clear(keep)}>
+        <Button type="text" icon={<HugeiconsIcon icon={Cancel01Icon} size={16} className="hicon" strokeWidth={1.7} />} onClick={() => clear(keep)}>
           Clear filters
         </Button>
       )}

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 
 import { hasPermission, type Permission } from '@/shared/constants';
-import { useSessionStore } from '@/shared/lib/session';
+import { roleOf, useSessionStore } from '@/shared/lib/session';
 
+export { useCurrentUser } from './useCurrentUser';
 export { useTableParams } from './useTableParams';
 
 export const useDebounce = <T,>(value: T, delay = 300) => {
@@ -15,6 +16,6 @@ export const useDebounce = <T,>(value: T, delay = 300) => {
 };
 
 export const usePermission = (permission: Permission) => {
-  const role = useSessionStore((s) => s.user?.role);
+  const role = useSessionStore((s) => roleOf(s.user));
   return hasPermission(role, permission);
 };

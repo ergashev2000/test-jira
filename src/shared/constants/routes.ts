@@ -11,6 +11,7 @@ export const ROUTES = {
   BOARD: '/board',
   task: (key: string) => `/tasks/${key}`,
   USERS: '/users',
+  ROLES: '/roles',
   TEAMS: '/teams',
   REPORTS: '/reports',
   NOTIFICATIONS: '/notifications',

@@ -1,8 +1,10 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { GlobeIcon, Settings02Icon, TelegramIcon } from '@hugeicons/core-free-icons';
 import { Alert, App, Button, Pagination, Segmented, Select, Switch, Table } from 'antd';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { EmptyState, Icon, PageHeader, QueryState } from '@/shared/components/ui';
+import { EmptyState, PageHeader, QueryState } from '@/shared/components/ui';
 import { ROUTES } from '@/shared/constants';
 import { useTableParams } from '@/shared/hooks';
 import type { NotificationSetting, NotificationType } from '@/shared/types';
@@ -21,7 +23,7 @@ export const NotificationsPage = () => {
   const { get, set, page, pageSize } = useTableParams();
   const navigate = useNavigate();
   const unreadOnly = get('filter') === 'unread';
-  const query = useNotificationList({ page, pageSize, unreadOnly, type: get('type') as NotificationType | undefined });
+  const query = useNotificationList({ page, page_size: pageSize, is_read: unreadOnly ? false : undefined, type: get('type') as NotificationType | undefined });
   const markAll = useMarkAllRead();
   const open = useOpenNotification();
 
@@ -30,7 +32,7 @@ export const NotificationsPage = () => {
       <PageHeader title="Notifications" extra={
         <>
           <Button size="small" loading={markAll.isPending} onClick={() => markAll.mutate()}>Mark all as read</Button>
-          <Button size="small" type="text" icon={<Icon name="settings" size={15} />} onClick={() => navigate(ROUTES.NOTIFICATION_SETTINGS)}>Settings</Button>
+          <Button size="small" type="text" icon={<HugeiconsIcon icon={Settings02Icon} size={15} className="hicon" strokeWidth={1.7} />} onClick={() => navigate(ROUTES.NOTIFICATION_SETTINGS)}>Settings</Button>
         </>
       }>
         <div className="flex flex-wrap gap-2">
@@ -41,13 +43,13 @@ export const NotificationsPage = () => {
         </div>
       </PageHeader>
       <div className="mx-auto max-w-3xl p-5">
-        <QueryState query={query} isEmpty={(d) => !d.items.length} empty={<EmptyState description="No notifications" />}>
+        <QueryState query={query} isEmpty={(d) => !d.results.length} empty={<EmptyState description="No notifications" />}>
           {(d) => (
             <>
-              <div className="overflow-hidden rounded-lg border border-line bg-surface">
-                {d.items.map((n) => <NotificationItem key={n.id} n={n} onClick={() => open(n)} />)}
+              <div className="overflow-hidden rounded-xl border border-line bg-surface">
+                {d.results.map((n) => <NotificationItem key={n.id} n={n} onClick={() => open(n)} />)}
               </div>
-              <Pagination className="!mt-4 text-right" size="small" current={page} pageSize={pageSize} total={d.total}
+              <Pagination className="!mt-4 text-right" size="small" current={page} pageSize={pageSize} total={d.count}
                 onChange={(p, ps) => set({ page: p, pageSize: ps }, false)} hideOnSinglePage />
             </>
           )}
@@ -67,7 +69,7 @@ export const NotificationSettingsPage = () => {
   useEffect(() => {
     if (query.data) setRows(query.data.items.map(({ event, telegram, web }) => ({ event, telegram, web })));
   }, [query.data]);
-  const linked = query.data?.telegramLinked ?? false;
+  const linked = query.data?.telegram_linked ?? false;
   const toggle = (event: NotificationType, key: 'telegram' | 'web', v: boolean) =>
     setRows((r) => r.map((x) => (x.event === event ? { ...x, [key]: v } : x)));
 
@@ -85,10 +87,10 @@ export const NotificationSettingsPage = () => {
             <Table<Row> className="app-table" size="middle" rowKey="event" dataSource={rows} pagination={false}
               columns={[
                 { title: 'Event', dataIndex: 'event', render: (e: NotificationType) => (
-                  <span className="flex items-center gap-2"><Icon name={NOTIFICATION_META[e].icon} size={15} color={NOTIFICATION_META[e].color} />{NOTIFICATION_META[e].label}</span>) },
-                { title: <span className="flex items-center gap-1"><Icon name="telegram" size={14} />Telegram</span>, dataIndex: 'telegram', width: 120,
+                  <span className="flex items-center gap-2"><HugeiconsIcon icon={NOTIFICATION_META[e].icon} size={15} color={NOTIFICATION_META[e].color} className="hicon" strokeWidth={1.7} />{NOTIFICATION_META[e].label}</span>) },
+                { title: <span className="flex items-center gap-1"><HugeiconsIcon icon={TelegramIcon} size={14} className="hicon" strokeWidth={1.7} />Telegram</span>, dataIndex: 'telegram', width: 120,
                   render: (v: boolean, r) => <Switch size="small" checked={linked && v} disabled={!linked} onChange={(x) => toggle(r.event, 'telegram', x)} /> },
-                { title: <span className="flex items-center gap-1"><Icon name="globe" size={14} />Web</span>, dataIndex: 'web', width: 100,
+                { title: <span className="flex items-center gap-1"><HugeiconsIcon icon={GlobeIcon} size={14} className="hicon" strokeWidth={1.7} />Web</span>, dataIndex: 'web', width: 100,
                   render: (v: boolean, r) => <Switch size="small" checked={v} onChange={(x) => toggle(r.event, 'web', x)} /> },
               ]} />
           )}

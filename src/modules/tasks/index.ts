@@ -1,13 +1,11 @@
 export * from './types/task.types';
 export { MyTasksPage } from './pages/MyTasksPage';
-export { TaskPage } from './pages/TaskPage';
 export { TaskDrawer } from './components/TaskDrawer';
 export { TaskFormModal } from './components/TaskFormModal';
 export { TaskTable } from './components/TaskTable';
 export { TaskListRow } from './components/TaskListRow';
 export { StatusDropdown } from './components/StatusDropdown';
-export { useTaskList, useMyTasks, useCreateTask, useMoveTask, useChangeStatus, invalidateTaskData } from './hooks/useTasks';
+export { useTaskList, useBoard, useMyTasks, useCreateTask, useMoveTask, useChangeStatus, invalidateTaskData } from './hooks/useTasks';
 export { useProjectActivity } from './hooks/useTaskActions';
 export { useTaskDrawer, useStatusChanger } from './hooks/useTaskUi';
 export { globalSearch } from './api/searchApi';
-export { enrichActivity } from './api/taskActionsApi';

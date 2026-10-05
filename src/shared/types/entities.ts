@@ -1,257 +1,491 @@
-import type { ID } from './common';
+// Shapes follow api/api.json (components.schemas) as-is: snake_case, numeric ids, lowercase enums.
+// Types marked "NOT IN api.json" describe endpoints the UI needs but the backend doesn't have yet —
+// see docs/BACKEND_REQUIREMENTS.md.
 
 export type Role = 'SUPER_ADMIN' | 'ADMIN' | 'PROJECT_MANAGER' | 'TEAM_LEAD' | 'EMPLOYEE';
-export type UserStatus = 'ACTIVE' | 'INACTIVE';
-export type ProjectStatus = 'PLANNING' | 'ACTIVE' | 'ON_HOLD' | 'COMPLETED' | 'ARCHIVED';
-export type SprintStatus = 'PLANNED' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
-export type TaskStatus = 'BACKLOG' | 'TODO' | 'IN_PROGRESS' | 'REVIEW' | 'DONE' | 'CANCELLED';
-export type TaskType = 'TASK' | 'BUG';
-export type Priority = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-export type Source = 'WEB' | 'TELEGRAM' | 'API';
-export type CancelReason = 'REQUIREMENT_CHANGED' | 'NO_LONGER_NEEDED' | 'DUPLICATE' | 'OTHER';
-export type DailyTaskStatus = 'PLANNED' | 'WORKED' | 'NOT_WORKED' | 'CARRIED_OVER';
+export type UserStatus = 'active' | 'inactive';
+export type ProjectStatus = 'planning' | 'active' | 'on_hold' | 'completed' | 'archived';
+export type ReviewMode = 'direct_done' | 'require_review';
+export type SprintStatus = 'planned' | 'active' | 'completed' | 'cancelled';
+export type TaskStatus = 'backlog' | 'todo' | 'in_progress' | 'review' | 'done' | 'cancelled';
+export type TaskType = 'task' | 'bug';
+export type Priority = 'low' | 'medium' | 'high' | 'critical';
+export type Source = 'web' | 'telegram' | 'api';
+export type CancelRequestStatus = 'pending' | 'approved' | 'rejected';
+export type DailyPlanStatus = 'planned' | 'worked' | 'not_worked' | 'carried_over' | 'done' | 'blocked';
 
-export interface TelegramLink {
+export type ActivityAction =
+  | 'created'
+  | 'updated'
+  | 'status_changed'
+  | 'assigned'
+  | 'reassigned'
+  | 'blocker_added'
+  | 'blocker_resolved'
+  | 'comment_added'
+  | 'attachment_added'
+  | 'moved_sprint'
+  | 'reopened'
+  | 'cancel_requested'
+  | 'cancel_rejected'
+  | 'cancelled';
+
+export interface UserBrief {
+  id: number;
+  full_name: string;
   username: string;
-  chatId: string;
-  linkedAt: string;
 }
 
-export interface User {
-  id: ID;
-  fullName: string;
+export interface TeamBrief {
+  id: number;
+  name: string;
+}
+
+export interface ProjectBrief {
+  id: number;
+  key: string;
+  name: string;
+  status: ProjectStatus;
+}
+
+export interface SprintBrief {
+  id: number;
+  name: string;
+  status: SprintStatus;
+}
+
+/** GET /auth/me/ — the signed-in user (login returns the same shape in `user`). */
+export interface Me {
+  id: number;
+  full_name: string;
   username: string;
   email: string;
   phone: string;
   position: string;
-  teamId: ID | null;
-  role: Role;
+  team: TeamBrief | null;
   status: UserStatus;
-  telegram: TelegramLink | null;
-  createdAt: string;
-  lastLoginAt: string | null;
+  roles: Role[];
+  is_superuser: boolean;
+  is_staff: boolean;
+  last_login: string | null;
+  created_at: string;
+  permissions: string[];
 }
 
+/** GET /users/ item — used by shared user selects. */
+export interface UserOption extends UserBrief {
+  email: string;
+  phone: string;
+  position: string;
+  team: TeamBrief | null;
+  status: UserStatus;
+  roles: Role[];
+}
+
+/** GET /teams/ item. */
 export interface Team {
-  id: ID;
+  id: number;
   name: string;
-  leadId: ID;
-  memberIds: ID[];
-  createdAt: string;
+  description: string;
+  lead: UserBrief | null;
+  members_count: number;
+  created_at: string;
+  updated_at: string;
 }
 
+/** Project.active_sprint / ProjectReport.active_sprint — untyped object in the schema. */
+export interface ActiveSprintInfo extends SprintBrief {
+  start_date: string;
+  end_date: string;
+  goal?: string;
+}
+
+/** GET /projects/, /projects/:id/ */
 export interface Project {
-  id: ID;
+  id: number;
   name: string;
   key: string;
   description: string;
-  managerId: ID;
-  memberIds: ID[];
-  startDate: string;
-  endDate: string | null;
+  manager: UserBrief;
+  start_date: string | null;
+  end_date: string | null;
   status: ProjectStatus;
-  taskCounter: number;
-  createdAt: string;
+  review_mode: ReviewMode;
+  members_count: number;
+  active_sprint: ActiveSprintInfo | null;
+  created_at: string;
+  updated_at: string;
+  /** NOT IN api.json — member avatars in lists/header. */
+  members?: UserBrief[];
+  /** NOT IN api.json — non-cancelled tasks / done tasks / done %. */
+  tasks_total?: number;
+  tasks_done?: number;
+  progress?: number;
 }
 
+/** POST /projects/, PATCH /projects/:id/ */
+export interface ProjectWrite {
+  name: string;
+  key: string;
+  description?: string;
+  manager: number;
+  start_date?: string | null;
+  end_date?: string | null;
+  status?: ProjectStatus;
+  review_mode?: ReviewMode;
+}
+
+/** GET /projects/:id/members/ */
+export interface ProjectMember {
+  id: number;
+  full_name: string;
+  username: string;
+  status: string;
+  role_in_project: string;
+  added_at: string;
+  /** NOT IN api.json — shown in the members table. */
+  position?: string;
+  roles?: Role[];
+  team?: TeamBrief | null;
+  active_tasks?: number;
+}
+
+/** GET /sprints/, /sprints/:id/ */
 export interface Sprint {
-  id: ID;
-  projectId: ID;
+  id: number;
+  project: ProjectBrief;
   name: string;
   goal: string;
-  startDate: string;
-  endDate: string;
+  start_date: string;
+  end_date: string;
   status: SprintStatus;
-  startedAt: string | null;
-  completedAt: string | null;
-  createdAt: string;
+  started_at: string | null;
+  completed_at: string | null;
+  created_at: string;
+  updated_at: string;
+  /** NOT IN api.json — non-cancelled / done task counts for the progress bar. */
+  tasks_total?: number;
+  tasks_done?: number;
 }
 
-export interface TaskCancellation {
-  reason: CancelReason;
-  note: string;
-  byId: ID;
-  at: string;
+/** POST /sprints/, PATCH /sprints/:id/ */
+export interface SprintWrite {
+  project: number;
+  name: string;
+  goal?: string;
+  start_date: string;
+  end_date: string;
 }
 
+/** Task.active_blocker — untyped object in the schema. */
+export interface ActiveBlocker {
+  id: number;
+  reason: string;
+  created_by: UserBrief | null;
+  created_at: string;
+}
+
+/** GET /tasks/, /tasks/:id/ */
 export interface Task {
-  id: ID;
+  id: number;
   key: string;
   title: string;
   description: string;
+  project: ProjectBrief;
+  sprint: SprintBrief | null;
+  assignee: UserBrief | null;
+  reporter: UserBrief;
+  reviewer: UserBrief | null;
   type: TaskType;
-  projectId: ID;
-  sprintId: ID | null;
-  assigneeId: ID | null;
-  reporterId: ID;
-  reviewerId: ID | null;
   priority: Priority;
   status: TaskStatus;
   deadline: string | null;
-  estimate: number | null;
-  labels: string[];
-  isBlocked: boolean;
-  cancellation: TaskCancellation | null;
-  createdAt: string;
-  updatedAt: string;
-  completedAt: string | null;
+  /** Decimal as string, e.g. "2.50". */
+  estimate: string | null;
+  is_blocked: boolean;
+  is_overdue: boolean;
+  active_blocker: ActiveBlocker | null;
+  cancellation_reason: string;
+  completed_at: string | null;
+  created_at: string;
+  updated_at: string;
+  /** NOT IN api.json — task labels. */
+  labels?: string[];
 }
 
-export interface TaskBlocker {
-  id: ID;
-  taskId: ID;
-  reason: string;
-  createdById: ID;
-  createdAt: string;
-  resolvedById: ID | null;
-  resolvedAt: string | null;
+/** POST /tasks/, PATCH /tasks/:id/ */
+export interface TaskWrite {
+  project: number;
+  title: string;
+  description?: string;
+  sprint?: number | null;
+  assignee?: number | null;
+  reviewer?: number | null;
+  type?: TaskType;
+  priority?: Priority;
+  deadline?: string | null;
+  estimate?: string | null;
+  /** NOT IN api.json — task labels. */
+  labels?: string[];
+}
+
+export interface Comment {
+  id: number;
+  author: UserBrief | null;
+  text: string;
+  created_at: string;
+  edited_at: string | null;
+}
+
+export interface Attachment {
+  id: number;
+  file_name: string;
+  file_size: number;
+  mime_type: string;
+  url: string;
+  uploaded_by: UserBrief | null;
+  created_at: string;
+}
+
+export interface Activity {
+  id: number;
+  actor: UserBrief | null;
+  action: ActivityAction;
+  old_value: string;
+  new_value: string;
+  source: Source;
+  created_at: string;
+  /** NOT IN api.json — needed by project/dashboard activity feeds. */
+  task?: { id: number; key: string; title: string };
 }
 
 export interface CancelRequest {
-  id: ID;
-  taskId: ID;
-  requestedById: ID;
-  reason: CancelReason;
-  note: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
-  reviewedById: ID | null;
-  createdAt: string;
-  reviewedAt: string | null;
+  id: number;
+  status: CancelRequestStatus;
+  reason: string;
+  requested_by: UserBrief;
+  reviewed_by: UserBrief | null;
+  reviewed_at: string | null;
+  created_at: string;
 }
 
-export interface TaskComment {
-  id: ID;
-  taskId: ID;
-  authorId: ID;
-  text: string;
-  createdAt: string;
-  editedAt: string | null;
+/** NOT IN api.json — GET /tasks/:id/blockers/ */
+export interface TaskBlocker {
+  id: number;
+  reason: string;
+  created_by: UserBrief | null;
+  created_at: string;
+  resolved_by: UserBrief | null;
+  resolved_at: string | null;
 }
 
-export interface TaskAttachment {
-  id: ID;
-  taskId: ID;
-  fileName: string;
-  fileSize: number;
-  mimeType: string;
-  url: string;
-  uploadedById: ID;
-  createdAt: string;
-}
-
-export type ActivityAction =
-  | 'CREATED'
-  | 'STATUS_CHANGED'
-  | 'ASSIGNED'
-  | 'PRIORITY_CHANGED'
-  | 'DEADLINE_CHANGED'
-  | 'SPRINT_CHANGED'
-  | 'BLOCKED'
-  | 'BLOCKER_RESOLVED'
-  | 'CANCELLED'
-  | 'CANCEL_REQUESTED'
-  | 'COMMENTED'
-  | 'ATTACHMENT_ADDED'
-  | 'REOPENED';
-
-export interface TaskActivity {
-  id: ID;
-  taskId: ID;
-  projectId: ID;
-  actorId: ID;
-  action: ActivityAction;
-  oldValue: string | null;
-  newValue: string | null;
-  source: Source;
-  createdAt: string;
-}
-
-export type NotificationType =
-  | 'TASK_ASSIGNED'
-  | 'TASK_REASSIGNED'
-  | 'DEADLINE_APPROACHING'
-  | 'TASK_OVERDUE'
-  | 'TASK_BLOCKED'
-  | 'BLOCKER_RESOLVED'
-  | 'COMMENT_ADDED'
-  | 'SPRINT_STARTED'
-  | 'SPRINT_ENDING'
-  | 'DAILY_REMINDER'
-  | 'DAILY_REPORT'
-  | 'CANCEL_REQUESTED';
-
-export interface AppNotification {
-  id: ID;
-  userId: ID;
-  type: NotificationType;
+/** GET /projects/:id/board/ */
+export interface BoardColumn {
+  status: TaskStatus;
   title: string;
-  message: string;
-  entityType: 'TASK' | 'SPRINT' | 'PROJECT' | 'REPORT';
-  entityId: ID;
-  isRead: boolean;
-  createdAt: string;
+  count: number;
+  tasks: Task[];
 }
 
-export interface NotificationSetting {
-  userId: ID;
-  event: NotificationType;
-  telegram: boolean;
-  web: boolean;
+export interface Board {
+  project: ProjectBrief;
+  sprint: SprintBrief | null;
+  columns: BoardColumn[];
+  summary: Record<string, number>;
 }
 
-export type AuditEntityType = 'TASK' | 'PROJECT' | 'SPRINT' | 'USER' | 'TEAM' | 'SETTINGS';
-
-export interface AuditLog {
-  id: ID;
-  actorId: ID;
-  action: string;
-  entityType: AuditEntityType;
-  entityId: ID;
-  entityLabel: string;
-  oldValue: Record<string, unknown> | null;
-  newValue: Record<string, unknown> | null;
-  ipAddress: string;
-  source: Source;
-  createdAt: string;
+/** GET /me/tasks/summary/ */
+export interface MyTasksSummary {
+  today: number;
+  upcoming: number;
+  overdue: number;
+  completed: number;
+  blocked: number;
 }
 
+export interface DailyPlanItem {
+  id: number;
+  planned_status: DailyPlanStatus;
+  note: string;
+  task: Task;
+}
+
+/** GET /me/daily-plan/ */
 export interface DailyPlan {
-  id: ID;
-  userId: ID;
+  id: number;
   date: string;
-  confirmedAt: string | null;
-  confirmedVia: Source | null;
-  tasks: { taskId: ID; dailyStatus: DailyTaskStatus }[];
-  note: string | null;
+  is_confirmed: boolean;
+  confirmed_at: string | null;
+  /** NOT IN api.json — where the plan was confirmed. */
+  confirmed_via?: Source | null;
+  note: string;
+  items: DailyPlanItem[];
+  created_at: string;
 }
 
+export interface ReportTaskLine {
+  key: string;
+  title: string;
+  status: TaskStatus;
+  planned_status: DailyPlanStatus | '';
+  reason: string | null;
+  /** NOT IN api.json */
+  priority?: Priority;
+}
+
+/** GET /me/daily-report/, /reports/users/:id/daily/ */
+export interface DailyReport {
+  date: string;
+  completed: number;
+  in_progress: number;
+  blocked: number;
+  cancelled: number;
+  not_started: number;
+  total: number;
+  progress_percent: number;
+  note: string;
+  generated_at: string;
+  completed_tasks: ReportTaskLine[];
+  blocked_tasks: ReportTaskLine[];
+  not_completed_tasks: ReportTaskLine[];
+  /** NOT IN api.json — whose report it is, plan confirmation, finer task groups. */
+  user?: UserBrief;
+  plan_confirmed_at?: string | null;
+  confirmed_via?: Source | null;
+  in_progress_tasks?: ReportTaskLine[];
+  cancelled_tasks?: ReportTaskLine[];
+  not_started_tasks?: ReportTaskLine[];
+}
+
+export interface TeamDailyMemberRow {
+  user: UserBrief;
+  has_plan: boolean;
+  completed: number;
+  total: number;
+  unfinished: number;
+  blocked: number;
+  progress_percent: number;
+  /** NOT IN api.json */
+  confirmed_at?: string | null;
+}
+
+/** GET /reports/teams/:id/daily/ */
+export interface TeamDailyReport {
+  team: TeamBrief;
+  date: string;
+  members: TeamDailyMemberRow[];
+  team_progress_percent: number;
+  blockers: number;
+  /** NOT IN api.json — the blocked tasks behind `blockers`. */
+  blocker_tasks?: (ReportTaskLine & { assignee: UserBrief | null })[];
+}
+
+/** GET /reports/sprints/:id/ */
 export interface SprintReport {
-  sprintId: ID;
-  generatedAt: string;
-  totalTasks: number;
+  sprint: ActiveSprintInfo;
+  is_snapshot: boolean;
+  total: number;
   completed: number;
   unfinished: number;
   cancelled: number;
   blocked: number;
   overdue: number;
-  completionPercent: number;
-  movedTaskIds: ID[];
-  movedTo: 'BACKLOG' | ID;
+  completion_percent: number;
+  moved_to_backlog: number;
+  generated_at: string | null;
+  /** NOT IN api.json — which tasks were moved and where. */
+  moved_tasks?: ReportTaskLine[];
+  moved_to?: SprintBrief | null;
 }
 
+/** GET /reports/projects/:id/ */
+export interface ProjectReport {
+  project: ProjectBrief;
+  total_tasks: number;
+  by_status: Partial<Record<TaskStatus, number>>;
+  blocked: number;
+  overdue: number;
+  completion_percent: number;
+  active_sprint: ActiveSprintInfo | null;
+  sprints_completed: number;
+  members_count: number;
+  /** NOT IN api.json — open tasks per priority / active tasks per member. */
+  by_priority?: Partial<Record<Priority, number>>;
+  workload?: { user: UserBrief; active: number }[];
+}
+
+/** GET /telegram/account/ */
+export interface TelegramAccount {
+  linked: boolean;
+  tg_username?: string;
+  is_active?: boolean;
+  linked_at?: string | null;
+}
+
+/** POST /telegram/link-token/ */
+export interface TelegramLinkToken {
+  token: string;
+  deep_link: string | null;
+  expires_at: string;
+}
+
+// ───────────── NOT IN api.json ─────────────
+
+export type NotificationType =
+  | 'task_assigned'
+  | 'task_reassigned'
+  | 'deadline_approaching'
+  | 'task_overdue'
+  | 'task_blocked'
+  | 'blocker_resolved'
+  | 'comment_added'
+  | 'sprint_started'
+  | 'sprint_ending'
+  | 'daily_reminder'
+  | 'daily_report'
+  | 'cancel_requested';
+
+/** GET /notifications/ */
+export interface AppNotification {
+  id: number;
+  type: NotificationType;
+  title: string;
+  message: string;
+  entity_type: 'task' | 'sprint' | 'project' | 'report';
+  /** Task key / project key / sprint id — whatever the UI links to. */
+  entity_id: string;
+  is_read: boolean;
+  created_at: string;
+}
+
+/** GET /notifications/settings/ item */
+export interface NotificationSetting {
+  event: NotificationType;
+  telegram: boolean;
+  web: boolean;
+}
+
+export type AuditEntityType = 'task' | 'project' | 'sprint' | 'user' | 'team' | 'settings';
+
+/** GET /audit-logs/ */
+export interface AuditLog {
+  id: number;
+  actor: UserBrief | null;
+  action: string;
+  entity_type: AuditEntityType;
+  entity_id: string;
+  entity_label: string;
+  old_value: Record<string, unknown> | null;
+  new_value: Record<string, unknown> | null;
+  ip_address: string;
+  source: Source;
+  created_at: string;
+}
+
+/** GET /settings/ */
 export interface AppSettings {
-  general: { companyName: string; timezone: string; workingDays: number[]; workStart: string; workEnd: string };
-  telegram: { botUsername: string; enabled: boolean; morningTime: string; eveningTime: string };
-  tasks: { defaultPriority: Priority; requireReview: boolean; maxAttachmentMb: number; allowedFileTypes: string[] };
-  sprint: { defaultDurationDays: number };
+  general: { company_name: string; timezone: string; working_days: number[]; work_start: string; work_end: string };
+  telegram: { bot_username: string; enabled: boolean; morning_time: string; evening_time: string };
+  tasks: { default_priority: Priority; require_review: boolean; max_attachment_mb: number; allowed_file_types: string[] };
+  sprint: { default_duration_days: number };
 }
-
-/** Activity enriched for display (actor name + task key). */
-export interface ActivityItem extends TaskActivity {
-  actorName: string;
-  taskKey: string;
-  taskTitle: string;
-}
-
-/** Lightweight user shape used inside other entities' responses. */
-export type UserBrief = Pick<User, 'id' | 'fullName' | 'username' | 'role' | 'status' | 'position'>;

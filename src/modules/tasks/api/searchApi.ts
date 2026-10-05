@@ -1,30 +1,32 @@
-import { actor, db, mockRequest, visibleProjectIds } from '@/shared/lib/mock';
+import { api } from '@/shared/lib/axios';
+import type { ApiPaginated, Project, Sprint, Task, Team } from '@/shared/types';
 
 import type { SearchResults } from '../types/task.types';
-import { toRow } from './helpers';
 
-// GET /api/search?q=
-export const globalSearch = (query: string) =>
-  mockRequest<SearchResults>(() => {
-    const me = actor();
-    const q = query.trim().toLowerCase();
-    if (!q) return { tasks: [], projects: [], users: [] };
-    const visible = visibleProjectIds(me);
-    return {
-      tasks: db.tasks
-        .filter((t) => visible.has(t.projectId))
-        .filter((t) => t.key.toLowerCase().includes(q) || t.title.toLowerCase().includes(q))
-        .slice(0, 6)
-        .map(toRow)
-        .map(({ id, key, title, status, projectKey }) => ({ id, key, title, status, projectKey })),
-      projects: db.projects
-        .filter((p) => visible.has(p.id))
-        .filter((p) => p.name.toLowerCase().includes(q) || p.key.toLowerCase().includes(q))
-        .slice(0, 4)
-        .map(({ id, key, name }) => ({ id, key, name })),
-      users: db.users
-        .filter((u) => u.fullName.toLowerCase().includes(q) || u.username.includes(q))
-        .slice(0, 4)
-        .map(({ id, fullName, username, position }) => ({ id, fullName, username, position })),
-    };
-  }, 200);
+const LIMIT = 5;
+
+const list = async <T,>(url: string, search: string, extra: object = {}): Promise<T[]> => {
+  const { data } = await api.get<ApiPaginated<T>>(url, { params: { search, page_size: LIMIT, ...extra } });
+  return data.results;
+};
+
+/** A section the user can't access (e.g. /users/ for non-admins) is simply empty. */
+const settled = <T,>(r: PromiseSettledResult<T[]>) => (r.status === 'fulfilled' ? r.value : []);
+
+// GET /tasks|projects|sprints|users|teams/?search=  — each list endpoint searches on the backend.
+// Empty query: the current user's recently updated open tasks (GET /me/tasks/?ordering=-updated_at).
+export const globalSearch = async (query: string): Promise<SearchResults> => {
+  const q = query.trim();
+  if (!q) {
+    const { data } = await api.get<ApiPaginated<Task>>('/me/tasks/', { params: { ordering: '-updated_at', page_size: LIMIT } });
+    return { tasks: data.results, projects: [], sprints: [], users: [], teams: [] };
+  }
+  const [tasks, projects, sprints, users, teams] = await Promise.allSettled([
+    list<Task>('/tasks/', q, { page_size: 8 }),
+    list<Project>('/projects/', q),
+    list<Sprint>('/sprints/', q),
+    list<SearchResults['users'][number]>('/users/', q),
+    list<Team>('/teams/', q),
+  ]);
+  return { tasks: settled(tasks), projects: settled(projects), sprints: settled(sprints), users: settled(users), teams: settled(teams) };
+};

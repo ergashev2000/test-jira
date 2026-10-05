@@ -3,11 +3,11 @@ import type { ReactNode } from 'react';
 import { BlockedBadge, DeadlineText, PriorityTag, StatusIcon, UserAvatar } from '@/shared/components/ui';
 
 import { useTaskDrawer } from '../hooks/useTaskUi';
-import type { TaskRow } from '../types/task.types';
+import type { Task } from '../types/task.types';
 import { StatusDropdown } from './StatusDropdown';
 
 /** Linear-style dense list row (key · status · title … meta · avatar · actions). */
-export const TaskListRow = ({ task, actions }: { task: TaskRow; actions?: ReactNode }) => {
+export const TaskListRow = ({ task, actions }: { task: Task; actions?: ReactNode }) => {
   const { openTask } = useTaskDrawer();
   return (
     <div
@@ -21,16 +21,16 @@ export const TaskListRow = ({ task, actions }: { task: TaskRow; actions?: ReactN
       <StatusDropdown task={task}>
         <span className="flex"><StatusIcon status={task.status} /></span>
       </StatusDropdown>
-      <span className={`min-w-0 flex-1 truncate text-fg ${task.status === 'CANCELLED' ? 'line-through opacity-60' : ''}`}>{task.title}</span>
-      {task.isBlocked && <BlockedBadge reason={task.blockerReason} compact />}
+      <span className={`min-w-0 flex-1 truncate text-fg ${task.status === 'cancelled' ? 'line-through opacity-60' : ''}`}>{task.title}</span>
+      {task.is_blocked && <BlockedBadge reason={task.active_blocker?.reason} compact />}
       <span className="hidden items-center gap-1 md:flex">
-        {task.labels.slice(0, 2).map((l) => (
+        {(task.labels ?? []).slice(0, 2).map((l) => (
           <span key={l} className="rounded-full border border-line px-2 text-[11px] leading-5 text-fg-2">{l}</span>
         ))}
       </span>
       <PriorityTag priority={task.priority} iconOnly />
       <span className="hidden w-40 text-right text-xs sm:block"><DeadlineText task={task} /></span>
-      <UserAvatar userId={task.assigneeId} />
+      <UserAvatar user={task.assignee} />
       {actions && <span onClick={(e) => e.stopPropagation()} className="flex">{actions}</span>}
     </div>
   );

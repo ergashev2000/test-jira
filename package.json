@@ -1,5 +1,5 @@
 {
-  "name": "task-managment",
+  "name": "u-management",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -7,7 +7,11 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": "oxlint"
   },
   "dependencies": {
     "@ant-design/cssinjs": "^1.24.0",
@@ -23,6 +27,8 @@
     "axios": "^1.20.0",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.23",
+    "framer-motion": "^13.5.0",
+    "js-cookie": "^3.0.8",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^6.30.6",
@@ -31,10 +37,13 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
+    "@types/js-cookie": "^3.0.6",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
     "oxlint": "^1.81.0",
     "prettier": "^3.9.9",
     "tailwindcss": "^4.3.3",

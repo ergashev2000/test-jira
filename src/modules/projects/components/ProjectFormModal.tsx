@@ -1,69 +1,76 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { ArrowRight01Icon, UserCircleIcon, UserMultipleIcon } from '@hugeicons/core-free-icons';
 import { App, Button, DatePicker, Form, Input, Modal, Select } from 'antd';
 import { useEffect, useRef } from 'react';
 
-import { Icon, ProjectIcon, UserSelect } from '@/shared/components/ui';
+import { ProjectIcon, UserSelect } from '@/shared/components/ui';
 import { PROJECT_STATUS, PROJECT_STATUS_OPTIONS } from '@/shared/constants';
 import dayjs, { type Dayjs } from '@/shared/lib/dayjs';
-import type { ProjectStatus } from '@/shared/types';
+import type { ProjectStatus, ProjectWrite } from '@/shared/types';
 import { errorMessage, rules, suggestProjectKey } from '@/shared/utils';
 
-import { useCreateProject, useUpdateProject } from '../hooks/useProjects';
-import type { ProjectFormValues, ProjectListItem } from '../types/project.types';
+import { useProject, useProjectMembers, useSaveProject } from '../hooks/useProjects';
+import type { Project } from '../types/project.types';
 
-type Shape = Omit<ProjectFormValues, 'startDate' | 'endDate'> & { startDate: Dayjs; endDate: Dayjs | null };
+/** ProjectWrite with Dayjs dates + the member picker. */
+type Shape = Omit<ProjectWrite, 'start_date' | 'end_date'> & { start_date: Dayjs; end_date: Dayjs | null; member_ids: number[] };
 
 interface Props {
   open: boolean;
   onClose: () => void;
-  project?: ProjectListItem;
-  onSaved?: (p: ProjectListItem) => void;
+  project?: Project;
+  onSaved?: (p: Project) => void;
 }
 
 const StatusDot = ({ s }: { s: ProjectStatus }) => (
   <span className="flex items-center gap-1.5">
-    <span className="h-2 w-2 rounded-full" style={{ background: { PLANNING: '#8a8f98', ACTIVE: '#f2c94c', ON_HOLD: '#f2994a', COMPLETED: '#5e6ad2', ARCHIVED: '#6b6f76' }[s] }} />
+    <span className="h-2 w-2 rounded-full" style={{ background: { planning: '#8a8f98', active: '#f2c94c', on_hold: '#f2994a', completed: '#165dff', archived: '#6b6f76' }[s] }} />
     {PROJECT_STATUS[s].label}
   </span>
 );
 
 /** Linear "New project" dialog: icon tile, big name, summary key, property chips, brief. */
-export const ProjectFormModal = ({ open, onClose, project, onSaved }: Props) => {
+export const ProjectFormModal = ({ open, onClose, project: listItem, onSaved }: Props) => {
   const [form] = Form.useForm<Shape>();
   const { message } = App.useApp();
-  const create = useCreateProject();
-  const update = useUpdateProject();
+  const save = useSaveProject();
+  // Edit works on a fresh copy: GET /projects/:key/ + /projects/:id/members/.
+  const detail = useProject(open ? listItem?.key : undefined);
+  const project = detail.data ?? listItem;
+  const members = useProjectMembers(open ? listItem?.id : undefined);
+  const memberList = members.data?.results ?? [];
   const keyTouched = useRef(false);
   const key = Form.useWatch('key', form);
-  const startDate = Form.useWatch('startDate', form);
+  const startDate = Form.useWatch('start_date', form);
 
   useEffect(() => {
     if (!open) return;
     keyTouched.current = !!project;
     form.resetFields();
     if (project) {
-      form.setFieldsValue({ ...project, startDate: dayjs(project.startDate), endDate: project.endDate ? dayjs(project.endDate) : null });
+      form.setFieldsValue({
+        name: project.name, key: project.key, description: project.description, status: project.status, manager: project.manager.id,
+        start_date: project.start_date ? dayjs(project.start_date) : dayjs(), end_date: project.end_date ? dayjs(project.end_date) : null,
+        member_ids: memberList.map((m) => m.id).filter((id) => id !== project.manager.id),
+      });
     } else {
-      form.setFieldsValue({ status: 'PLANNING', startDate: dayjs(), endDate: null, memberIds: [], description: '' });
+      form.setFieldsValue({ status: 'planning', start_date: dayjs(), end_date: null, member_ids: [], description: '' });
     }
-  }, [open, project, form]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, project, form, members.data]);
 
   const submit = (v: Shape) => {
-    const values: ProjectFormValues = {
-      ...v,
-      description: v.description ?? '',
-      memberIds: v.memberIds ?? [],
-      startDate: v.startDate.format('YYYY-MM-DD'),
-      endDate: v.endDate ? v.endDate.format('YYYY-MM-DD') : null,
+    const { member_ids: memberIds = [], ...fields } = v;
+    const body: ProjectWrite = {
+      ...fields,
+      description: fields.description ?? '',
+      start_date: fields.start_date.format('YYYY-MM-DD'),
+      end_date: fields.end_date ? fields.end_date.format('YYYY-MM-DD') : null,
     };
-    const opts = {
-      onSuccess: (p: ProjectListItem) => { message.success(project ? 'Project updated' : `Project ${p.key} created`); onSaved?.(p); onClose(); },
-      onError: (e: unknown) => message.error(errorMessage(e)),
-    };
-    if (project) {
-      const { key: _k, ...rest } = values;
-      void _k;
-      update.mutate({ id: project.id, values: rest }, opts);
-    } else create.mutate(values, opts);
+    save.mutate({ project, body, memberIds, currentIds: memberList.map((m) => m.id) }, {
+      onSuccess: (p) => { message.success(project ? 'Project updated' : `Project ${p.key} created`); onSaved?.(p); onClose(); },
+      onError: (e) => message.error(errorMessage(e)),
+    });
   };
 
   return (
@@ -75,7 +82,7 @@ export const ProjectFormModal = ({ open, onClose, project, onSaved }: Props) => 
         }}>
         <div className="mb-5 flex items-center gap-2 text-xs text-fg-2">
           <span className="rounded-md border border-line px-2 py-0.5">Workspace</span>
-          <Icon name="arrowRight" size={11} />
+          <HugeiconsIcon icon={ArrowRight01Icon} size={11} className="hicon" strokeWidth={1.7} />
           <span className="text-fg">{project ? `Edit ${project.key}` : 'New project'}</span>
         </div>
 
@@ -99,28 +106,28 @@ export const ProjectFormModal = ({ open, onClose, project, onSaved }: Props) => 
         <div className="flex flex-wrap items-center gap-1.5 border-b border-line pb-4">
           <Form.Item name="status" noStyle>
             <Select size="small" variant="filled" className="chip-select" popupMatchSelectWidth={false}
-              options={PROJECT_STATUS_OPTIONS.filter((o) => o.value !== 'ARCHIVED').map((o) => ({ value: o.value, label: <StatusDot s={o.value} /> }))} />
+              options={PROJECT_STATUS_OPTIONS.filter((o) => o.value !== 'archived').map((o) => ({ value: o.value, label: <StatusDot s={o.value} /> }))} />
           </Form.Item>
-          <Form.Item name="managerId" noStyle rules={[rules.required('Lead')]}>
+          <Form.Item name="manager" noStyle rules={[rules.required('Lead')]}>
             <UserSelect size="small" variant="filled" className="chip-select min-w-36" popupMatchSelectWidth={false} allowClear={false}
-              roles={['PROJECT_MANAGER', 'ADMIN', 'SUPER_ADMIN']} placeholder={<span className="flex items-center gap-1"><Icon name="userCircle" size={13} /> Lead</span>} />
+              roles={['PROJECT_MANAGER', 'TEAM_LEAD', 'ADMIN', 'SUPER_ADMIN']} initial={project ? [project.manager] : []} placeholder={<span className="flex items-center gap-1"><HugeiconsIcon icon={UserCircleIcon} size={13} className="hicon" strokeWidth={1.7} /> Lead</span>} />
           </Form.Item>
-          <Form.Item name="memberIds" noStyle>
+          <Form.Item name="member_ids" noStyle>
             <UserSelect size="small" variant="filled" mode="multiple" maxTagCount="responsive" className="chip-select min-w-40"
-              popupMatchSelectWidth={260} placeholder={<span className="flex items-center gap-1"><Icon name="users" size={13} /> Members</span>} />
+              popupMatchSelectWidth={260} initial={memberList} placeholder={<span className="flex items-center gap-1"><HugeiconsIcon icon={UserMultipleIcon} size={13} className="hicon" strokeWidth={1.7} /> Members</span>} />
           </Form.Item>
-          <Form.Item name="startDate" noStyle rules={[rules.required('Start date')]}>
+          <Form.Item name="start_date" noStyle rules={[rules.required('Start date')]}>
             <DatePicker size="small" variant="filled" className="chip-picker" format="DD.MM.YYYY" placeholder="Start" allowClear={false} />
           </Form.Item>
-          <Form.Item name="endDate" noStyle dependencies={['startDate']}
+          <Form.Item name="end_date" noStyle dependencies={['start_date']}
             rules={[({ getFieldValue }) => ({ validator: (_, v: Dayjs | null) =>
-              !v || !v.isBefore(getFieldValue('startDate'), 'day') ? Promise.resolve() : Promise.reject(new Error('Target must be after start')) })]}>
+              !v || !v.isBefore(getFieldValue('start_date'), 'day') ? Promise.resolve() : Promise.reject(new Error('Target must be after start')) })]}>
             <DatePicker size="small" variant="filled" className="chip-picker" format="DD.MM.YYYY" placeholder="Target"
               disabledDate={(d) => !!startDate && d.isBefore(startDate, 'day')} />
           </Form.Item>
         </div>
         <Form.Item noStyle shouldUpdate>{() => {
-          const errs = form.getFieldsError(['managerId', 'endDate', 'startDate']).flatMap((e) => e.errors);
+          const errs = form.getFieldsError(['manager', 'end_date', 'start_date']).flatMap((e) => e.errors);
           return errs.length ? <div className="mt-2 text-xs text-danger">{errs.join(' · ')}</div> : null;
         }}</Form.Item>
 
@@ -131,7 +138,7 @@ export const ProjectFormModal = ({ open, onClose, project, onSaved }: Props) => 
 
         <div className="-mx-6 flex justify-end gap-2 border-t border-line px-6 pt-4">
           <Button onClick={onClose}>Cancel</Button>
-          <Button type="primary" htmlType="submit" loading={create.isPending || update.isPending}>
+          <Button type="primary" htmlType="submit" loading={save.isPending}>
             {project ? 'Save changes' : 'Create project'}
           </Button>
         </div>

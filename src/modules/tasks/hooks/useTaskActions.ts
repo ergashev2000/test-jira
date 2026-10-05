@@ -5,20 +5,19 @@ import { QUERY_KEYS } from '@/shared/constants';
 import {
   addComment,
   blockTask,
-  cancelTask,
   editComment,
   listAttachments,
   listBlockers,
+  listCancelRequests,
   listComments,
   listProjectActivity,
   listTaskActivity,
   requestCancel,
-  resolveBlocker,
   reviewCancelRequest,
+  unblockTask,
   uploadAttachment,
   type ProjectActivityParams,
 } from '../api/taskActionsApi';
-import type { CancelPayload } from '../types/task.types';
 import { invalidateTaskData } from './useTasks';
 
 const useTaskMutation = <V,>(fn: (v: V) => Promise<unknown>) => {
@@ -26,32 +25,49 @@ const useTaskMutation = <V,>(fn: (v: V) => Promise<unknown>) => {
   return useMutation({ mutationFn: fn, onSuccess: () => invalidateTaskData(qc) });
 };
 
-export const useBlockTask = () => useTaskMutation(({ id, reason }: { id: string; reason: string }) => blockTask(id, reason));
-export const useResolveBlocker = () => useTaskMutation((id: string) => resolveBlocker(id));
-export const useCancelTask = () => useTaskMutation(({ id, payload }: { id: string; payload: CancelPayload }) => cancelTask(id, payload));
-export const useRequestCancel = () =>
-  useTaskMutation(({ id, payload }: { id: string; payload: CancelPayload }) => requestCancel(id, payload));
+export const useBlockTask = () => useTaskMutation(({ id, reason }: { id: number; reason: string }) => blockTask(id, reason));
+export const useResolveBlocker = () => useTaskMutation((id: number) => unblockTask(id));
+export const useRequestCancel = () => useTaskMutation(({ id, reason }: { id: number; reason: string }) => requestCancel(id, reason));
 export const useReviewCancel = () =>
-  useTaskMutation(({ requestId, approve }: { requestId: string; approve: boolean }) => reviewCancelRequest(requestId, approve));
+  useTaskMutation(({ taskId, approve }: { taskId: number; approve: boolean }) => reviewCancelRequest(taskId, approve));
 
-export const useComments = (taskId: string) =>
-  useQuery({ queryKey: QUERY_KEYS.tasks.comments(taskId), queryFn: () => listComments(taskId) });
-export const useAddComment = () => useTaskMutation(({ taskId, text }: { taskId: string; text: string }) => addComment(taskId, text));
-export const useEditComment = () => useTaskMutation(({ id, text }: { id: string; text: string }) => editComment(id, text));
+/**
+ * Leads/managers cancel right away. The API has no direct cancel endpoint, so this files a request
+ * and approves it in the same step (POST /cancel-request/ → /cancel-approve/).
+ */
+export const useCancelTask = () =>
+  useTaskMutation(async ({ id, reason }: { id: number; reason: string }) => {
+    await requestCancel(id, reason);
+    return reviewCancelRequest(id, true);
+  });
 
-export const useAttachments = (taskId: string) =>
-  useQuery({ queryKey: QUERY_KEYS.tasks.attachments(taskId), queryFn: () => listAttachments(taskId) });
+export const usePendingCancelRequest = (taskId: number) =>
+  useQuery({
+    queryKey: [...QUERY_KEYS.tasks.all, 'cancel-requests', taskId],
+    queryFn: () => listCancelRequests(taskId, { status: 'pending', page_size: 1 }),
+    select: (d) => d.results[0] ?? null,
+  });
+
+export const useComments = (taskId: number) =>
+  useQuery({ queryKey: QUERY_KEYS.tasks.comments(String(taskId)), queryFn: () => listComments(taskId) });
+export const useAddComment = () => useTaskMutation(({ taskId, text }: { taskId: number; text: string }) => addComment(taskId, text));
+export const useEditComment = () =>
+  useTaskMutation(({ taskId, id, text }: { taskId: number; id: number; text: string }) => editComment(taskId, id, text));
+
+export const useAttachments = (taskId: number) =>
+  useQuery({ queryKey: QUERY_KEYS.tasks.attachments(String(taskId)), queryFn: () => listAttachments(taskId) });
 export const useUploadAttachment = () =>
-  useTaskMutation(({ taskId, file }: { taskId: string; file: File }) => uploadAttachment(taskId, file));
+  useTaskMutation(({ taskId, file }: { taskId: number; file: File }) => uploadAttachment(taskId, file));
 
-export const useTaskActivity = (taskId: string) =>
-  useQuery({ queryKey: QUERY_KEYS.tasks.activity(taskId), queryFn: () => listTaskActivity(taskId) });
-export const useBlockerHistory = (taskId: string) =>
-  useQuery({ queryKey: QUERY_KEYS.tasks.blockers(taskId), queryFn: () => listBlockers(taskId) });
+export const useTaskActivity = (taskId: number) =>
+  useQuery({ queryKey: QUERY_KEYS.tasks.activity(String(taskId)), queryFn: () => listTaskActivity(taskId) });
+export const useBlockerHistory = (taskId: number) =>
+  useQuery({ queryKey: QUERY_KEYS.tasks.blockers(String(taskId)), queryFn: () => listBlockers(taskId) });
 
 export const useProjectActivity = (params: ProjectActivityParams) =>
   useQuery({
     queryKey: QUERY_KEYS.projects.activity(params),
     queryFn: () => listProjectActivity(params),
+    enabled: !!params.projectId,
     placeholderData: (prev) => prev,
   });

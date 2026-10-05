@@ -5,7 +5,7 @@ import type { AppSettings } from '@/shared/types';
 
 import { getSettings, updateSettings, type SettingsSection } from '../api/settingsApi';
 
-export const useAppSettings = () => useQuery({ queryKey: QUERY_KEYS.settings, queryFn: getSettings, staleTime: 60_000 });
+export const useAppSettings = () => useQuery({ queryKey: QUERY_KEYS.settings, queryFn: getSettings, staleTime: 60_000, retry: false });
 
 export const useUpdateSettings = <S extends SettingsSection>(section: S) => {
   const qc = useQueryClient();

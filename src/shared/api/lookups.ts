@@ -1,63 +1,80 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { QUERY_KEYS } from '@/shared/constants';
-import { actor, db, mockRequest, visibleProjects } from '@/shared/lib/mock';
-import type { Project, Sprint, User } from '@/shared/types';
+import { api } from '@/shared/lib/axios';
+import type { ApiPaginated, Project, Role, Sprint, SprintStatus, Team, TeamBrief, UserBrief } from '@/shared/types';
+
+/** Page size for reference lists rendered in full (selects, sidebar). */
+export const LOOKUP_PAGE_SIZE = 100;
+
+export interface UserOptionsParams {
+  projectId?: number;
+  teamId?: number;
+  roles?: Role[];
+  onlyActive?: boolean;
+  search?: string;
+}
+
+/** Picker row: the brief plus team / roles when the endpoint returns them (GET /users/ does). */
+export type UserOptionRow = UserBrief & { team?: TeamBrief | null; roles?: Role[] };
 
 /**
- * Lightweight reference data used by shared selects/avatars across modules.
+ * Users for a picker, filtered and searched on the backend:
+ * GET /projects/:id/members/ | /teams/:id/members/ | /users/?role=&status=active
  */
-export type UserLookup = Pick<User, 'id' | 'fullName' | 'username' | 'role' | 'status' | 'position' | 'teamId'>;
-export type ProjectLookup = Pick<Project, 'id' | 'key' | 'name' | 'status' | 'managerId' | 'memberIds'>;
+export const fetchUserOptions = async ({ projectId, teamId, roles, onlyActive, search }: UserOptionsParams) => {
+  const url = projectId ? `/projects/${projectId}/members/` : teamId ? `/teams/${teamId}/members/` : '/users/';
+  const base = { search: search || undefined, page_size: 50, status: onlyActive ? 'active' : undefined };
+  const get = async (role?: Role) => {
+    const { data } = await api.get<ApiPaginated<UserOptionRow>>(url, { params: { ...base, role } });
+    return data.results;
+  };
+  // `role` on /users/ is single-valued: one request per role, merged by id.
+  if (projectId || teamId || !roles?.length) return get();
+  const lists = await Promise.all(roles.map(get));
+  return [...new Map(lists.flat().map((u) => [u.id, u])).values()];
+};
 
-// GET /api/lookups/users
-export const fetchUserLookups = () =>
-  mockRequest(() => {
-    actor();
-    return db.users.map<UserLookup>(({ id, fullName, username, role, status, position, teamId }) => ({
-      id, fullName, username, role, status, position, teamId,
-    }));
-  }, 200);
-
-// GET /api/lookups/projects  (only projects visible to current user)
-export const fetchProjectLookups = () =>
-  mockRequest(
-    () =>
-      visibleProjects(actor()).map<ProjectLookup>(({ id, key, name, status, managerId, memberIds }) => ({
-        id, key, name, status, managerId, memberIds,
-      })),
-    200,
-  );
-
-export type SprintLookup = Pick<Sprint, 'id' | 'name' | 'status' | 'projectId' | 'startDate' | 'endDate'>;
-
-// GET /api/lookups/sprints?projectId=
-export const fetchSprintLookups = (projectId?: string) =>
-  mockRequest(() => {
-    const visible = new Set(visibleProjects(actor()).map((p) => p.id));
-    return db.sprints
-      .filter((s) => visible.has(s.projectId) && (!projectId || s.projectId === projectId))
-      .map<SprintLookup>(({ id, name, status, projectId: pid, startDate, endDate }) => ({
-        id, name, status, projectId: pid, startDate, endDate,
-      }));
-  }, 200);
-
-/** Sprints a task may be put into: ACTIVE / PLANNED only (never COMPLETED). */
-export const useOpenSprints = (projectId?: string) =>
+export const useUserOptions = (params: UserOptionsParams) =>
   useQuery({
-    queryKey: ['sprints', 'lookup', projectId ?? 'all'],
-    queryFn: () => fetchSprintLookups(projectId),
-    enabled: !!projectId,
-    select: (list) => list.filter((s) => s.status === 'ACTIVE' || s.status === 'PLANNED'),
+    queryKey: ['users', 'options', params],
+    queryFn: () => fetchUserOptions(params),
+    placeholderData: (prev) => prev,
+    staleTime: 30_000,
   });
 
-export const useUserLookups = () =>
-  useQuery({ queryKey: QUERY_KEYS.users.options, queryFn: fetchUserLookups, staleTime: 60_000 });
+// GET /projects/  — projects visible to the current user
+export const fetchProjectLookups = async () => {
+  const { data } = await api.get<ApiPaginated<Project>>('/projects/', { params: { page_size: LOOKUP_PAGE_SIZE, ordering: 'name' } });
+  return data.results;
+};
+
+// GET /sprints/?project=&status=
+export const fetchSprintLookups = async (params: { project?: number; status?: SprintStatus[] }) => {
+  const { data } = await api.get<ApiPaginated<Sprint>>('/sprints/', {
+    params: { ...params, page_size: LOOKUP_PAGE_SIZE, ordering: '-start_date' },
+  });
+  return data.results;
+};
+
+export const useSprintLookups = (project?: number, status?: SprintStatus[]) =>
+  useQuery({
+    queryKey: ['sprints', 'lookup', project ?? 'all', status ?? 'any'],
+    queryFn: () => fetchSprintLookups({ project, status }),
+    enabled: !!project,
+  });
+
+/** Sprints a task may be put into: active / planned only (never completed). */
+export const useOpenSprints = (project?: number) => useSprintLookups(project, ['active', 'planned']);
+
+// GET /teams/
+export const fetchTeamLookups = async () => {
+  const { data } = await api.get<ApiPaginated<Team>>('/teams/', { params: { page_size: LOOKUP_PAGE_SIZE, ordering: 'name' } });
+  return data.results;
+};
+
+export const useTeamLookups = () =>
+  useQuery({ queryKey: QUERY_KEYS.teams.lookups, queryFn: fetchTeamLookups, staleTime: 30_000 });
 
 export const useProjectLookups = () =>
   useQuery({ queryKey: QUERY_KEYS.projects.options, queryFn: fetchProjectLookups, staleTime: 30_000 });
-
-export const useUserMap = () => {
-  const { data } = useUserLookups();
-  return new Map((data ?? []).map((u) => [u.id, u]));
-};

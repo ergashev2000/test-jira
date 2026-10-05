@@ -1,17 +1,18 @@
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Edit02Icon } from '@hugeicons/core-free-icons';
 import { Alert, Button, Result, Skeleton, Tabs, Tag } from 'antd';
 import { useState } from 'react';
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom';
 
-import { ErrorState, Icon, PageHeader, ProjectIcon, UserAvatar, UserAvatarGroup } from '@/shared/components/ui';
+import { ErrorState, PageHeader, ProjectIcon, UserAvatar, UserAvatarGroup } from '@/shared/components/ui';
 import { PROJECT_STATUS, ROUTES } from '@/shared/constants';
-import { ApiError } from '@/shared/lib/mock';
+import { ApiError } from '@/shared/lib/apiError';
 
 import { ProjectFormModal } from '../components/ProjectFormModal';
-import { useProject } from '../hooks/useProjects';
+import { useProject, useProjectAccess } from '../hooks/useProjects';
 
 const TABS = ['overview', 'board', 'backlog', 'sprints', 'members', 'reports', 'activity'] as const;
 
-/** Current project for nested tab routes (reads :projectKey; cached query). */
 export const useCurrentProject = () => {
   const { projectKey = '' } = useParams();
   return useProject(projectKey);
@@ -23,6 +24,7 @@ export const ProjectLayout = () => {
   const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
   const { data: project, isLoading, isError, error, refetch } = useProject(projectKey);
+  const { canEdit } = useProjectAccess(project);
   const tab = TABS.find((t) => pathname.endsWith(`/${t}`)) ?? 'overview';
 
   if (isLoading) return <div className="p-6"><Skeleton active /></div>;
@@ -44,15 +46,15 @@ export const ProjectLayout = () => {
           <>
             <span className="font-mono text-xs text-fg-3">{project.key}</span>
             <Tag color={PROJECT_STATUS[project.status].color} className="!m-0">{PROJECT_STATUS[project.status].label}</Tag>
-            <UserAvatar userId={project.managerId} size={22} />
-            <UserAvatarGroup userIds={project.memberIds} size={22} />
-            {project.canEdit && (
-              <Button size="small" icon={<Icon name="edit" size={14} />} onClick={() => setEditing(true)}>Edit</Button>
+            <UserAvatar user={project.manager} size={22} />
+            <UserAvatarGroup users={project.members ?? []} size={22} />
+            {canEdit && (
+              <Button size="small" icon={<HugeiconsIcon icon={Edit02Icon} size={14} className="hicon" strokeWidth={1.7} />} onClick={() => setEditing(true)}>Edit</Button>
             )}
           </>
         }
       />
-      {project.status === 'ARCHIVED' && (
+      {project.status === 'archived' && (
         <Alert type="warning" showIcon banner message="This project is archived. You can't create new tasks." />
       )}
       <div className="border-b border-line px-5">

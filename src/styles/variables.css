@@ -1,20 +1,51 @@
-/* Linear-inspired dark palette — single source for Tailwind + plain CSS. */
+/* Linear-inspired palette — single source for Tailwind + plain CSS. Dark is default; light via <html data-theme="light">. */
 :root {
   --c-bg: #090909;
   --c-panel: #0f0f10;
   --c-surface: #151517;
   --c-surface-2: #1c1c1f;
   --c-surface-3: #232327;
+  --c-card: #151517;
   --c-line: #232326;
   --c-line-strong: #34343a;
   --c-fg: #ededef;
   --c-fg-2: #9c9ca3;
   --c-fg-3: #66666d;
-  --c-primary: #5e6ad2;
-  --c-primary-hover: #7079dc;
+  --c-primary: #165dff;
+  --c-primary-hover: #4080ff;
   --c-danger: #eb5757;
   --c-warn: #f2994a;
   --c-success: #4cb782;
   --c-telegram: #2aabee;
+  --c-status-todo: #d0d1d6;
+  --c-scrollbar: #2a2a2f;
+  --c-shadow: rgba(0, 0, 0, 0.6);
+  --c-mask: rgba(0, 0, 0, 0.219);
   --font-sans: 'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+  --c-bg: #f3f3f5;
+  --c-panel: #ffffff;
+  --c-surface: #fbfbfc;
+  --c-surface-2: #f2f2f5;
+  --c-surface-3: #e9e9ee;
+  --c-card: #ffffff;
+  --c-line: #e6e6eb;
+  --c-line-strong: #d3d3da;
+  --c-fg: #1b1b1f;
+  --c-fg-2: #5f5f68;
+  --c-fg-3: #8f8f98;
+  --c-primary: #165dff;
+  --c-primary-hover: #4080ff;
+  --c-danger: #e5484d;
+  --c-warn: #e5832f;
+  --c-success: #2f9e6a;
+  --c-telegram: #229ed9;
+  --c-status-todo: #a3a4ad;
+  --c-scrollbar: #d3d3da;
+  --c-shadow: rgba(16, 16, 24, 0.14);
+  --c-mask: rgba(16, 16, 24, 0.16);
+  color-scheme: light;
 }

@@ -35,18 +35,18 @@ const useSave = <S extends keyof AppSettings>(section: S) => {
 const GeneralForm = ({ s }: { s: AppSettings['general'] }) => {
   const [form] = Form.useForm();
   const { save, loading } = useSave('general');
-  useEffect(() => form.setFieldsValue({ ...s, workStart: t(s.workStart), workEnd: t(s.workEnd) }), [s, form]);
+  useEffect(() => form.setFieldsValue({ ...s, work_start: t(s.work_start), work_end: t(s.work_end) }), [s, form]);
   return (
-    <Form form={form} layout="vertical" onFinish={(v) => save({ ...v, workStart: f(v.workStart), workEnd: f(v.workEnd) })}>
-      <Form.Item name="companyName" label="Company name" rules={[rules.required('Company name')]}><Input /></Form.Item>
+    <Form form={form} layout="vertical" onFinish={(v) => save({ ...v, work_start: f(v.work_start), work_end: f(v.work_end) })}>
+      <Form.Item name="company_name" label="Company name" rules={[rules.required('Company name')]}><Input /></Form.Item>
       <Form.Item name="timezone" label="Timezone"><Select options={TIMEZONES.map((z) => ({ value: z, label: z }))} /></Form.Item>
-      <Form.Item name="workingDays" label="Working days" rules={[{ type: 'array', min: 1, message: 'Pick at least one day' }]}>
+      <Form.Item name="working_days" label="Working days" rules={[{ type: 'array', min: 1, message: 'Pick at least one day' }]}>
         <Checkbox.Group options={DAYS} />
       </Form.Item>
       <div className="grid grid-cols-2 gap-4">
-        <Form.Item name="workStart" label="Work start time" rules={[rules.required('Start time')]}><TimePicker format="HH:mm" className="w-full" minuteStep={5} /></Form.Item>
-        <Form.Item name="workEnd" label="Work end time" dependencies={['workStart']} rules={[rules.required('End time'), ({ getFieldValue }) => ({
-          validator: (_, v: Dayjs | undefined) => !v || v.isAfter(getFieldValue('workStart')) ? Promise.resolve() : Promise.reject(new Error('End must be after start')),
+        <Form.Item name="work_start" label="Work start time" rules={[rules.required('Start time')]}><TimePicker format="HH:mm" className="w-full" minuteStep={5} /></Form.Item>
+        <Form.Item name="work_end" label="Work end time" dependencies={['work_start']} rules={[rules.required('End time'), ({ getFieldValue }) => ({
+          validator: (_, v: Dayjs | undefined) => !v || v.isAfter(getFieldValue('work_start')) ? Promise.resolve() : Promise.reject(new Error('End must be after start')),
         })]}><TimePicker format="HH:mm" className="w-full" minuteStep={5} /></Form.Item>
       </div>
       <Button type="primary" htmlType="submit" loading={loading}>Save</Button>
@@ -57,14 +57,14 @@ const GeneralForm = ({ s }: { s: AppSettings['general'] }) => {
 const TelegramForm = ({ s }: { s: AppSettings['telegram'] }) => {
   const [form] = Form.useForm();
   const { save, loading } = useSave('telegram');
-  useEffect(() => form.setFieldsValue({ ...s, morningTime: t(s.morningTime), eveningTime: t(s.eveningTime) }), [s, form]);
+  useEffect(() => form.setFieldsValue({ ...s, morning_time: t(s.morning_time), evening_time: t(s.evening_time) }), [s, form]);
   return (
-    <Form form={form} layout="vertical" onFinish={(v) => save({ ...s, ...v, morningTime: f(v.morningTime), eveningTime: f(v.eveningTime) })}>
-      <Form.Item label="Bot username"><Input value={`@${s.botUsername}`} readOnly disabled /></Form.Item>
+    <Form form={form} layout="vertical" onFinish={(v) => save({ ...s, ...v, morning_time: f(v.morning_time), evening_time: f(v.evening_time) })}>
+      <Form.Item label="Bot username"><Input value={`@${s.bot_username}`} readOnly disabled /></Form.Item>
       <Form.Item name="enabled" label="Bot enabled" valuePropName="checked"><Switch /></Form.Item>
       <div className="grid grid-cols-2 gap-4">
-        <Form.Item name="morningTime" label="Morning notification" rules={[rules.required('Time')]}><TimePicker format="HH:mm" className="w-full" /></Form.Item>
-        <Form.Item name="eveningTime" label="Evening report" rules={[rules.required('Time')]}><TimePicker format="HH:mm" className="w-full" /></Form.Item>
+        <Form.Item name="morning_time" label="Morning notification" rules={[rules.required('Time')]}><TimePicker format="HH:mm" className="w-full" /></Form.Item>
+        <Form.Item name="evening_time" label="Evening report" rules={[rules.required('Time')]}><TimePicker format="HH:mm" className="w-full" /></Form.Item>
       </div>
       <Form.Item><Checkbox checked disabled>Send only on working days</Checkbox></Form.Item>
       <Button type="primary" htmlType="submit" loading={loading}>Save</Button>
@@ -78,11 +78,11 @@ const TasksForm = ({ s }: { s: AppSettings['tasks'] }) => {
   useEffect(() => form.setFieldsValue(s), [s, form]);
   return (
     <Form form={form} layout="vertical" onFinish={save}>
-      <Form.Item name="defaultPriority" label="Default priority"><Select options={PRIORITY_OPTIONS} /></Form.Item>
-      <Form.Item name="requireReview" label="Require review before Done" valuePropName="checked"
+      <Form.Item name="default_priority" label="Default priority"><Select options={PRIORITY_OPTIONS} /></Form.Item>
+      <Form.Item name="require_review" label="Require review before Done" valuePropName="checked"
         extra="Tasks moved to Done go to Review first; only reviewer / lead / manager can approve."><Switch /></Form.Item>
-      <Form.Item name="maxAttachmentMb" label="Max attachment size (MB)" rules={[rules.required('Size')]}><InputNumber min={1} max={100} /></Form.Item>
-      <Form.Item name="allowedFileTypes" label="Allowed file types"><Select mode="tags" tokenSeparators={[',', ' ']} /></Form.Item>
+      <Form.Item name="max_attachment_mb" label="Max attachment size (MB)" rules={[rules.required('Size')]}><InputNumber min={1} max={100} /></Form.Item>
+      <Form.Item name="allowed_file_types" label="Allowed file types"><Select mode="tags" tokenSeparators={[',', ' ']} /></Form.Item>
       <Button type="primary" htmlType="submit" loading={loading}>Save</Button>
     </Form>
   );
@@ -94,7 +94,7 @@ const SprintForm = ({ s }: { s: AppSettings['sprint'] }) => {
   useEffect(() => form.setFieldsValue(s), [s, form]);
   return (
     <Form form={form} layout="vertical" onFinish={save}>
-      <Form.Item name="defaultDurationDays" label="Default sprint duration (days)" rules={[rules.required('Duration')]}>
+      <Form.Item name="default_duration_days" label="Default sprint duration (days)" rules={[rules.required('Duration')]}>
         <InputNumber min={1} max={30} />
       </Form.Item>
       <Button type="primary" htmlType="submit" loading={loading}>Save</Button>

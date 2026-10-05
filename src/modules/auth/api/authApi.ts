@@ -1,43 +1,41 @@
-import { actor, ApiError, db, mockRequest, nowIso, TOKEN_PREFIX } from '@/shared/lib/mock';
-import type { User } from '@/shared/types';
+import { api } from '@/shared/lib/axios';
+import type { Me } from '@/shared/types';
 
 export interface LoginPayload {
   username: string;
   password: string;
-  remember?: boolean;
 }
 
+/** POST /auth/login/ response. */
 export interface LoginResponse {
-  token: string;
-  user: User;
+  access: string;
+  refresh: string;
+  user: Me;
 }
 
-// POST /api/auth/login
-export const login = ({ username, password }: LoginPayload) =>
-  mockRequest<LoginResponse>(() => {
-    const q = username.trim().toLowerCase();
-    const user = db.users.find((u) => u.username === q || u.email.toLowerCase() === q);
-    if (!user || db.passwords[user.id] !== password) throw new ApiError(401, 'Invalid username or password');
-    if (user.status === 'INACTIVE') throw new ApiError(403, 'Your account is deactivated. Contact admin.');
-    user.lastLoginAt = nowIso();
-    return { token: `${TOKEN_PREFIX}${user.id}`, user };
-  }, 600);
+// POST /auth/login/
+export const login = async ({ username, password }: LoginPayload) => {
+  const { data } = await api.post<LoginResponse>('/auth/login/', { username: username.trim(), password });
+  return data;
+};
 
-// GET /api/auth/me
-export const fetchMe = () => mockRequest(() => actor(), 200);
+// POST /auth/logout/  — blacklists the refresh token
+export const logoutRequest = async (refresh: string) => {
+  await api.post('/auth/logout/', { refresh });
+};
 
-// POST /api/auth/forgot-password
-export const forgotPassword = (email: string) =>
-  mockRequest(() => {
-    // Always succeed — never reveal whether an email exists.
-    void email;
-    return { ok: true };
-  }, 700);
+// GET /auth/me/
+export const fetchMe = async () => {
+  const { data } = await api.get<Me>('/auth/me/');
+  return data;
+};
 
-// POST /api/auth/reset-password
-export const resetPassword = (token: string, password: string) =>
-  mockRequest(() => {
-    if (!token) throw new ApiError(422, 'Reset link is invalid or expired');
-    void password;
-    return { ok: true };
-  }, 700);
+// POST /auth/password-reset/  — always succeeds for the UI: never reveal whether an email exists
+export const forgotPassword = async (email: string) => {
+  await api.post('/auth/password-reset/', { email });
+};
+
+// POST /auth/password-reset/confirm/  — `uid` and `token` come from the emailed link
+export const resetPassword = async (body: { uid: string; token: string; new_password: string }) => {
+  await api.post('/auth/password-reset/confirm/', body);
+};
