@@ -44,6 +44,11 @@ export const QUERY_KEYS = {
     userOptions: (search: string) => ['teams', 'user-options', search] as const,
     lookups: ['teams', 'lookups'] as const,
   },
+  branches: {
+    all: ['branches'] as const,
+    list: (params: object) => ['branches', 'list', params] as const,
+    detail: (id: number) => ['branches', 'detail', id] as const,
+  },
   reports: {
     all: ['reports'] as const,
     daily: (userId: string, date: string) => ['reports', 'daily', userId, date] as const,

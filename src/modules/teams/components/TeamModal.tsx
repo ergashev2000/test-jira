@@ -39,7 +39,7 @@ export const TeamModal = ({ open, team, onClose }: { open: boolean; team?: Team;
           onError: (e) => message.error(errorMessage(e)),
         })}>
         <Form.Item name="name" label="Team name" rules={[rules.required('Team name'), rules.max(150)]}><Input /></Form.Item>
-        <Form.Item name="lead" label="Team lead" rules={[rules.required('Team lead')]}>
+        <Form.Item name="lead" label="Team lead">
           <UserSearchSelect role="TEAM_LEAD" initial={team?.lead ? [team.lead] : []} placeholder="Select a Team Lead" />
         </Form.Item>
         <Form.Item name="member_ids" label="Members" extra="A user can belong to one team; adding moves them here.">

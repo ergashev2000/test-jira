@@ -50,6 +50,7 @@ export const router = createBrowserRouter([
       { path: 'users', element: guard('user.manage', page(() => import('@/modules/users/pages/UsersPage'), 'UsersPage')) },
       { path: 'roles', element: guard('user.manage', page(() => import('@/modules/roles/pages/RolesPage'), 'RolesPage')) },
       { path: 'teams', element: guard('team.manage', page(() => import('@/modules/teams/pages/TeamsPage'), 'TeamsPage')) },
+      { path: 'branches', element: guard('settings.manage', page(() => import('@/modules/branches/pages/BranchesPage'), 'BranchesPage')) },
       { path: 'reports', element: guard('report.view', page(reportsPages, 'ReportsPage')) },
       { path: 'notifications', element: <NotificationsPage /> },
       { path: 'notifications/settings', element: <NotificationSettingsPage /> },

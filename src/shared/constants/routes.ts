@@ -13,6 +13,7 @@ export const ROUTES = {
   USERS: '/users',
   ROLES: '/roles',
   TEAMS: '/teams',
+  BRANCHES: '/branches',
   REPORTS: '/reports',
   NOTIFICATIONS: '/notifications',
   NOTIFICATION_SETTINGS: '/notifications/settings',
