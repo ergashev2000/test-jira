@@ -22,8 +22,8 @@ export const TaskAttachments = ({ taskId, disabled }: { taskId: number; disabled
   const query = useAttachments(taskId);
   const upload = useUploadAttachment();
   const { data: settings } = useAppSettings();
-  const maxMb = settings?.tasks.max_attachment_mb ?? 10;
-  const types = settings?.tasks.allowed_file_types ?? [];
+  const maxMb = settings?.tasks?.max_attachment_mb ?? 10;
+  const types = settings?.tasks?.allowed_file_types ?? [];
 
   return (
     <div className="flex flex-col gap-3">
