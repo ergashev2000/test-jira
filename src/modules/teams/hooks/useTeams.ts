@@ -3,11 +3,15 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/shared/constants';
 import type { Role } from '@/shared/types';
 
-import { addTeamMember, createTeam, listTeamMembers, listTeams, removeTeamMember, searchUsers, updateTeam } from '../api/teamsApi';
+import { addTeamMember, createTeam, getTeam, listTeamMembers, listTeams, removeTeamMember, searchUsers, updateTeam } from '../api/teamsApi';
 import type { Team, TeamFormValues, TeamListParams } from '../types/team.types';
 
 export const useTeamList = (params: TeamListParams) =>
   useQuery({ queryKey: QUERY_KEYS.teams.list(params), queryFn: () => listTeams(params), placeholderData: (x) => x });
+
+/** GET /teams/:id/ — the edit modal works on this, not on the card data. */
+export const useTeam = (id: number | undefined) =>
+  useQuery({ queryKey: [...QUERY_KEYS.teams.all, 'detail', id], queryFn: () => getTeam(id!), enabled: !!id });
 
 export const useTeamMembers = (id: number | undefined) =>
   useQuery({ queryKey: QUERY_KEYS.teams.members(id ?? 0), queryFn: () => listTeamMembers(id!), enabled: !!id });

@@ -11,18 +11,19 @@ import { errorMessage } from '@/shared/utils';
 
 import { UserDrawer } from '../components/UserDrawer';
 import { getUserColumns } from '../components/userColumns';
-import { useSetUserActive, useTeams, useUserList } from '../hooks/useUsers';
+import { useSetUserActive, useTeams, useUser, useUserList } from '../hooks/useUsers';
 import type { User, UserStatus } from '../types/user.types';
 
 export const UsersPage = () => {
-  const { get, page, pageSize } = useTableParams();
+  const { get, page, pageSize, ordering } = useTableParams();
   const { message } = App.useApp();
   const me = useCurrentUser();
   const { data: teams = [] } = useTeams();
   const [drawer, setDrawer] = useState<{ open: boolean; user?: User }>({ open: false });
   const setActive = useSetUserActive();
+  const detail = useUser(drawer.open ? drawer.user?.id : undefined);
   const query = useUserList({
-    page, page_size: pageSize, search: get('search'), role: get('role') as Role | undefined,
+    page, page_size: pageSize, ordering: ordering ?? '-created_at', search: get('search'), role: get('role') as Role | undefined,
     status: get('status') as UserStatus | undefined, team: get('team') ? Number(get('team')) : undefined,
   });
 
@@ -36,8 +37,8 @@ export const UsersPage = () => {
   };
 
   const columns = getUserColumns({
-    meId: Number(me.id),
-    isLocked: (u) => u.roles.includes('SUPER_ADMIN') && me.role !== 'SUPER_ADMIN',
+    meId: me.id,
+    isLocked: (u) => u.roles.includes('SUPER_ADMIN') && !me.roles.includes('SUPER_ADMIN'),
     onEdit: (user) => setDrawer({ open: true, user }),
     onToggleStatus: toggleActive,
     pendingId: setActive.isPending ? setActive.variables?.id : undefined,
@@ -55,7 +56,7 @@ export const UsersPage = () => {
         ]} />
       </PageHeader>
       <DataTable<User> query={query} columns={columns} scroll={{ x: 1400 }} emptyText="No users found" />
-      <UserDrawer open={drawer.open} user={drawer.user} onClose={() => setDrawer({ open: false })} />
+      <UserDrawer open={drawer.open} user={detail.data ?? drawer.user} onClose={() => setDrawer({ open: false })} />
     </>
   );
 };

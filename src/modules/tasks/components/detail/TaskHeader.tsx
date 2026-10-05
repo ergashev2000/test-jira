@@ -7,16 +7,15 @@ import { useNavigate } from 'react-router-dom';
 
 import { useCurrentUser } from '@/shared/hooks';
 import { ReasonModal, TaskTypeIcon, type ReasonValues } from '@/shared/components/ui';
-import { ROUTES } from '@/shared/constants';
-import type { CancelReason } from '@/shared/types';
+import { CANCEL_REASONS, ROUTES, type CancelReason } from '@/shared/constants';
 import { canBlock, canCancelDirect, canEditTask, canRequestCancel, copyToClipboard, errorMessage } from '@/shared/utils';
 
-import { useBlockTask, useCancelTask, useRequestCancel } from '../../hooks/useTaskActions';
+import { useBlockTask, useCancelTask, usePendingCancelRequest, useRequestCancel } from '../../hooks/useTaskActions';
 import { useUpdateTask } from '../../hooks/useTasks';
-import type { TaskDetail } from '../../types/task.types';
+import type { Task } from '../../types/task.types';
 import { TaskFormModal } from '../TaskFormModal';
 
-export const TaskHeader = ({ task, inDrawer }: { task: TaskDetail; inDrawer?: boolean }) => {
+export const TaskHeader = ({ task, inDrawer }: { task: Task; inDrawer?: boolean }) => {
   const user = useCurrentUser();
   const { message } = App.useApp();
   const navigate = useNavigate();
@@ -25,21 +24,24 @@ export const TaskHeader = ({ task, inDrawer }: { task: TaskDetail; inDrawer?: bo
   const cancel = useCancelTask();
   const request = useRequestCancel();
   const update = useUpdateTask();
+  const { data: pendingCancel } = usePendingCancelRequest(task.id);
 
-  const closed = task.status === 'CANCELLED';
-  const readOnly = task.projectArchived || closed;
+  const closed = task.status === 'cancelled';
+  const readOnly = task.project.status === 'archived' || closed;
   const editable = canEditTask(user) && !readOnly;
 
   const onReason = ({ reason, note }: ReasonValues) => {
     const done = (msg: string) => ({ onSuccess: () => { message.success(msg); setModal(null); }, onError: (e: unknown) => message.error(errorMessage(e)) });
+    // The backend keeps one free-text reason: "<preset> — <note>".
+    const text = [reason && CANCEL_REASONS[reason as CancelReason], note].filter(Boolean).join(' — ');
     if (modal === 'block') block.mutate({ id: task.id, reason: note }, done('Task marked as blocked'));
-    if (modal === 'cancel') cancel.mutate({ id: task.id, payload: { reason: reason as CancelReason, note } }, done('Task cancelled'));
-    if (modal === 'request') request.mutate({ id: task.id, payload: { reason: reason as CancelReason, note } }, done('Cancel request sent to your lead'));
+    if (modal === 'cancel') cancel.mutate({ id: task.id, reason: text }, done('Task cancelled'));
+    if (modal === 'request') request.mutate({ id: task.id, reason: text }, done('Cancel request sent to your lead'));
   };
 
   const menu = [
     canCancelDirect(user) && !readOnly && { key: 'cancel', label: 'Cancel task', danger: true, icon: <HugeiconsIcon icon={StopCircleIcon} size={16} className="hicon" strokeWidth={1.7} /> },
-    canRequestCancel(user, task) && !readOnly && !task.pendingCancelRequest && { key: 'request', label: 'Request cancel', icon: <HugeiconsIcon icon={StopCircleIcon} size={16} className="hicon" strokeWidth={1.7} /> },
+    canRequestCancel(user, task) && !readOnly && !pendingCancel && { key: 'request', label: 'Request cancel', icon: <HugeiconsIcon icon={StopCircleIcon} size={16} className="hicon" strokeWidth={1.7} /> },
   ].filter((x): x is Exclude<typeof x, false> => !!x);
 
   return (
@@ -53,9 +55,9 @@ export const TaskHeader = ({ task, inDrawer }: { task: TaskDetail; inDrawer?: bo
             message.success('Link copied');
           }} />
         </Tooltip>
-        {task.pendingCancelRequest && <Tag color="orange">Cancel request pending</Tag>}
+        {pendingCancel && <Tag color="orange">Cancel request pending</Tag>}
         <div className="ml-auto flex items-center gap-1.5">
-          {!readOnly && canBlock(user, task) && !task.isBlocked && (
+          {!readOnly && canBlock(user, task) && !task.is_blocked && (
             <Button size="small" onClick={() => setModal('block')}>🚧 Block</Button>
           )}
           {editable && <Button size="small" icon={<HugeiconsIcon icon={Edit02Icon} size={16} className="hicon" strokeWidth={1.7} />} onClick={() => setModal('edit')}>Edit</Button>}
@@ -78,7 +80,7 @@ export const TaskHeader = ({ task, inDrawer }: { task: TaskDetail; inDrawer?: bo
         editable={editable ? {
           triggerType: ['text'],
           onChange: (title) => title.trim() && title !== task.title &&
-            update.mutate({ id: task.id, patch: { title } }, { onError: (e) => message.error(errorMessage(e)) }),
+            update.mutate({ task, patch: { title } }, { onError: (e) => message.error(errorMessage(e)) }),
         } : false}
       >
         {task.title}

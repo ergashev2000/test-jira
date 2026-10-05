@@ -1,11 +1,11 @@
 import type { ProjectStatus, SprintStatus } from '@/shared/types';
 
 export const PROJECT_STATUS: Record<ProjectStatus, { label: string; color: string }> = {
-  PLANNING: { label: 'Planning', color: 'blue' },
-  ACTIVE: { label: 'Active', color: 'green' },
-  ON_HOLD: { label: 'On Hold', color: 'orange' },
-  COMPLETED: { label: 'Completed', color: 'purple' },
-  ARCHIVED: { label: 'Archived', color: 'default' },
+  planning: { label: 'Planning', color: 'blue' },
+  active: { label: 'Active', color: 'green' },
+  on_hold: { label: 'On Hold', color: 'orange' },
+  completed: { label: 'Completed', color: 'purple' },
+  archived: { label: 'Archived', color: 'default' },
 };
 export const PROJECT_STATUS_OPTIONS = (Object.keys(PROJECT_STATUS) as ProjectStatus[]).map((s) => ({
   value: s,
@@ -13,10 +13,10 @@ export const PROJECT_STATUS_OPTIONS = (Object.keys(PROJECT_STATUS) as ProjectSta
 }));
 
 export const SPRINT_STATUS: Record<SprintStatus, { label: string; color: string }> = {
-  PLANNED: { label: 'Planned', color: 'blue' },
-  ACTIVE: { label: 'Active', color: 'green' },
-  COMPLETED: { label: 'Completed', color: 'purple' },
-  CANCELLED: { label: 'Cancelled', color: 'default' },
+  planned: { label: 'Planned', color: 'blue' },
+  active: { label: 'Active', color: 'green' },
+  completed: { label: 'Completed', color: 'purple' },
+  cancelled: { label: 'Cancelled', color: 'default' },
 };
 export const SPRINT_STATUS_OPTIONS = (Object.keys(SPRINT_STATUS) as SprintStatus[]).map((s) => ({
   value: s,

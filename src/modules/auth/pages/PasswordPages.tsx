@@ -58,7 +58,7 @@ export const ResetPasswordPage = () => {
   const { message } = App.useApp();
   const navigate = useNavigate();
   const mutation = useMutation({
-    mutationFn: (password: string) => resetPassword(sp.get('token') ?? '', password),
+    mutationFn: (password: string) => resetPassword({ uid: sp.get('uid') ?? '', token: sp.get('token') ?? '', new_password: password }),
     onSuccess: () => {
       message.success('Password updated. You can log in now.');
       navigate(ROUTES.LOGIN);

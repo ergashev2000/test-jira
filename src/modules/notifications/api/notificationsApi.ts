@@ -1,70 +1,50 @@
-import { actor, ApiError, db, mockRequest, NOTIFICATION_TYPES, paginate } from '@/shared/lib/mock';
-import type { AppNotification, NotificationSetting, NotificationType } from '@/shared/types';
+// Notifications are NOT IN api.json yet — these are the endpoints the UI expects
+// (see docs/BACKEND_REQUIREMENTS.md → notifications).
+import { api } from '@/shared/lib/axios';
+import type { ApiPaginated, AppNotification, ListParams, NotificationSetting, NotificationType } from '@/shared/types';
 
-export interface NotificationListParams {
-  page?: number;
-  pageSize?: number;
-  unreadOnly?: boolean;
+export interface NotificationListParams extends ListParams {
+  is_read?: boolean;
   type?: NotificationType;
 }
 
-const mine = () => {
-  const me = actor();
-  return db.notifications.filter((n) => n.userId === me.id).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+// GET /notifications/?is_read=&type=&page=&page_size=  — newest first
+export const listNotifications = async (params: NotificationListParams = {}) => {
+  const { data } = await api.get<ApiPaginated<AppNotification>>('/notifications/', { params: { ordering: '-created_at', ...params } });
+  return data;
 };
 
-// GET /api/notifications
-export const listNotifications = (p: NotificationListParams = {}) =>
-  mockRequest(() => {
-    const items = mine().filter((n) => (!p.unreadOnly || !n.isRead) && (!p.type || n.type === p.type));
-    return paginate(items, p.page ?? 1, p.pageSize ?? 20);
-  }, 250);
+// GET /notifications/unread-count/  → { count }
+export const getUnreadCount = async () => {
+  const { data } = await api.get<{ count: number }>('/notifications/unread-count/');
+  return data.count;
+};
 
-// GET /api/notifications/latest
-export const latestNotifications = () =>
-  mockRequest(() => {
-    const all = mine();
-    return { items: all.slice(0, 10), unread: all.filter((n) => !n.isRead).length };
-  }, 200);
+// POST /notifications/:id/read/
+export const markRead = async (id: number) => {
+  await api.post(`/notifications/${id}/read/`);
+};
 
-// POST /api/notifications/:id/read
-export const markRead = (id: string) =>
-  mockRequest(() => {
-    const me = actor();
-    const n = db.notifications.find((x) => x.id === id && x.userId === me.id);
-    if (!n) throw new ApiError(404, 'Notification not found');
-    n.isRead = true;
-    return n;
-  }, 150);
+// POST /notifications/read-all/
+export const markAllRead = async () => {
+  await api.post('/notifications/read-all/');
+};
 
-// POST /api/notifications/read-all
-export const markAllRead = () =>
-  mockRequest(() => {
-    const me = actor();
-    db.notifications.filter((n) => n.userId === me.id).forEach((n) => (n.isRead = true));
-    return { ok: true };
-  }, 250);
+export interface NotificationSettings {
+  telegram_linked: boolean;
+  items: NotificationSetting[];
+}
 
-// GET /api/notifications/settings
-export const getNotificationSettings = () =>
-  mockRequest(() => {
-    const me = actor();
-    return {
-      telegramLinked: !!me.telegram,
-      items: NOTIFICATION_TYPES.map<NotificationSetting>((event) =>
-        db.notificationSettings.find((s) => s.userId === me.id && s.event === event) ?? { userId: me.id, event, telegram: !!me.telegram, web: true }),
-    };
-  }, 250);
+// GET /notifications/settings/
+export const getNotificationSettings = async () => {
+  const { data } = await api.get<NotificationSettings>('/notifications/settings/');
+  return data;
+};
 
-// PUT /api/notifications/settings
-export const saveNotificationSettings = (items: Pick<NotificationSetting, 'event' | 'telegram' | 'web'>[]) =>
-  mockRequest(() => {
-    const me = actor();
-    db.notificationSettings = [
-      ...db.notificationSettings.filter((s) => s.userId !== me.id),
-      ...items.map((s) => ({ ...s, userId: me.id, telegram: me.telegram ? s.telegram : false })),
-    ];
-    return { ok: true };
-  });
+// PUT /notifications/settings/  { items }
+export const saveNotificationSettings = async (items: NotificationSetting[]) => {
+  const { data } = await api.put<NotificationSettings>('/notifications/settings/', { items });
+  return data;
+};
 
 export type { AppNotification };

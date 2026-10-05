@@ -1,79 +1,41 @@
-import { primaryRole } from '@/shared/constants';
 import { api } from '@/shared/lib/axios';
-import { ApiError, mockRequest } from '@/shared/lib/mock';
-import type { User } from '@/shared/types';
+import type { Me } from '@/shared/types';
 
 export interface LoginPayload {
   username: string;
   password: string;
 }
 
+/** POST /auth/login/ response. */
 export interface LoginResponse {
-  token: string;
-  refresh: string;
-  user: User;
-}
-
-/** User as returned by the backend (snake_case, numeric id, several roles). */
-interface ApiUser {
-  id: number | string;
-  full_name: string;
-  username: string;
-  email: string;
-  phone: string;
-  position: string;
-  team: { id: number | string; name?: string } | number | string | null;
-  status: string;
-  roles: string[];
-  last_login: string | null;
-  created_at: string;
-}
-
-interface ApiLoginResponse {
   access: string;
   refresh: string;
-  user: ApiUser;
+  user: Me;
 }
 
-export const fromApiUser = (u: ApiUser): User => ({
-  id: String(u.id),
-  fullName: u.full_name || u.username,
-  username: u.username,
-  email: u.email,
-  phone: u.phone,
-  position: u.position,
-  teamId: u.team === null ? null : String(typeof u.team === 'object' ? u.team.id : u.team),
-  role: primaryRole(u.roles),
-  status: u.status.toUpperCase() === 'ACTIVE' ? 'ACTIVE' : 'INACTIVE',
-  telegram: null,
-  createdAt: u.created_at,
-  lastLoginAt: u.last_login,
-});
-
-// POST /auth/login/  →  { access, refresh, user }
-export const login = async ({ username, password }: LoginPayload): Promise<LoginResponse> => {
-  const { data } = await api.post<ApiLoginResponse>('/auth/login/', { username: username.trim(), password });
-  return { token: data.access, refresh: data.refresh, user: fromApiUser(data.user) };
+// POST /auth/login/
+export const login = async ({ username, password }: LoginPayload) => {
+  const { data } = await api.post<LoginResponse>('/auth/login/', { username: username.trim(), password });
+  return data;
 };
 
-// GET /auth/me/  — same user shape as the login response
-export const fetchMe = async (): Promise<User> => {
-  const { data } = await api.get<ApiUser>('/auth/me/');
-  return fromApiUser(data);
+// POST /auth/logout/  — blacklists the refresh token
+export const logoutRequest = async (refresh: string) => {
+  await api.post('/auth/logout/', { refresh });
 };
 
-// POST /api/auth/forgot-password
-export const forgotPassword = (email: string) =>
-  mockRequest(() => {
-    // Always succeed — never reveal whether an email exists.
-    void email;
-    return { ok: true };
-  }, 700);
+// GET /auth/me/
+export const fetchMe = async () => {
+  const { data } = await api.get<Me>('/auth/me/');
+  return data;
+};
 
-// POST /api/auth/reset-password
-export const resetPassword = (token: string, password: string) =>
-  mockRequest(() => {
-    if (!token) throw new ApiError(422, 'Reset link is invalid or expired');
-    void password;
-    return { ok: true };
-  }, 700);
+// POST /auth/password-reset/  — always succeeds for the UI: never reveal whether an email exists
+export const forgotPassword = async (email: string) => {
+  await api.post('/auth/password-reset/', { email });
+};
+
+// POST /auth/password-reset/confirm/  — `uid` and `token` come from the emailed link
+export const resetPassword = async (body: { uid: string; token: string; new_password: string }) => {
+  await api.post('/auth/password-reset/confirm/', body);
+};

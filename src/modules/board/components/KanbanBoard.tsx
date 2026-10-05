@@ -14,7 +14,7 @@ import {
 import { Button } from 'antd';
 import { useState } from 'react';
 
-import { useStatusChanger, useTaskDrawer, type TaskRow } from '@/modules/tasks';
+import { useStatusChanger, useTaskDrawer, type Task } from '@/modules/tasks';
 import { StatusIcon } from '@/shared/components/ui';
 import { BOARD_COLUMNS, TASK_STATUS } from '@/shared/constants';
 import type { TaskStatus } from '@/shared/types';
@@ -23,7 +23,7 @@ import { cn } from '@/shared/utils';
 import { TaskCard, TaskCardView } from './TaskCard';
 
 const Column = ({ status, tasks, onAdd, onOpen }: {
-  status: TaskStatus; tasks: TaskRow[]; onAdd?: () => void; onOpen: (key: string) => void;
+  status: TaskStatus; tasks: Task[]; onAdd?: () => void; onOpen: (key: string) => void;
 }) => {
   const { setNodeRef, isOver } = useDroppable({ id: status });
   return (
@@ -51,7 +51,7 @@ const Column = ({ status, tasks, onAdd, onOpen }: {
 };
 
 interface Props {
-  tasks: TaskRow[];
+  tasks: Task[];
   onQuickAdd?: (status: TaskStatus) => void;
 }
 
@@ -59,22 +59,22 @@ interface Props {
 export const KanbanBoard = ({ tasks, onQuickAdd }: Props) => {
   const { openTask } = useTaskDrawer();
   const { change } = useStatusChanger();
-  const [active, setActive] = useState<TaskRow | null>(null);
+  const [active, setActive] = useState<Task | null>(null);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(KeyboardSensor),
   );
 
-  const onDragStart = (e: DragStartEvent) => setActive((e.active.data.current?.task as TaskRow) ?? null);
+  const onDragStart = (e: DragStartEvent) => setActive((e.active.data.current?.task as Task) ?? null);
   const onDragEnd = (e: DragEndEvent) => {
     setActive(null);
-    const task = e.active.data.current?.task as TaskRow | undefined;
+    const task = e.active.data.current?.task as Task | undefined;
     const to = e.over?.id as TaskStatus | undefined;
     if (!task || !to || task.status === to) return;
     change(task, to);
   };
 
-  const visible = tasks.filter((t) => t.status !== 'CANCELLED');
+  const visible = tasks.filter((t) => t.status !== 'cancelled');
 
   return (
     <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={() => setActive(null)}>
@@ -85,7 +85,7 @@ export const KanbanBoard = ({ tasks, onQuickAdd }: Props) => {
             status={s}
             tasks={visible.filter((t) => t.status === s)}
             onOpen={openTask}
-            onAdd={onQuickAdd && (s === 'BACKLOG' || s === 'TODO') ? () => onQuickAdd(s) : undefined}
+            onAdd={onQuickAdd && (s === 'backlog' || s === 'todo') ? () => onQuickAdd(s) : undefined}
           />
         ))}
       </div>

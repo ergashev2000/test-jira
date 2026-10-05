@@ -9,6 +9,12 @@ export const listUsers = async (params: UserListParams = {}) => {
   return data;
 };
 
+// GET /users/:id/  — fresh copy before editing
+export const getUser = async (id: number) => {
+  const { data } = await api.get<User>(`/users/${id}/`);
+  return data;
+};
+
 // POST /users/
 export const createUser = async (body: UserCreate) => {
   const { data } = await api.post<User>('/users/', body);

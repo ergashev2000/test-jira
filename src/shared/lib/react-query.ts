@@ -1,6 +1,6 @@
 import { QueryClient } from '@tanstack/react-query';
 
-import { ApiError } from './mock/mockRequest';
+import { ApiError } from './apiError';
 
 export const queryClient = new QueryClient({
   defaultOptions: {

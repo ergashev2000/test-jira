@@ -1,42 +1,48 @@
 import { useState, type ReactNode } from 'react';
 
-import { TaskFormModal, useTaskList, type DeadlineFilter, type TaskFormValues } from '@/modules/tasks';
+import { TaskFormModal, useBoard, type BoardParams, type DeadlineFilter } from '@/modules/tasks';
 import { FilterBar, QueryState, type FilterDef } from '@/shared/components/ui';
 import { PRIORITY_OPTIONS } from '@/shared/constants';
 import { useTableParams } from '@/shared/hooks';
-import type { Priority, TaskStatus } from '@/shared/types';
+import dayjs from '@/shared/lib/dayjs';
+import type { Priority, TaskStatus, TaskWrite } from '@/shared/types';
 
 import { KanbanBoard } from './KanbanBoard';
 
 interface Props {
-  projectId: string;
-  /** Sprint id or 'active'. */
-  sprintId: string;
+  projectId: number;
+  /** Sprint id; omitted — the project's active sprint (backend default). */
+  sprintId?: number;
   canCreate: boolean;
   extraFilters?: FilterDef[];
   keep?: string[];
   toolbar?: ReactNode;
 }
 
-/** Filters (URL, AND-combined) + live Kanban for one project sprint. */
+/** Deadline bucket → board query (`deadline_to`; overdue also sends `overdue=true`). */
+const deadlineParams = (f: DeadlineFilter | undefined): Pick<BoardParams, 'deadline_to' | 'overdue'> => {
+  if (f === 'today') return { deadline_to: dayjs().format('YYYY-MM-DD') };
+  if (f === 'week') return { deadline_to: dayjs().add(7, 'day').format('YYYY-MM-DD') };
+  if (f === 'overdue') return { deadline_to: dayjs().subtract(1, 'day').format('YYYY-MM-DD'), overdue: true };
+  return {};
+};
+
+/** Filters (URL, AND-combined, applied by the backend) + live Kanban: GET /projects/:id/board/. */
 export const BoardView = ({ projectId, sprintId, canCreate, extraFilters = [], keep = [], toolbar }: Props) => {
   const { get, getArray, getBool } = useTableParams();
-  const [quickAdd, setQuickAdd] = useState<Partial<TaskFormValues> | null>(null);
-  const query = useTaskList(
-    {
-      projectId,
-      sprintId,
-      assigneeIds: getArray('assignee'),
-      priorities: getArray('priority') as Priority[],
-      label: get('label'),
-      onlyBlocked: getBool('blocked'),
-      deadline: get('deadline') as DeadlineFilter | undefined,
-      search: get('search'),
-    },
-    { live: true },
-  );
-  const labels = [...new Set((query.data?.items ?? []).flatMap((t) => t.labels))].sort();
-  const activeSprintId = query.data?.items.find((t) => t.sprintId)?.sprintId ?? (sprintId !== 'active' ? sprintId : null);
+  const [quickAdd, setQuickAdd] = useState<Partial<TaskWrite> | null>(null);
+  const query = useBoard(projectId, {
+    sprint: sprintId,
+    assignee: getArray('assignee').map(Number),
+    priority: getArray('priority') as Priority[],
+    label: get('label'),
+    blocked: getBool('blocked') || undefined,
+    search: get('search'),
+    ...deadlineParams(get('deadline') as DeadlineFilter | undefined),
+  });
+  const tasks = query.data?.columns.flatMap((c) => c.tasks) ?? [];
+  const labels = [...new Set(tasks.flatMap((t) => t.labels ?? []))].sort();
+  const boardSprintId = query.data?.sprint?.id ?? sprintId ?? null;
 
   return (
     <div className="flex h-full flex-col">
@@ -58,10 +64,10 @@ export const BoardView = ({ projectId, sprintId, canCreate, extraFilters = [], k
       </div>
       <div className="min-h-0 flex-1">
         <QueryState query={query}>
-          {(data) => (
+          {() => (
             <KanbanBoard
-              tasks={data.items}
-              onQuickAdd={canCreate ? (s: TaskStatus) => setQuickAdd({ projectId, sprintId: s === 'TODO' ? activeSprintId : null }) : undefined}
+              tasks={tasks}
+              onQuickAdd={canCreate ? (s: TaskStatus) => setQuickAdd({ project: projectId, sprint: s === 'todo' ? boardSprintId : null }) : undefined}
             />
           )}
         </QueryState>

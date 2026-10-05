@@ -17,14 +17,26 @@ export interface PermissionDef {
   description: string;
 }
 
-// GET /roles/  — role → permission matrix (read-only, defined on the server)
+// GET /roles/?ordering=level  — role → permission matrix (read-only, defined on the server)
 export const listRoles = async () => {
-  const { data } = await api.get<RoleDef[]>('/roles/');
+  const { data } = await api.get<RoleDef[]>('/roles/', { params: { ordering: 'level' } });
   return data;
 };
 
-// GET /permissions/
-export const listPermissions = async () => {
-  const { data } = await api.get<PermissionDef[]>('/permissions/');
+// GET /roles/:id/
+export const getRole = async (id: number) => {
+  const { data } = await api.get<RoleDef>(`/roles/${id}/`);
+  return data;
+};
+
+// GET /permissions/?search=&ordering=code
+export const listPermissions = async (search?: string) => {
+  const { data } = await api.get<PermissionDef[]>('/permissions/', { params: { search: search || undefined, ordering: 'code' } });
+  return data;
+};
+
+// GET /permissions/:id/
+export const getPermission = async (id: number) => {
+  const { data } = await api.get<PermissionDef>(`/permissions/${id}/`);
   return data;
 };

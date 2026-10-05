@@ -9,6 +9,12 @@ export const listTeams = async (params: TeamListParams = {}) => {
   return data;
 };
 
+// GET /teams/:id/  — fresh copy before editing
+export const getTeam = async (id: number) => {
+  const { data } = await api.get<Team>(`/teams/${id}/`);
+  return data;
+};
+
 // POST /teams/
 export const createTeam = async (body: TeamWrite) => {
   const { data } = await api.post<Team>('/teams/', body);

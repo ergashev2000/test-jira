@@ -3,11 +3,12 @@ import axios, { type AxiosRequestConfig, type InternalAxiosRequestConfig } from 
 import { queryClient } from '@/shared/lib/react-query';
 import { useSessionStore } from '@/shared/lib/session';
 
-import { ApiError } from './mock/mockRequest';
+import { ApiError } from './apiError';
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? '/api';
 
-export const api = axios.create({ baseURL: BASE_URL, timeout: 20_000 });
+// Arrays go as repeated keys (`status=todo&status=done`) — what django-filter expects.
+export const api = axios.create({ baseURL: BASE_URL, timeout: 20_000, paramsSerializer: { indexes: null } });
 
 const AUTH_ENDPOINTS = ['/auth/login/', '/auth/refresh/'];
 const isAuthEndpoint = (url?: string) => !!url && AUTH_ENDPOINTS.some((e) => url.includes(e));

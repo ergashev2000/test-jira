@@ -1,36 +1,25 @@
-import { db, mockRequest, paginate, requirePermission } from '@/shared/lib/mock';
-import type { AuditEntityType, AuditLog, Source } from '@/shared/types';
+// Audit log is NOT IN api.json yet — these are the endpoints the UI expects
+// (see docs/BACKEND_REQUIREMENTS.md → audit-log). Read-only: no edit/delete endpoints.
+import { api } from '@/shared/lib/axios';
+import type { ApiPaginated, AuditEntityType, AuditLog, ListParams, Source } from '@/shared/types';
 
-export interface AuditParams {
-  page?: number;
-  pageSize?: number;
-  actorId?: string;
+export interface AuditParams extends ListParams {
+  actor?: number;
   action?: string;
-  entityType?: AuditEntityType;
+  entity_type?: AuditEntityType;
   source?: Source;
-  from?: string;
-  to?: string;
+  date_from?: string;
+  date_to?: string;
 }
 
-export interface AuditRow extends AuditLog {
-  actorName: string;
-}
+// GET /audit-logs/?actor=&action=&entity_type=&source=&date_from=&date_to=&ordering=
+export const listAuditLogs = async (params: AuditParams = {}) => {
+  const { data } = await api.get<ApiPaginated<AuditLog>>('/audit-logs/', { params });
+  return data;
+};
 
-// GET /api/audit-logs   (read-only — no edit/delete endpoints exist)
-export const listAuditLogs = (p: AuditParams = {}) =>
-  mockRequest(() => {
-    requirePermission('auditLog.view');
-    const items = db.auditLogs
-      .filter((a) => !p.actorId || a.actorId === p.actorId)
-      .filter((a) => !p.action || a.action === p.action)
-      .filter((a) => !p.entityType || a.entityType === p.entityType)
-      .filter((a) => !p.source || a.source === p.source)
-      .filter((a) => !p.from || a.createdAt.slice(0, 10) >= p.from)
-      .filter((a) => !p.to || a.createdAt.slice(0, 10) <= p.to)
-      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-      .map<AuditRow>((a) => ({ ...a, actorName: db.users.find((u) => u.id === a.actorId)?.fullName ?? 'System' }));
-    return paginate(items, p.page ?? 1, p.pageSize ?? 20);
-  }, 350);
-
-// GET /api/audit-logs/actions
-export const listAuditActions = () => mockRequest(() => [...new Set(db.auditLogs.map((a) => a.action))].sort(), 150);
+// GET /audit-logs/actions/  → distinct action codes for the filter
+export const listAuditActions = async () => {
+  const { data } = await api.get<string[]>('/audit-logs/actions/');
+  return data;
+};

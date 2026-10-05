@@ -3,9 +3,9 @@
 Project & task management web app — projects, sprints, a Kanban board, daily reports and Telegram notifications,
 with role-based access for the whole team.
 
-> **Status: backend integration in progress.** Authentication (login, current user, token refresh) runs on the real
-> backend. All other modules still use an in-memory **mock API** that enforces the same business rules; mock data
-> resets on every page reload.
+> **Status:** every module talks to the real backend (`VITE_API_URL`, spec in [`api/api.json`](api/api.json)).
+> Endpoints and fields the UI needs but the backend doesn't have yet are listed in
+> [`docs/BACKEND_REQUIREMENTS.md`](docs/BACKEND_REQUIREMENTS.md).
 
 ---
 
@@ -16,7 +16,7 @@ with role-based access for the whole team.
 - [Tech stack](#tech-stack)
 - [Project structure](#project-structure)
 - [Architecture rules](#architecture-rules)
-- [Mock API & connecting a real backend](#mock-api--connecting-a-real-backend)
+- [Backend integration](#backend-integration)
 - [Theming & styling](#theming--styling)
 - [Environment variables](#environment-variables)
 - [Scripts & quality gates](#scripts--quality-gates)
@@ -35,7 +35,7 @@ npm run dev            # http://localhost:5173
 ```
 
 Log in with an account that exists on the backend. Each role sees a different app: menu items, pages and actions are
-filtered by permission. `SUPER_ADMIN` / `ADMIN` see all mock projects; other roles only see projects they are members of.
+filtered by permission. `SUPER_ADMIN` / `ADMIN` see all projects; other roles only see projects they are members of.
 
 ## Features
 
@@ -80,7 +80,7 @@ src/
 │   ├── components/ui   Reusable UI (tags, icons, avatars, filters, loaders, KPI cards…)
 │   ├── constants       ROUTES, PERMISSIONS, QUERY_KEYS, statuses, priorities, roles
 │   ├── hooks           useTableParams (URL ⇄ filters), useDebounce, usePermission
-│   ├── lib             axios, react-query, dayjs, session & theme stores, mock/
+│   ├── lib             axios, react-query, dayjs, session & theme stores
 │   ├── types           Domain entities
 │   └── utils           Dates, validation, task rules
 └── styles/       global.css (layers, component classes), variables.css (color palette)
@@ -90,7 +90,7 @@ Every module has the same shape and exposes a single public API through its `ind
 
 ```
 modules/<name>/
-├── api/         Request functions (currently backed by the mock API)
+├── api/         Request functions — one per backend endpoint
 ├── hooks/       TanStack Query hooks (queries + mutations, cache invalidation)
 ├── components/  Module-only UI
 ├── pages/       Route components
@@ -112,35 +112,21 @@ modules/<name>/
 Rules 1–2 are enforced by a custom oxlint rule, [`lint/boundaries-plugin.js`](lint/boundaries-plugin.js). It reports
 violations as **warnings**: they are visible in the editor and in `npm run lint`, but do not block commits.
 
-## Mock API & connecting a real backend
+## Backend integration
 
-All data comes from [`src/shared/lib/mock`](src/shared/lib/mock):
+- **Shapes as-is.** Responses are used exactly as the backend returns them (snake_case, numeric ids, lowercase enums,
+  embedded `UserBrief`) — no mapping layer. Types live in [`src/shared/types/entities.ts`](src/shared/types/entities.ts);
+  fields marked `NOT IN api.json` are requested from the backend.
+- **Server-side everything.** Filters, search, sorting and pagination are query params (`?status=…&ordering=-created_at`);
+  the UI never filters or sorts lists itself. Sortable `DataTable` columns (`sorter: true`) write `?ordering=` to the URL.
+  Multi-value filters are sent as repeated keys (`status=todo&status=review`).
+- **Edit = fresh copy.** Edit dialogs load the entity by id/key (`GET /users/:id/`, `/projects/:key/`, `/sprints/:id/`…).
+- **Auth.** `POST /auth/login/` → JWT in cookies (`pm.access`, `pm.refresh`), `GET /auth/me/` in `localStorage` (`pm.user`);
+  any 401 triggers one shared `POST /auth/refresh/`, logout blacklists the refresh token.
+- **Errors.** `{ error: { status_code, detail } }` is turned into an `ApiError` with a readable message by the axios interceptor.
 
-- `mockDb.ts` — in-memory database, deep-copied from the seed data in `mock/data/` on load.
-- `mockRequest(fn, delay)` — wraps a handler in a Promise with network-like latency and typed `ApiError`s
-  (`401 / 403 / 404 / 422`).
-- `session.ts` — resolves the current user and checks project access, like server-side auth would.
-
-The mock behaves like a backend, not like a fixture: role checks, workflow rules, a review step before *Done*, one active
-sprint per project, archived projects, inactive users, required blocker/cancel reasons… Every mutation also writes task
-activity, an audit-log entry and notifications.
-
-**Switching to a real API.** Request functions in `modules/*/api` are annotated with the endpoint they stand for
-(e.g. `// GET /api/search?q=`). To connect the backend, replace the `mockRequest(...)` body with a call to the shared
-axios client (`http` from `shared/lib/axios`). Hooks, pages and components do not change.
-
-**Current integration state:**
-
-| Area            | Source  | Notes                                                                                  |
-| --------------- | ------- | -------------------------------------------------------------------------------------- |
-| Login           | Backend | `POST /auth/login/` → `access` / `refresh` JWT + user (mapped in `fromApiUser`)         |
-| Current user    | Backend | `GET /auth/me/` on app load — the persisted user renders instantly, then is refreshed   |
-| Token refresh   | Backend | Any 401 → one shared `POST /auth/refresh/`, then the failed requests are replayed       |
-| Session storage | Browser | Tokens in cookies via js-cookie (`pm.access`, `pm.refresh`; expire with the JWT), user in `localStorage` (`pm.user`) |
-| Everything else | Mock    | The backend user is bridged into the mock DB (`bindActor`) so all pages keep working   |
-
-The backend returns errors as `{ error: { status_code, detail } }`; the axios interceptor turns them into `ApiError`s
-with a readable message, so UI error handling is the same for mock and real calls.
+What the backend still has to add (fields, filters, ordering fields, missing endpoints) is listed per tag in
+[`docs/BACKEND_REQUIREMENTS.md`](docs/BACKEND_REQUIREMENTS.md).
 
 ## Theming & styling
 
@@ -165,7 +151,6 @@ See [`.env.example`](.env.example).
 | Variable                 | Default | Description                                                                                 |
 | ------------------------ | ------- | ------------------------------------------------------------------------------------------- |
 | `VITE_API_URL`           | `/api`  | Backend base URL, e.g. `http://192.168.1.151:8000/api/v1`. Required for login.               |
-| `VITE_MOCK_TELEGRAM_SIM` | `true`  | Dev only: every 45 s moves one of `shohrux`'s tasks forward, as if done via the Telegram bot. |
 
 ## Scripts & quality gates
 
@@ -181,6 +166,6 @@ commit; warnings do not.
 
 ## Known limitations
 
-- Only auth is on the backend; mock data (projects, tasks…) is lost on reload.
+- Dashboard, notifications, audit log, settings, comment editing, blocker history and project activity call endpoints that are not in `api.json` yet — they show an error until the backend adds them (see `docs/BACKEND_REQUIREMENTS.md`).
 - No automated tests yet.
 - UI copy is English only (antd locale `en_US`).

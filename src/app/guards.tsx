@@ -6,8 +6,8 @@ import { Navigate, useLocation, useNavigate, useRouteError } from 'react-router-
 import { fetchMe, logout, useAuthStore } from '@/modules/auth';
 import { PageLoader } from '@/shared/components/ui/Loader';
 import { hasPermission, QUERY_KEYS, ROUTES, type Permission } from '@/shared/constants';
-import { ApiError } from '@/shared/lib/mock';
-import { isSignedIn } from '@/shared/lib/session';
+import { ApiError } from '@/shared/lib/apiError';
+import { isSignedIn, roleOf } from '@/shared/lib/session';
 
 export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   const { user, setUser } = useAuthStore();
@@ -50,17 +50,17 @@ export const NotFound = () => {
 };
 
 export const RoleGuard = ({ permission, children }: { permission: Permission; children: ReactNode }) => {
-  const role = useAuthStore((s) => s.user?.role);
+  const role = useAuthStore((s) => roleOf(s.user));
   return hasPermission(role, permission) ? <>{children}</> : <Forbidden />;
 };
 
 export const HomeRedirect = () => {
-  const role = useAuthStore((s) => s.user?.role);
+  const role = useAuthStore((s) => roleOf(s.user));
   return <Navigate to={hasPermission(role, 'dashboard.view') ? ROUTES.DASHBOARD : ROUTES.MY_TASKS} replace />;
 };
 
 export const DashboardGuard = ({ children }: { children: ReactNode }) => {
-  const role = useAuthStore((s) => s.user?.role);
+  const role = useAuthStore((s) => roleOf(s.user));
   return hasPermission(role, 'dashboard.view') ? <>{children}</> : <Navigate to={ROUTES.MY_TASKS} replace />;
 };
 

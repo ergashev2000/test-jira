@@ -8,14 +8,14 @@ import { PROJECT_STATUS, ROUTES } from '@/shared/constants';
 import type { ProjectStatus } from '@/shared/types';
 import { formatDate } from '@/shared/utils';
 
-import type { ProjectListItem } from '../types/project.types';
+import type { Project } from '../types/project.types';
 
-const COLUMNS: ProjectStatus[] = ['PLANNING', 'ACTIVE', 'ON_HOLD', 'COMPLETED', 'ARCHIVED'];
+const COLUMNS: ProjectStatus[] = ['planning', 'active', 'on_hold', 'completed', 'archived'];
 const COLORS: Record<ProjectStatus, string> = {
-  PLANNING: '#8a8f98', ACTIVE: '#f2c94c', ON_HOLD: '#f2994a', COMPLETED: '#165dff', ARCHIVED: '#6b6f76',
+  planning: '#8a8f98', active: '#f2c94c', on_hold: '#f2994a', completed: '#165dff', archived: '#6b6f76',
 };
 
-const Card = ({ p }: { p: ProjectListItem }) => {
+const Card = ({ p }: { p: Project }) => {
   const navigate = useNavigate();
   return (
     <button type="button" onClick={() => navigate(ROUTES.project(p.key))}
@@ -23,23 +23,23 @@ const Card = ({ p }: { p: ProjectListItem }) => {
       <div className="flex items-center gap-2">
         <ProjectIcon projectKey={p.key} />
         <span className="flex-1 truncate text-[13px] font-medium text-fg">{p.name}</span>
-        <UserAvatar userId={p.managerId} size={18} />
+        <UserAvatar user={p.manager} size={18} />
       </div>
-      {p.endDate && (
-        <span className="flex items-center gap-1.5 text-xs text-fg-2"><HugeiconsIcon icon={Calendar03Icon} size={13} className="hicon" strokeWidth={1.7} />{formatDate(p.endDate)}</span>
+      {p.end_date && (
+        <span className="flex items-center gap-1.5 text-xs text-fg-2"><HugeiconsIcon icon={Calendar03Icon} size={13} className="hicon" strokeWidth={1.7} />{formatDate(p.end_date)}</span>
       )}
       <div className="flex items-center gap-2 text-xs text-fg-3">
-        <span>{p.totalTasks} tasks</span>
-        {p.activeSprint && <span className="flex items-center gap-1"><HugeiconsIcon icon={Rocket01Icon} size={12} className="hicon" strokeWidth={1.7} />{p.activeSprint.name}</span>}
-        <Progress percent={p.progress} size="small" showInfo={false} className="!m-0 flex-1" strokeColor="#165dff" />
-        <span className="tabular-nums">{p.progress}%</span>
+        <span>{p.tasks_total ?? 0} tasks</span>
+        {p.active_sprint && <span className="flex items-center gap-1"><HugeiconsIcon icon={Rocket01Icon} size={12} className="hicon" strokeWidth={1.7} />{p.active_sprint.name}</span>}
+        <Progress percent={p.progress ?? 0} size="small" showInfo={false} className="!m-0 flex-1" strokeColor="#165dff" />
+        <span className="tabular-nums">{p.progress ?? 0}%</span>
       </div>
     </button>
   );
 };
 
 /** Linear-like board of projects grouped by status. */
-export const ProjectsBoard = ({ items }: { items: ProjectListItem[] }) => (
+export const ProjectsBoard = ({ items }: { items: Project[] }) => (
   <div className="flex h-full gap-3 overflow-x-auto p-4">
     {COLUMNS.map((s) => {
       const list = items.filter((p) => p.status === s);

@@ -7,7 +7,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 
 import { useProjectLookups } from '@/shared/api/lookups';
 import { hasPermission, ROUTES } from '@/shared/constants';
-import { useSessionStore } from '@/shared/lib/session';
+import { roleOf, useSessionStore } from '@/shared/lib/session';
 import { cn } from '@/shared/utils';
 
 import { ProjectIcon } from '@/shared/components/ui/ProjectIcon';
@@ -149,7 +149,7 @@ const ProjectsNav = ({ collapsed }: { collapsed: boolean }) => {
   const { data: projects = [] } = useProjectLookups();
   const { pathname } = useLocation();
   const [expanded, setExpanded] = useState<string | null>(pathname.split('/')[2] ?? null);
-  const list = projects.filter((p) => p.status !== 'ARCHIVED');
+  const list = projects.filter((p) => p.status !== 'archived');
   if (!list.length) return null;
   if (collapsed) {
     return (
@@ -192,7 +192,7 @@ const ProjectsNav = ({ collapsed }: { collapsed: boolean }) => {
 
 /** Role-filtered navigation — items without permission are not rendered at all. */
 export const Sidebar = ({ collapsed }: { collapsed: boolean }) => {
-  const role = useSessionStore((s) => s.user?.role);
+  const role = useSessionStore((s) => roleOf(s.user));
   const visible = (items: NavItem[]) =>
     items.filter((i) => !i.permission || hasPermission(role, i.permission));
   const admin = visible(ADMIN);

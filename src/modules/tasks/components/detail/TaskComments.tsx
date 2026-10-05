@@ -3,32 +3,30 @@ import { useState } from 'react';
 
 import { useCurrentUser } from '@/shared/hooks';
 import { EmptyState, QueryState, UserAvatar } from '@/shared/components/ui';
-import { useUserMap } from '@/shared/api/lookups';
-import type { TaskComment } from '@/shared/types';
+import type { Comment } from '@/shared/types';
 import { errorMessage, formatDateTime, fromNow } from '@/shared/utils';
 
 import { useAddComment, useComments, useEditComment } from '../../hooks/useTaskActions';
 
-const CommentItem = ({ c }: { c: TaskComment }) => {
+const CommentItem = ({ c, taskId }: { c: Comment; taskId: number }) => {
   const me = useCurrentUser();
-  const users = useUserMap();
   const { message } = App.useApp();
   const edit = useEditComment();
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState(c.text);
 
   const save = () =>
-    edit.mutate({ id: c.id, text }, { onSuccess: () => setEditing(false), onError: (e) => message.error(errorMessage(e)) });
+    edit.mutate({ taskId, id: c.id, text }, { onSuccess: () => setEditing(false), onError: (e) => message.error(errorMessage(e)) });
 
   return (
     <div className="flex gap-3">
-      <UserAvatar userId={c.authorId} size={24} />
+      <UserAvatar user={c.author} size={24} />
       <div className="min-w-0 flex-1 rounded-xl border border-line bg-surface px-3 py-2">
         <div className="mb-1 flex items-center gap-2 text-xs">
-          <span className="font-medium text-fg">{users.get(c.authorId)?.fullName}</span>
-          <Tooltip title={formatDateTime(c.createdAt)}><span className="text-fg-3">{fromNow(c.createdAt)}</span></Tooltip>
-          {c.editedAt && <span className="text-fg-3">(edited)</span>}
-          {c.authorId === me.id && !editing && (
+          <span className="font-medium text-fg">{c.author?.full_name ?? 'Unknown'}</span>
+          <Tooltip title={formatDateTime(c.created_at)}><span className="text-fg-3">{fromNow(c.created_at)}</span></Tooltip>
+          {c.edited_at && <span className="text-fg-3">(edited)</span>}
+          {c.author?.id === me.id && !editing && (
             <Button size="small" type="link" className="!ml-auto !h-auto !p-0 !text-xs" onClick={() => setEditing(true)}>Edit</Button>
           )}
         </div>
@@ -49,7 +47,7 @@ const CommentItem = ({ c }: { c: TaskComment }) => {
   );
 };
 
-export const TaskComments = ({ taskId }: { taskId: string }) => {
+export const TaskComments = ({ taskId }: { taskId: number }) => {
   const me = useCurrentUser();
   const { message } = App.useApp();
   const query = useComments(taskId);
@@ -63,11 +61,11 @@ export const TaskComments = ({ taskId }: { taskId: string }) => {
 
   return (
     <div className="flex flex-col gap-4">
-      <QueryState query={query} isEmpty={(d) => !d.length} empty={<EmptyState description="No comments yet" />}>
-        {(list) => <div className="flex flex-col gap-3">{list.map((c) => <CommentItem key={c.id} c={c} />)}</div>}
+      <QueryState query={query} isEmpty={(d) => !d.results.length} empty={<EmptyState description="No comments yet" />}>
+        {(d) => <div className="flex flex-col gap-3">{d.results.map((c) => <CommentItem key={c.id} c={c} taskId={taskId} />)}</div>}
       </QueryState>
       <div className="flex gap-3">
-        <UserAvatar userId={me.id} size={24} />
+        <UserAvatar user={me} size={24} />
         <div className="flex-1 rounded-xl border border-line bg-surface p-2 focus-within:border-line-strong">
           <Input.TextArea
             variant="borderless"

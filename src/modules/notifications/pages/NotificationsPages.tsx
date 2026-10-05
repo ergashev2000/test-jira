@@ -23,7 +23,7 @@ export const NotificationsPage = () => {
   const { get, set, page, pageSize } = useTableParams();
   const navigate = useNavigate();
   const unreadOnly = get('filter') === 'unread';
-  const query = useNotificationList({ page, pageSize, unreadOnly, type: get('type') as NotificationType | undefined });
+  const query = useNotificationList({ page, page_size: pageSize, is_read: unreadOnly ? false : undefined, type: get('type') as NotificationType | undefined });
   const markAll = useMarkAllRead();
   const open = useOpenNotification();
 
@@ -43,13 +43,13 @@ export const NotificationsPage = () => {
         </div>
       </PageHeader>
       <div className="mx-auto max-w-3xl p-5">
-        <QueryState query={query} isEmpty={(d) => !d.items.length} empty={<EmptyState description="No notifications" />}>
+        <QueryState query={query} isEmpty={(d) => !d.results.length} empty={<EmptyState description="No notifications" />}>
           {(d) => (
             <>
               <div className="overflow-hidden rounded-xl border border-line bg-surface">
-                {d.items.map((n) => <NotificationItem key={n.id} n={n} onClick={() => open(n)} />)}
+                {d.results.map((n) => <NotificationItem key={n.id} n={n} onClick={() => open(n)} />)}
               </div>
-              <Pagination className="!mt-4 text-right" size="small" current={page} pageSize={pageSize} total={d.total}
+              <Pagination className="!mt-4 text-right" size="small" current={page} pageSize={pageSize} total={d.count}
                 onChange={(p, ps) => set({ page: p, pageSize: ps }, false)} hideOnSinglePage />
             </>
           )}
@@ -69,7 +69,7 @@ export const NotificationSettingsPage = () => {
   useEffect(() => {
     if (query.data) setRows(query.data.items.map(({ event, telegram, web }) => ({ event, telegram, web })));
   }, [query.data]);
-  const linked = query.data?.telegramLinked ?? false;
+  const linked = query.data?.telegram_linked ?? false;
   const toggle = (event: NotificationType, key: 'telegram' | 'web', v: boolean) =>
     setRows((r) => r.map((x) => (x.event === event ? { ...x, [key]: v } : x)));
 

@@ -5,8 +5,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useCurrentProject } from '@/modules/projects';
-import { SprintFormModal, useSprints } from '@/modules/sprints';
-import { useProjectLookups } from '@/shared/api/lookups';
+import { SprintFormModal } from '@/modules/sprints';
+import { useOpenSprints, useProjectLookups } from '@/shared/api/lookups';
 import { EmptyState, PageHeader, ProjectIcon } from '@/shared/components/ui';
 import { ROUTES } from '@/shared/constants';
 import { usePermission, useTableParams } from '@/shared/hooks';
@@ -20,14 +20,13 @@ export const ProjectBoardTab = () => {
   const canManage = usePermission('sprint.manage');
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const sprints = useSprints({ projectId: project?.id }, !!project);
-  if (!project || sprints.isLoading) return null;
+  if (!project) return null;
 
-  const active = sprints.data?.find((s) => s.status === 'ACTIVE');
+  const active = project.active_sprint;
   if (!active) {
     return (
       <EmptyState description="No active sprint in this project">
-        {canManage && project.status !== 'ARCHIVED' && (
+        {canManage && project.status !== 'archived' && (
           <div className="flex justify-center gap-2">
             <Button onClick={() => navigate(ROUTES.project(project.key, 'backlog'))}>Go to backlog</Button>
             <Button type="primary" onClick={() => setOpen(true)}>Start a sprint</Button>
@@ -41,7 +40,7 @@ export const ProjectBoardTab = () => {
     <BoardView
       projectId={project.id}
       sprintId={active.id}
-      canCreate={canCreate && project.status !== 'ARCHIVED'}
+      canCreate={canCreate && project.status !== 'archived'}
       toolbar={<span className="flex items-center gap-1.5 text-xs text-fg-2"><HugeiconsIcon icon={Rocket01Icon} size={13} className="hicon" strokeWidth={1.7} />{active.name}</span>}
     />
   );
@@ -52,12 +51,12 @@ export const GlobalBoardPage = () => {
   const { get, set } = useTableParams();
   const canCreate = usePermission('task.create');
   const { data: projects = [], isLoading } = useProjectLookups();
-  const fallback = projects.find((p) => p.status === 'ACTIVE') ?? projects[0];
-  const projectId = get('projectId') ?? fallback?.id;
+  const fallback = projects.find((p) => p.status === 'active') ?? projects[0];
+  const projectId = get('project') ? Number(get('project')) : fallback?.id;
   const project = projects.find((p) => p.id === projectId);
-  const sprints = useSprints({ projectId }, !!projectId);
-  const open = (sprints.data ?? []).filter((s) => s.status === 'ACTIVE' || s.status === 'PLANNED');
-  const sprintId = get('sprintId') ?? open.find((s) => s.status === 'ACTIVE')?.id ?? 'active';
+  const { data: open = [] } = useOpenSprints(projectId);
+  // No sprint in the URL → the backend's default (active sprint).
+  const sprintId = get('sprint') ? Number(get('sprint')) : undefined;
 
   return (
     <div className="flex h-full flex-col">
@@ -66,17 +65,18 @@ export const GlobalBoardPage = () => {
         extra={
           <>
             <Select size="small" className="min-w-52" loading={isLoading} value={projectId} placeholder="Project"
-              onChange={(v: string) => set({ projectId: v, sprintId: undefined })}
+              onChange={(v: number) => set({ project: v, sprint: undefined })}
               options={projects.map((p) => ({ value: p.id, label: <span className="flex items-center gap-1.5"><ProjectIcon projectKey={p.key} size={13} />{p.name}</span> }))} />
-            <Select size="small" className="min-w-36" value={sprintId} onChange={(v: string) => set({ sprintId: v })}
-              options={open.length ? open.map((s) => ({ value: s.id, label: `${s.name}${s.status === 'ACTIVE' ? ' · active' : ''}` })) : [{ value: 'active', label: 'No open sprint' }]} />
+            <Select size="small" className="min-w-36" value={sprintId ?? open.find((s) => s.status === 'active')?.id} placeholder="No open sprint"
+              onChange={(v: number) => set({ sprint: v })}
+              options={open.map((s) => ({ value: s.id, label: `${s.name}${s.status === 'active' ? ' · active' : ''}` }))} />
           </>
         }
       />
       <div className="min-h-0 flex-1">
         {project ? (
-          <BoardView key={`${projectId}-${sprintId}`} projectId={project.id} sprintId={sprintId} keep={['projectId', 'sprintId']}
-            canCreate={canCreate && project.status !== 'ARCHIVED'} />
+          <BoardView key={`${projectId}-${sprintId}`} projectId={project.id} sprintId={sprintId} keep={['project', 'sprint']}
+            canCreate={canCreate && project.status !== 'archived'} />
         ) : (
           !isLoading && <EmptyState description="You are not a member of any project yet" />
         )}

@@ -6,40 +6,40 @@ export const StatusIcon = ({ status, size = 14 }: { status: TaskStatus; size?: n
   const c = TASK_STATUS[status].color;
   const common = { width: size, height: size, viewBox: '0 0 14 14', fill: 'none' } as const;
   switch (status) {
-    case 'BACKLOG':
+    case 'backlog':
       return (
         <svg {...common}>
           <circle cx="7" cy="7" r="6" stroke={c} strokeWidth="1.5" strokeDasharray="1.4 1.6" />
         </svg>
       );
-    case 'TODO':
+    case 'todo':
       return (
         <svg {...common}>
           <circle cx="7" cy="7" r="6" stroke={c} strokeWidth="1.5" />
         </svg>
       );
-    case 'IN_PROGRESS':
+    case 'in_progress':
       return (
         <svg {...common}>
           <circle cx="7" cy="7" r="6" stroke={c} strokeWidth="1.5" />
           <path d="M7 3.5a3.5 3.5 0 0 1 0 7z" fill={c} />
         </svg>
       );
-    case 'REVIEW':
+    case 'review':
       return (
         <svg {...common}>
           <circle cx="7" cy="7" r="6" stroke={c} strokeWidth="1.5" />
           <path d="M7 3.5A3.5 3.5 0 1 1 3.5 7H7z" fill={c} />
         </svg>
       );
-    case 'DONE':
+    case 'done':
       return (
         <svg {...common}>
           <circle cx="7" cy="7" r="7" fill={c} />
           <path d="M4.2 7.2 6.1 9l3.7-3.9" stroke="var(--c-panel)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       );
-    case 'CANCELLED':
+    case 'cancelled':
       return (
         <svg {...common}>
           <circle cx="7" cy="7" r="7" fill={c} />
@@ -49,10 +49,10 @@ export const StatusIcon = ({ status, size = 14 }: { status: TaskStatus; size?: n
   }
 };
 
-/** Linear-style signal bars; CRITICAL is an urgent square. */
+/** Linear-style signal bars; critical is an urgent square. */
 export const PriorityIcon = ({ priority, size = 14 }: { priority: Priority; size?: number }) => {
   const { color, weight } = PRIORITY[priority];
-  if (priority === 'CRITICAL') {
+  if (priority === 'critical') {
     return (
       <svg width={size} height={size} viewBox="0 0 14 14">
         <rect x="1" y="1" width="12" height="12" rx="3" fill={color} />
@@ -80,7 +80,7 @@ export const PriorityIcon = ({ priority, size = 14 }: { priority: Priority; size
 
 export const TaskTypeIcon = ({ type, size = 14 }: { type: TaskType; size?: number }) => {
   const c = TASK_TYPES[type].color;
-  if (type === 'BUG') {
+  if (type === 'bug') {
     return (
       <svg width={size} height={size} viewBox="0 0 14 14" fill="none" aria-label="Bug">
         <rect x="0.5" y="0.5" width="13" height="13" rx="3" fill={c} fillOpacity="0.18" stroke={c} strokeOpacity="0.5" />

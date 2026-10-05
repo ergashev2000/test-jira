@@ -9,4 +9,6 @@ const STALE = 10 * 60_000;
 
 export const useRoles = () => useQuery({ queryKey: QUERY_KEYS.roles.list, queryFn: listRoles, staleTime: STALE });
 
-export const usePermissions = () => useQuery({ queryKey: QUERY_KEYS.roles.permissions, queryFn: listPermissions, staleTime: STALE });
+/** Searched on the backend (`?search=` matches code / description). */
+export const usePermissions = (search?: string) =>
+  useQuery({ queryKey: [...QUERY_KEYS.roles.permissions, search ?? ''], queryFn: () => listPermissions(search), staleTime: STALE, placeholderData: (p) => p });

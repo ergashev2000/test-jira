@@ -13,7 +13,7 @@ import { UserSelect } from './UserSelect';
 export type FilterDef =
   | { type: 'search'; key: string; placeholder?: string; width?: number }
   | { type: 'select'; key: string; placeholder: string; options: Option[]; multiple?: boolean; width?: number }
-  | { type: 'user'; key: string; placeholder: string; multiple?: boolean; projectId?: string; onlyActive?: boolean; width?: number }
+  | { type: 'user'; key: string; placeholder: string; multiple?: boolean; projectId?: number; onlyActive?: boolean; width?: number }
   | { type: 'switch'; key: string; label: string }
   | { type: 'dateRange'; from: string; to: string };
 
@@ -74,8 +74,8 @@ export const FilterBar = ({ filters, keep = [], extra }: { filters: FilterDef[];
                 placeholder={f.placeholder}
                 projectId={f.projectId}
                 onlyActive={f.onlyActive ?? false}
-                value={f.multiple ? getArray(f.key) : get(f.key)}
-                onChange={(v) => set({ [f.key]: v as string | string[] | undefined })}
+                value={f.multiple ? getArray(f.key).map(Number) : get(f.key) ? Number(get(f.key)) : undefined}
+                onChange={(v) => set({ [f.key]: Array.isArray(v) ? v.map(String) : v == null ? undefined : String(v) })}
                 style={{ minWidth: f.width ?? 180 }}
               />
             );

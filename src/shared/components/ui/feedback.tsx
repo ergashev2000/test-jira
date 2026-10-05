@@ -5,7 +5,7 @@ import { Button, Empty, Result, Skeleton } from 'antd';
 import type { ReactNode } from 'react';
 
 import { hasPermission, type Permission } from '@/shared/constants';
-import { useSessionStore } from '@/shared/lib/session';
+import { roleOf, useSessionStore } from '@/shared/lib/session';
 import { errorMessage } from '@/shared/utils';
 
 export const EmptyState = ({ description = 'No data', children }: { description?: ReactNode; children?: ReactNode }) => (
@@ -44,6 +44,6 @@ export function QueryState<T>({ query, isEmpty, empty, skeletonRows = 4, childre
 
 /** Renders children only when current role has the permission. */
 export const Can = ({ permission, children, fallback = null }: { permission: Permission; children: ReactNode; fallback?: ReactNode }) => {
-  const role = useSessionStore((s) => s.user?.role);
+  const role = useSessionStore((s) => roleOf(s.user));
   return <>{hasPermission(role, permission) ? children : fallback}</>;
 };

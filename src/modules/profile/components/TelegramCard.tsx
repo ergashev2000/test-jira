@@ -4,57 +4,56 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { App, Button, Popconfirm, Statistic } from 'antd';
 import { useEffect, useState } from 'react';
 
-import { useCurrentUser } from '@/shared/hooks';
 import { Panel } from '@/shared/components/ui';
 import { QUERY_KEYS } from '@/shared/constants';
 import dayjs from '@/shared/lib/dayjs';
-import { useSessionStore } from '@/shared/lib/session';
+import type { TelegramLinkToken } from '@/shared/types';
 import { copyToClipboard, errorMessage, formatDateTime } from '@/shared/utils';
 
-import { disconnectTelegram, generateTelegramCode, getTelegramLinkStatus, type TelegramCode } from '../api/profileApi';
+import { createTelegramLinkToken, disconnectTelegram, getTelegramAccount } from '../api/profileApi';
+
+/** "https://t.me/my_bot?start=CODE" → "my_bot" */
+const botOf = (link: string | null) => (link ? new URL(link).pathname.replace(/^\//, '') : '');
 
 export const TelegramCard = () => {
   const { message } = App.useApp();
   const qc = useQueryClient();
-  const user = useCurrentUser();
-  const setUser = useSessionStore((s) => s.setUser);
-  const [code, setCode] = useState<TelegramCode | null>(null);
-  const expired = !!code && dayjs().isAfter(code.expiresAt);
+  const [code, setCode] = useState<TelegramLinkToken | null>(null);
+  const expired = !!code && dayjs().isAfter(code.expires_at);
 
-  const status = useQuery({
+  // Polls while a code is waiting for the bot's /start confirmation.
+  const account = useQuery({
     queryKey: QUERY_KEYS.telegram,
-    queryFn: getTelegramLinkStatus,
+    queryFn: getTelegramAccount,
     refetchInterval: code && !expired ? 2_000 : false,
   });
 
   useEffect(() => {
-    if (!status.data) return;
-    if (status.data.linked && !user.telegram && status.data.telegram) {
-      setUser({ ...user, telegram: status.data.telegram });
+    if (code && account.data?.linked) {
       setCode(null);
       message.success('Telegram connected');
       qc.invalidateQueries({ queryKey: QUERY_KEYS.notifications.all });
     }
-  }, [status.data, user, setUser, message, qc]);
+  }, [account.data?.linked, code, message, qc]);
 
-  const generate = useMutation({ mutationFn: generateTelegramCode, onSuccess: setCode, onError: (e) => message.error(errorMessage(e)) });
+  const generate = useMutation({ mutationFn: createTelegramLinkToken, onSuccess: setCode, onError: (e) => message.error(errorMessage(e)) });
   const disconnect = useMutation({
     mutationFn: disconnectTelegram,
     onSuccess: () => {
-      setUser({ ...user, telegram: null });
       qc.invalidateQueries({ queryKey: QUERY_KEYS.telegram });
       message.success('Telegram disconnected');
     },
   });
 
-  const tg = user.telegram;
+  const tg = account.data?.linked ? account.data : null;
+  const bot = botOf(code?.deep_link ?? null);
   return (
     <Panel title={<span className="flex items-center gap-2"><HugeiconsIcon icon={TelegramIcon} size={16} color="var(--c-telegram)" className="hicon" strokeWidth={1.7} />Telegram</span>}>
       {tg ? (
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex-1">
-            <div className="font-medium text-success">✅ Connected as @{tg.username}</div>
-            <div className="mt-1 text-xs text-fg-2">Chat ID {tg.chatId} · linked {formatDateTime(tg.linkedAt)}</div>
+            <div className="font-medium text-success">✅ Connected{tg.tg_username && ` as @${tg.tg_username}`}</div>
+            {tg.linked_at && <div className="mt-1 text-xs text-fg-2">Linked {formatDateTime(tg.linked_at)}</div>}
           </div>
           <Popconfirm title="Disconnect Telegram?" description="You'll stop receiving Telegram notifications." okButtonProps={{ danger: true }}
             onConfirm={() => disconnect.mutateAsync()}>
@@ -63,16 +62,18 @@ export const TelegramCard = () => {
         </div>
       ) : code && !expired ? (
         <div className="flex flex-col gap-3">
-          <div className="text-fg-2">Open <b className="text-fg">@{code.botUsername}</b> and send:</div>
+          <div className="text-fg-2">Open {bot ? <b className="text-fg">@{bot}</b> : 'the bot'} and send:</div>
           <div className="flex items-center gap-2">
-            <code className="rounded-md border border-line bg-bg px-3 py-2 font-mono text-lg tracking-widest text-fg">/start {code.code}</code>
-            <Button icon={<HugeiconsIcon icon={Copy01Icon} size={14} className="hicon" strokeWidth={1.7} />} onClick={() => { copyToClipboard(`/start ${code.code}`); message.success('Copied'); }} />
-            <Button type="primary" icon={<HugeiconsIcon icon={TelegramIcon} size={14} className="hicon" strokeWidth={1.7} />} href={`https://t.me/${code.botUsername}?start=${code.code}`} target="_blank">
-              Open bot
-            </Button>
+            <code className="rounded-md border border-line bg-bg px-3 py-2 font-mono text-lg tracking-widest text-fg">/start {code.token}</code>
+            <Button icon={<HugeiconsIcon icon={Copy01Icon} size={14} className="hicon" strokeWidth={1.7} />} onClick={() => { copyToClipboard(`/start ${code.token}`); message.success('Copied'); }} />
+            {code.deep_link && (
+              <Button type="primary" icon={<HugeiconsIcon icon={TelegramIcon} size={14} className="hicon" strokeWidth={1.7} />} href={code.deep_link} target="_blank">
+                Open bot
+              </Button>
+            )}
           </div>
           <div className="flex items-center gap-2 text-xs text-fg-3">
-            Code expires in <Statistic.Countdown value={dayjs(code.expiresAt).valueOf()} format="mm:ss" valueStyle={{ fontSize: 12, color: 'var(--c-fg-2)' }}
+            Code expires in <Statistic.Countdown value={dayjs(code.expires_at).valueOf()} format="mm:ss" valueStyle={{ fontSize: 12, color: 'var(--c-fg-2)' }}
               onFinish={() => setCode({ ...code })} />
             · waiting for confirmation…
           </div>

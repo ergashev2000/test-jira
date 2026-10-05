@@ -1,5 +1,6 @@
 import { Table, type TableProps } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
+import type { SorterResult } from 'antd/es/table/interface';
 import { useState, type ReactNode } from 'react';
 
 import { useTableParams } from '@/shared/hooks';
@@ -36,7 +37,16 @@ export type DataTableProps<T> = BaseProps<T> & (
 export function DataTable<T extends object>({
   query, dataSource, columns, emptyText, onRowClick, rowNumbers = true, className, rowClassName, onRow, onChange, pagination, ...rest
 }: DataTableProps<T>) {
-  const { pagination: urlPagination, page, pageSize } = useTableParams();
+  const { pagination: urlPagination, page, pageSize, get, set } = useTableParams();
+  const ordering = get('ordering');
+
+  // Server-side sorting: a column with `sorter: true` sorts by its `key` (or `dataIndex`) via ?ordering=.
+  const fieldOf = (c: ColumnsType<T>[number]) => String(c.key ?? ('dataIndex' in c ? c.dataIndex : ''));
+  const sortable: ColumnsType<T> = query
+    ? columns.map((c) => (c.sorter === true
+      ? { ...c, sortOrder: ordering === fieldOf(c) ? 'ascend' : ordering === `-${fieldOf(c)}` ? 'descend' : null }
+      : c))
+    : columns;
   // Client-side pagination lives inside antd, so track the visible page for numbering.
   const [clientPage, setClientPage] = useState({ current: 1, pageSize: DEFAULT_CLIENT_PAGE_SIZE });
 
@@ -48,7 +58,7 @@ export function DataTable<T extends object>({
     title: '#', key: '__rowNumber', width: 56, align: 'center',
     fixed: columns[0]?.fixed ? 'left' : undefined,
     render: (_, __, i) => <span className="text-xs tabular-nums text-fg-3">{offset + i + 1}</span>,
-  }, ...columns] : columns;
+  }, ...sortable] : sortable;
 
   const render = (rows: readonly T[], extra?: Partial<TableProps<T>>) => (
     <Table<T>
@@ -63,9 +73,14 @@ export function DataTable<T extends object>({
       columns={allColumns}
       dataSource={rows}
       pagination={pagination}
-      onChange={(p, ...args) => {
+      onChange={(p, filters, sorter, extra) => {
         if (!query) setClientPage({ current: p.current ?? 1, pageSize: p.pageSize ?? DEFAULT_CLIENT_PAGE_SIZE });
-        onChange?.(p, ...args);
+        if (query && extra.action === 'sort') {
+          const s = (Array.isArray(sorter) ? sorter[0] : sorter) as SorterResult<T> | undefined;
+          const field = s?.column ? fieldOf(s.column) : '';
+          set({ ordering: s?.order && field ? `${s.order === 'descend' ? '-' : ''}${field}` : undefined });
+        }
+        onChange?.(p, filters, sorter, extra);
       }}
       {...extra}
       {...rest}

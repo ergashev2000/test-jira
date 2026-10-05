@@ -12,28 +12,26 @@ import type { TeamBrief, User } from '../types/user.types';
 
 interface Options {
   meId: number;
-  /** Row can't be edited or (de)activated by the current user. */
   isLocked: (u: User) => boolean;
   onEdit: (u: User) => void;
   onToggleStatus: (u: User) => void;
-  /** Row whose status change is in flight — its switch shows a spinner. */
   pendingId?: number;
 }
 
 export const getUserColumns = ({ meId, isLocked, onEdit, onToggleStatus, pendingId }: Options): ColumnsType<User> => [
-  { title: 'Full name', dataIndex: 'full_name', width: 210, render: (_, u) => <NameAvatar id={u.id} name={u.full_name || u.username} inactive={u.status === 'inactive'} /> },
-  { title: 'Username', dataIndex: 'username', width: 120, render: (v: string) => <span className="text-fg-2">@{v}</span> },
-  { title: 'Email', dataIndex: 'email', width: 200 },
+  { title: 'Full name', dataIndex: 'full_name', width: 210, sorter: true, render: (_, u) => <NameAvatar id={u.id} name={u.full_name || u.username} inactive={u.status === 'inactive'} /> },
+  { title: 'Username', dataIndex: 'username', width: 120, sorter: true, render: (v: string) => <span className="text-fg-2">@{v}</span> },
+  { title: 'Email', dataIndex: 'email', width: 200, sorter: true },
   { title: 'Phone', dataIndex: 'phone', width: 160, render: (v: string) => (v ? formatPhone(v) : <EmptyCell />) },
-  { title: 'Position', dataIndex: 'position', width: 170, render: (v: string) => v || <EmptyCell /> },
-  { title: 'Team', dataIndex: 'team', width: 120, render: (t: TeamBrief | null) => t?.name ?? <EmptyCell /> },
+  { title: 'Position', dataIndex: 'position', width: 170, sorter: true, render: (v: string) => v || <EmptyCell /> },
+  { title: 'Team', dataIndex: 'team', key: 'team__name', width: 120, sorter: true, render: (t: TeamBrief | null) => t?.name ?? <EmptyCell /> },
   {
     title: 'Roles', dataIndex: 'roles', width: 200, render: (roles: Role[]) => (roles.length
       ? <span className="flex flex-wrap gap-1">{roles.map((r) => <Tag key={r} color={ROLES[r]?.color} className="m-0!">{ROLES[r]?.label ?? r}</Tag>)}</span>
       : <EmptyCell />)
   },
-  { title: 'Created', dataIndex: 'created_at', width: 110, render: (d: string) => formatDate(d) },
-  { title: 'Last login', dataIndex: 'last_login', width: 120, render: (d: string | null) => <span className="text-fg-2">{fromNow(d, 'Never')}</span> },
+  { title: 'Created', dataIndex: 'created_at', width: 110, sorter: true, render: (d: string) => formatDate(d) },
+  { title: 'Last login', dataIndex: 'last_login', width: 120, sorter: true, render: (d: string | null) => <span className="text-fg-2">{fromNow(d, 'Never')}</span> },
   {
     title: 'Active', dataIndex: 'status', width: 90, align: 'center', render: (_, u) => (
       <StatusSwitch checked={u.status === 'active'} label="Active" loading={pendingId === u.id} onChange={() => onToggleStatus(u)}

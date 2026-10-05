@@ -1,31 +1,27 @@
 import { Alert, App, Button, Popconfirm, Space } from 'antd';
 
 import { useCurrentUser } from '@/shared/hooks';
-import { useUserMap } from '@/shared/api/lookups';
-import { CANCEL_REASONS } from '@/shared/constants';
 import { canBlock, errorMessage, fromNow, isManager } from '@/shared/utils';
 
-import { useResolveBlocker, useReviewCancel } from '../../hooks/useTaskActions';
-import type { TaskDetail } from '../../types/task.types';
+import { usePendingCancelRequest, useResolveBlocker, useReviewCancel } from '../../hooks/useTaskActions';
+import type { Task } from '../../types/task.types';
 
-export const TaskAlerts = ({ task }: { task: TaskDetail }) => {
+export const TaskAlerts = ({ task }: { task: Task }) => {
   const user = useCurrentUser();
-  const users = useUserMap();
   const { message } = App.useApp();
   const resolve = useResolveBlocker();
   const review = useReviewCancel();
-  const name = (id: string | null | undefined) => (id && users.get(id)?.fullName) || 'Unknown';
-
-  const req = task.pendingCancelRequest;
+  const { data: req } = usePendingCancelRequest(task.id);
+  const blocker = task.active_blocker;
 
   return (
     <div className="flex flex-col gap-2 empty:hidden">
-      {task.projectArchived && <Alert type="warning" showIcon message="This project is archived. The task is read-only." />}
-      {task.isBlocked && task.activeBlocker && (
+      {task.project.status === 'archived' && <Alert type="warning" showIcon message="This project is archived. The task is read-only." />}
+      {task.is_blocked && blocker && (
         <Alert
           type="error"
           showIcon
-          message={<span>🚧 Blocked by <b>{name(task.activeBlocker.createdById)}</b>, {fromNow(task.activeBlocker.createdAt)} — {task.activeBlocker.reason}</span>}
+          message={<span>🚧 Blocked by <b>{blocker.created_by?.full_name ?? 'Unknown'}</b>, {fromNow(blocker.created_at)} — {blocker.reason}</span>}
           action={
             canBlock(user, task) && (
               <Popconfirm
@@ -41,17 +37,11 @@ export const TaskAlerts = ({ task }: { task: TaskDetail }) => {
           }
         />
       )}
-      {task.status === 'CANCELLED' && task.cancellation && (
+      {task.status === 'cancelled' && (
         <Alert
           type="info"
           showIcon
-          message={
-            <span>
-              Cancelled: <b>{CANCEL_REASONS[task.cancellation.reason]}</b>
-              {task.cancellation.note && ` — ${task.cancellation.note}`}
-              <span className="text-fg-3"> · by {name(task.cancellation.byId)}, {fromNow(task.cancellation.at)}</span>
-            </span>
-          }
+          message={<span>Cancelled{task.cancellation_reason && <>: <b>{task.cancellation_reason}</b></>}</span>}
         />
       )}
       {req && (
@@ -60,8 +50,7 @@ export const TaskAlerts = ({ task }: { task: TaskDetail }) => {
           showIcon
           message={
             <span>
-              Cancel request pending from <b>{name(req.requestedById)}</b>: {CANCEL_REASONS[req.reason]}
-              {req.note && ` — ${req.note}`}
+              Cancel request pending from <b>{req.requested_by.full_name}</b>: {req.reason}
             </span>
           }
           action={
@@ -71,14 +60,14 @@ export const TaskAlerts = ({ task }: { task: TaskDetail }) => {
                   size="small"
                   danger
                   loading={review.isPending}
-                  onClick={() => review.mutate({ requestId: req.id, approve: true }, {
+                  onClick={() => review.mutate({ taskId: task.id, approve: true }, {
                     onSuccess: () => message.success('Task cancelled'), onError: (e) => message.error(errorMessage(e)) })}
                 >
                   Approve
                 </Button>
                 <Button
                   size="small"
-                  onClick={() => review.mutate({ requestId: req.id, approve: false }, {
+                  onClick={() => review.mutate({ taskId: task.id, approve: false }, {
                     onSuccess: () => message.info('Request rejected'), onError: (e) => message.error(errorMessage(e)) })}
                 >
                   Reject

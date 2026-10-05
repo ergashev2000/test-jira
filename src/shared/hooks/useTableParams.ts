@@ -18,6 +18,8 @@ export const useTableParams = (defaultPageSize = DEFAULT_PAGE_SIZE) => {
 
   const page = Number(sp.get('page') ?? 1) || 1;
   const pageSize = Number(sp.get('pageSize') ?? defaultPageSize) || defaultPageSize;
+  /** DRF `?ordering=` — set by sortable DataTable columns, sent to the backend as-is. */
+  const ordering = sp.get('ordering') ?? undefined;
 
   const set = useCallback(
     (patch: Record<string, ParamValue>, resetPage = true) => {
@@ -61,5 +63,5 @@ export const useTableParams = (defaultPageSize = DEFAULT_PAGE_SIZE) => {
     [page, pageSize, set],
   );
 
-  return { sp, get, getArray, getBool, set, clear, page, pageSize, pagination };
+  return { sp, get, getArray, getBool, set, clear, page, pageSize, ordering, pagination };
 };

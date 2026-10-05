@@ -1,19 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { QUERY_KEYS } from '@/shared/constants';
+import { hasPermission, QUERY_KEYS } from '@/shared/constants';
+import { roleOf, useSessionStore } from '@/shared/lib/session';
 
 import {
-  addMembers,
+  addMember,
   archiveProject,
   createProject,
   getProject,
-  getProjectStats,
+  getProjectReport,
   listMembers,
   listProjects,
+  listTopBlockers,
   removeMember,
   updateProject,
 } from '../api/projectsApi';
-import type { ProjectFormValues, ProjectListParams } from '../types/project.types';
+import type { Project, ProjectListParams, ProjectWrite } from '../types/project.types';
 
 const useInvalidate = () => {
   const qc = useQueryClient();
@@ -27,24 +29,32 @@ const useInvalidate = () => {
 export const useProjectList = (params: ProjectListParams) =>
   useQuery({ queryKey: QUERY_KEYS.projects.list(params), queryFn: () => listProjects(params), placeholderData: (p) => p });
 
-export const useProject = (key: string) =>
-  useQuery({ queryKey: QUERY_KEYS.projects.detail(key), queryFn: () => getProject(key), enabled: !!key });
+/** GET /projects/:key/ — also used to load a fresh copy before editing. */
+export const useProject = (key: string | undefined) =>
+  useQuery({ queryKey: QUERY_KEYS.projects.detail(key ?? ''), queryFn: () => getProject(key!), enabled: !!key });
 
-export const useProjectStats = (id: string | undefined) =>
-  useQuery({ queryKey: QUERY_KEYS.projects.stats(id ?? ''), queryFn: () => getProjectStats(id!), enabled: !!id });
+export const useProjectStats = (id: number | undefined) =>
+  useQuery({ queryKey: QUERY_KEYS.projects.stats(String(id ?? '')), queryFn: () => getProjectReport(id!), enabled: !!id });
 
-export const useProjectMembers = (id: string) =>
-  useQuery({ queryKey: [...QUERY_KEYS.projects.all, 'members', id], queryFn: () => listMembers(id) });
+export const useTopBlockers = (id: number | undefined) =>
+  useQuery({ queryKey: [...QUERY_KEYS.projects.all, 'blockers', id], queryFn: () => listTopBlockers(id!), enabled: !!id });
 
-export const useCreateProject = () => {
-  const inv = useInvalidate();
-  return useMutation({ mutationFn: createProject, onSuccess: inv });
-};
+export const useProjectMembers = (id: number | undefined) =>
+  useQuery({ queryKey: [...QUERY_KEYS.projects.all, 'members', id], queryFn: () => listMembers(id!), enabled: !!id });
 
-export const useUpdateProject = () => {
+/** Create/update the project, then sync members one by one (POST / DELETE /projects/:id/members/). */
+export const useSaveProject = () => {
   const inv = useInvalidate();
   return useMutation({
-    mutationFn: ({ id, values }: { id: string; values: Omit<ProjectFormValues, 'key'> }) => updateProject(id, values),
+    mutationFn: async ({ project, body, memberIds = [], currentIds = [] }: {
+      project?: Project; body: ProjectWrite; memberIds?: number[]; currentIds?: number[];
+    }) => {
+      const { key, ...patch } = body;
+      const saved = project ? await updateProject(project.id, patch) : await createProject({ key, ...patch });
+      for (const id of memberIds.filter((m) => !currentIds.includes(m))) await addMember(saved.id, id);
+      for (const id of currentIds.filter((m) => !memberIds.includes(m) && m !== saved.manager.id)) await removeMember(saved.id, id);
+      return saved;
+    },
     onSuccess: inv,
   });
 };
@@ -56,10 +66,26 @@ export const useArchiveProject = () => {
 
 export const useAddMembers = () => {
   const inv = useInvalidate();
-  return useMutation({ mutationFn: ({ id, userIds }: { id: string; userIds: string[] }) => addMembers(id, userIds), onSuccess: inv });
+  return useMutation({
+    mutationFn: async ({ id, userIds }: { id: number; userIds: number[] }) => {
+      for (const userId of userIds) await addMember(id, userId);
+    },
+    onSuccess: inv,
+  });
 };
 
 export const useRemoveMember = () => {
   const inv = useInvalidate();
-  return useMutation({ mutationFn: ({ id, userId }: { id: string; userId: string }) => removeMember(id, userId), onSuccess: inv });
+  return useMutation({ mutationFn: ({ id, userId }: { id: number; userId: number }) => removeMember(id, userId), onSuccess: inv });
+};
+
+/** What the current user may do with a project (the backend re-checks every request). */
+export const useProjectAccess = (project: Project | undefined) => {
+  const me = useSessionStore((s) => s.user);
+  const role = roleOf(me);
+  const open = !!project && project.status !== 'archived';
+  return {
+    canEdit: open && (hasPermission(role, 'project.create') || (hasPermission(role, 'project.edit') && project.manager.id === me?.id)),
+    canManageMembers: open && hasPermission(role, 'project.members.manage'),
+  };
 };

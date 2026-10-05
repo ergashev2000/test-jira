@@ -7,12 +7,13 @@ import { Can, EmptyState, PageHeader, QueryState } from '@/shared/components/ui'
 
 import { TeamCard } from '../components/TeamCard';
 import { TeamModal } from '../components/TeamModal';
-import { useTeamList } from '../hooks/useTeams';
+import { useTeam, useTeamList } from '../hooks/useTeams';
 import type { Team } from '../types/team.types';
 
 export const TeamsPage = () => {
-  const query = useTeamList({ page_size: 100 });
+  const query = useTeamList({ page_size: 100, ordering: 'name' });
   const [modal, setModal] = useState<{ open: boolean; team?: Team }>({ open: false });
+  const detail = useTeam(modal.open ? modal.team?.id : undefined);
   return (
     <>
       <PageHeader title="Teams" count={query.data?.count}
@@ -26,7 +27,7 @@ export const TeamsPage = () => {
           )}
         </QueryState>
       </div>
-      <TeamModal open={modal.open} team={modal.team} onClose={() => setModal({ open: false })} />
+      <TeamModal open={modal.open} team={detail.data ?? modal.team} onClose={() => setModal({ open: false })} />
     </>
   );
 };

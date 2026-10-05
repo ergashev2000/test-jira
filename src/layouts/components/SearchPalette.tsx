@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { globalSearch } from '@/modules/tasks';
 import { hasPermission, PROJECT_STATUS, QUERY_KEYS, ROUTES, SPRINT_STATUS } from '@/shared/constants';
 import { useDebounce } from '@/shared/hooks';
-import { useSessionStore } from '@/shared/lib/session';
+import { roleOf, useSessionStore } from '@/shared/lib/session';
 import { useThemeStore } from '@/shared/lib/theme';
 import { cn, TASK_KEY_RE } from '@/shared/utils';
 
@@ -33,8 +33,6 @@ interface PaletteItem {
   trailing?: ReactNode;
   run: () => void;
 }
-
-const MATCH_LABEL = { description: 'Description', label: 'Label', assignee: 'Assignee', project: 'Project', status: 'Status', priority: 'Priority' } as const;
 
 const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -64,7 +62,7 @@ const Kbd = ({ children }: { children: ReactNode }) => (
 /** Command palette: searches everything in the workspace, keyboard driven. */
 export const SearchPalette = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
   const navigate = useNavigate();
-  const role = useSessionStore((s) => s.user?.role);
+  const role = useSessionStore((s) => roleOf(s.user));
   const toggleTheme = useThemeStore((s) => s.toggle);
   const themeMode = useThemeStore((s) => s.mode);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -98,8 +96,8 @@ export const SearchPalette = ({ open, onClose }: { open: boolean; onClose: () =>
         id: `task:${t.id}`, group: q ? 'Tasks' : 'Recent tasks',
         icon: <span className="flex size-7 items-center justify-center"><StatusIcon status={t.status} size={14} /></span>,
         code: t.key, title: t.title,
-        hint: t.match ? `${MATCH_LABEL[t.match.field]}: ${t.match.snippet}` : undefined,
-        trailing: <span className="flex items-center gap-2"><PriorityIcon priority={t.priority} size={13} />{t.assigneeId && <UserAvatar userId={t.assigneeId} size={18} noTooltip />}</span>,
+        hint: t.project.name,
+        trailing: <span className="flex items-center gap-2"><PriorityIcon priority={t.priority} size={13} />{t.assignee && <UserAvatar user={t.assignee} size={18} noTooltip />}</span>,
         run: go(ROUTES.task(t.key)),
       });
     }
@@ -114,34 +112,34 @@ export const SearchPalette = ({ open, onClose }: { open: boolean; onClose: () =>
     for (const s of data?.sprints ?? []) {
       list.push({
         id: `sprint:${s.id}`, group: 'Sprints', icon: <NavIcon icon={Rocket01Icon} />,
-        title: s.name, meta: `${s.projectName} · ${SPRINT_STATUS[s.status].label}`, hint: s.goal || undefined,
-        run: go(ROUTES.project(s.projectKey, 'sprints')),
+        title: s.name, meta: `${s.project.name} · ${SPRINT_STATUS[s.status].label}`, hint: s.goal || undefined,
+        run: go(ROUTES.project(s.project.key, 'sprints')),
       });
     }
     for (const u of data?.users ?? []) {
       list.push({
         id: `user:${u.id}`, group: 'People',
-        icon: <span className="flex size-7 items-center justify-center"><UserAvatar userId={u.id} size={22} noTooltip /></span>,
-        title: u.fullName, meta: `@${u.username} · ${u.position}`,
-        run: go(can('user.manage') ? `${ROUTES.USERS}?search=${encodeURIComponent(u.username)}` : `${ROUTES.REPORTS}?type=daily&userId=${u.id}`),
+        icon: <span className="flex size-7 items-center justify-center"><UserAvatar user={u} size={22} noTooltip /></span>,
+        title: u.full_name, meta: `@${u.username}${u.position ? ` · ${u.position}` : ''}`,
+        run: go(can('user.manage') ? `${ROUTES.USERS}?search=${encodeURIComponent(u.username)}` : `${ROUTES.REPORTS}?type=daily&user=${u.id}`),
       });
     }
     if (can('user.manage') || can('team.manage')) {
       for (const t of data?.teams ?? []) {
         list.push({
           id: `team:${t.id}`, group: 'Teams', icon: <NavIcon icon={UserGroupIcon} />,
-          title: t.name, meta: `${t.memberCount} members`,
-          trailing: <UserAvatar userId={t.leadId} size={18} />,
-          run: go(can('user.manage') ? `${ROUTES.USERS}?teamId=${t.id}` : ROUTES.TEAMS),
+          title: t.name, meta: `${t.members_count} members`,
+          trailing: <UserAvatar user={t.lead} size={18} />,
+          run: go(can('user.manage') ? `${ROUTES.USERS}?team=${t.id}` : ROUTES.TEAMS),
         });
       }
     }
     for (const c of data?.comments ?? []) {
       list.push({
         id: `comment:${c.id}`, group: 'Comments',
-        icon: <span className="flex size-7 items-center justify-center"><UserAvatar userId={c.authorId} size={22} noTooltip /></span>,
-        code: c.taskKey, title: c.taskTitle, hint: c.snippet,
-        run: go(ROUTES.task(c.taskKey)),
+        icon: <span className="flex size-7 items-center justify-center"><UserAvatar user={c.author} size={22} noTooltip /></span>,
+        code: c.task.key, title: c.task.title, hint: c.text,
+        run: go(ROUTES.task(c.task.key)),
       });
     }
 

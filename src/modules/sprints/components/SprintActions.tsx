@@ -5,11 +5,11 @@ import { App, Button, Dropdown, Tooltip } from 'antd';
 import { usePermission } from '@/shared/hooks';
 import { errorMessage, formatDate } from '@/shared/utils';
 
-import type { SprintRow } from '../api/sprintsApi';
+import type { Sprint } from '../api/sprintsApi';
 import { useCancelSprint, useStartSprint } from '../hooks/useSprints';
 
 interface Props {
-  sprint: SprintRow;
+  sprint: Sprint;
   hasActive: boolean;
   onEdit: () => void;
   onComplete: () => void;
@@ -22,12 +22,12 @@ export const SprintActions = ({ sprint, hasActive, onEdit, onComplete, size = 's
   const { message, modal } = App.useApp();
   const start = useStartSprint();
   const cancel = useCancelSprint();
-  if (!canManage || sprint.status === 'COMPLETED' || sprint.status === 'CANCELLED') return null;
+  if (!canManage || sprint.status === 'completed' || sprint.status === 'cancelled') return null;
 
   const confirmStart = () =>
     modal.confirm({
       title: `Start ${sprint.name}?`,
-      content: <div>{formatDate(sprint.startDate)} — {formatDate(sprint.endDate)}<br /><span className="text-fg-2">{sprint.goal}</span></div>,
+      content: <div>{formatDate(sprint.start_date)} — {formatDate(sprint.end_date)}<br /><span className="text-fg-2">{sprint.goal}</span></div>,
       okText: 'Start sprint',
       onOk: () => start.mutateAsync(sprint.id).then(() => message.success(`${sprint.name} started`)).catch((e) => message.error(errorMessage(e))),
     });
@@ -43,12 +43,12 @@ export const SprintActions = ({ sprint, hasActive, onEdit, onComplete, size = 's
 
   return (
     <span className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-      {sprint.status === 'PLANNED' && (
+      {sprint.status === 'planned' && (
         <Tooltip title={hasActive ? 'Only one active sprint per project' : undefined}>
           <Button size={size} disabled={hasActive} loading={start.isPending} onClick={confirmStart}>Start sprint</Button>
         </Tooltip>
       )}
-      {sprint.status === 'ACTIVE' && <Button size={size} type="primary" onClick={onComplete}>Complete sprint</Button>}
+      {sprint.status === 'active' && <Button size={size} type="primary" onClick={onComplete}>Complete sprint</Button>}
       <Dropdown trigger={['click']} menu={{
         items: [
           { key: 'edit', label: 'Edit sprint', icon: <HugeiconsIcon icon={Edit02Icon} size={14} className="hicon" strokeWidth={1.7} /> },

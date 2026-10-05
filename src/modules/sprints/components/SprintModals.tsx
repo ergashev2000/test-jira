@@ -8,31 +8,41 @@ import { ROUTES } from '@/shared/constants';
 import dayjs, { type Dayjs } from '@/shared/lib/dayjs';
 import { errorMessage, rules } from '@/shared/utils';
 
-import type { SprintRow } from '../api/sprintsApi';
-import { useCompleteSprint, useCompletionPreview, useCreateSprint, useSprintDefaults, useUpdateSprint } from '../hooks/useSprints';
+import type { Sprint } from '../api/sprintsApi';
+import { useCompleteSprint, useCompletionPreview, useCreateSprint, useLastSprint, useSprint, useUpdateSprint } from '../hooks/useSprints';
+
+const DEFAULT_DURATION_DAYS = 14;
 
 interface FormShape { name: string; goal: string; range: [Dayjs, Dayjs] }
 
 export const SprintFormModal = ({ open, projectId, sprint, onClose }: {
-  open: boolean; projectId: string; sprint?: SprintRow; onClose: () => void;
+  open: boolean; projectId: number; sprint?: Sprint; onClose: () => void;
 }) => {
   const [form] = Form.useForm<FormShape>();
   const { message } = App.useApp();
-  const defaults = useSprintDefaults(projectId, open && !sprint);
+  const last = useLastSprint(projectId, open && !sprint);
+  // Edit works on a fresh copy: GET /sprints/:id/.
+  const detail = useSprint(open ? sprint?.id : undefined);
+  const current = detail.data ?? sprint;
   const create = useCreateSprint();
   const update = useUpdateSprint();
 
   useEffect(() => {
     if (!open) return;
-    const src = sprint ?? defaults.data;
-    if (src) form.setFieldsValue({ name: src.name, goal: sprint?.goal ?? '', range: [dayjs(src.startDate), dayjs(src.endDate)] });
-  }, [open, sprint, defaults.data, form]);
+    if (current) {
+      form.setFieldsValue({ name: current.name, goal: current.goal, range: [dayjs(current.start_date), dayjs(current.end_date)] });
+    } else if (last.data) {
+      const { count, last: prev } = last.data;
+      const start = prev && dayjs(prev.end_date).isAfter(dayjs()) ? dayjs(prev.end_date).add(1, 'day') : dayjs();
+      form.setFieldsValue({ name: `Sprint ${count + 1}`, goal: '', range: [start, start.add(DEFAULT_DURATION_DAYS - 1, 'day')] });
+    }
+  }, [open, current, last.data, form]);
 
   const submit = ({ name, goal, range }: FormShape) => {
-    const values = { name, goal: goal ?? '', startDate: range[0].format('YYYY-MM-DD'), endDate: range[1].format('YYYY-MM-DD') };
+    const body = { project: projectId, name, goal: goal ?? '', start_date: range[0].format('YYYY-MM-DD'), end_date: range[1].format('YYYY-MM-DD') };
     const opts = { onSuccess: () => { message.success(sprint ? 'Sprint updated' : `${name} created`); onClose(); }, onError: (e: unknown) => message.error(errorMessage(e)) };
-    if (sprint) update.mutate({ id: sprint.id, values }, opts);
-    else create.mutate({ projectId, values }, opts);
+    if (sprint) update.mutate({ id: sprint.id, body }, opts);
+    else create.mutate(body, opts);
   };
 
   return (
@@ -44,20 +54,21 @@ export const SprintFormModal = ({ open, projectId, sprint, onClose }: {
         <Form.Item name="range" label="Dates" rules={[rules.required('Dates')]}>
           <DatePicker.RangePicker format="DD.MM.YYYY" className="w-full" />
         </Form.Item>
-        {sprint && <div className="text-xs text-fg-3">Status: {sprint.status}</div>}
+        {current && <div className="text-xs text-fg-3">Status: {current.status}</div>}
       </Form>
     </Modal>
   );
 };
 
-export const CompleteSprintModal = ({ sprint, onClose }: { sprint: SprintRow | null; onClose: () => void }) => {
+export const CompleteSprintModal = ({ sprint, onClose }: { sprint: Sprint | null; onClose: () => void }) => {
   const { message, modal } = App.useApp();
   const navigate = useNavigate();
-  const preview = useCompletionPreview(sprint?.id ?? null);
+  const preview = useCompletionPreview(sprint);
   const complete = useCompleteSprint();
   const [mode, setMode] = useState<'BACKLOG' | 'NEXT'>('BACKLOG');
-  const [next, setNext] = useState<string>();
-  const nextSprints = preview.data?.nextSprints ?? [];
+  const [next, setNext] = useState<number>();
+  const nextSprints = preview.next.data?.results ?? [];
+  const unfinishedTasks = preview.unfinished.data?.results ?? [];
 
   useEffect(() => {
     setMode('BACKLOG');
@@ -66,15 +77,15 @@ export const CompleteSprintModal = ({ sprint, onClose }: { sprint: SprintRow | n
 
   const submit = () => {
     if (!sprint) return;
-    const moveTo = mode === 'NEXT' && next ? next : 'BACKLOG';
+    const moveTo = mode === 'NEXT' && next ? next : 'backlog';
     complete.mutate({ id: sprint.id, moveTo }, {
       onSuccess: (report) => {
         onClose();
         modal.success({
           title: `${sprint.name} completed`,
-          content: `Completion: ${report.completionPercent}%. ${report.unfinished} unfinished task(s) moved. A sprint report was generated.`,
+          content: `Completion: ${report.completion_percent}%. ${report.unfinished} unfinished task(s) moved. A sprint report was generated.`,
           okText: 'View report',
-          onOk: () => navigate(`${ROUTES.REPORTS}?type=sprint&projectId=${sprint.projectId}&sprintId=${sprint.id}`),
+          onOk: () => navigate(`${ROUTES.REPORTS}?type=sprint&projectId=${sprint.project.id}&sprintId=${sprint.id}`),
           closable: true,
         });
       },
@@ -86,10 +97,10 @@ export const CompleteSprintModal = ({ sprint, onClose }: { sprint: SprintRow | n
     <Modal open={!!sprint} title={`Complete ${sprint?.name ?? ''}`} onCancel={onClose} onOk={submit} okText="Complete sprint"
       confirmLoading={complete.isPending} okButtonProps={{ disabled: preview.isLoading || (mode === 'NEXT' && !next) }} destroyOnHidden>
       <div className="mb-4 grid grid-cols-2 gap-3">
-        <div className="rounded-xl border border-line p-3"><Statistic title="Completed" value={preview.data?.completed ?? 0} valueStyle={{ color: '#4cb782' }} /></div>
-        <div className="rounded-xl border border-line p-3"><Statistic title="Unfinished" value={preview.data?.unfinished ?? 0} valueStyle={{ color: '#f2994a' }} /></div>
+        <div className="rounded-xl border border-line p-3"><Statistic title="Completed" value={preview.report.data?.completed ?? 0} valueStyle={{ color: '#4cb782' }} /></div>
+        <div className="rounded-xl border border-line p-3"><Statistic title="Unfinished" value={preview.report.data?.unfinished ?? 0} valueStyle={{ color: '#f2994a' }} /></div>
       </div>
-      {!!preview.data?.unfinished && (
+      {!!preview.report.data?.unfinished && (
         <>
           <div className="mb-2 text-fg-2">Move unfinished tasks to:</div>
           <Radio.Group value={mode} onChange={(e) => setMode(e.target.value)} className="!flex !flex-col gap-2">
@@ -103,7 +114,7 @@ export const CompleteSprintModal = ({ sprint, onClose }: { sprint: SprintRow | n
               options={nextSprints.map((s) => ({ value: s.id, label: s.name }))} />
           )}
           <ul className="mt-3 mb-0 max-h-40 list-none overflow-auto rounded-md border border-line p-2 text-xs">
-            {preview.data.unfinishedTasks.map((t) => <li key={t.id} className="py-0.5"><span className="font-mono text-fg-3">{t.key}</span> {t.title}</li>)}
+            {unfinishedTasks.map((t) => <li key={t.id} className="py-0.5"><span className="font-mono text-fg-3">{t.key}</span> {t.title}</li>)}
           </ul>
         </>
       )}

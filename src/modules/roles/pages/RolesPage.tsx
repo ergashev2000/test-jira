@@ -38,15 +38,13 @@ const RoleCard = ({ role }: { role: RoleDef }) => (
 );
 
 const Matrix = ({ roles, permissions, search }: { roles: RoleDef[]; permissions: PermissionDef[]; search?: string }) => {
+  // `permissions` is already searched on the backend; codes granted to a role but unknown to /permissions/ are kept only without a search.
   const rows = useMemo(() => {
     // Codes granted to a role but missing from /permissions/ still deserve a row.
     const known = new Set(permissions.map((p) => p.code));
-    const extra = [...new Set(roles.flatMap((r) => r.permissions))].filter((c) => !known.has(c))
+    const extra = search ? [] : [...new Set(roles.flatMap((r) => r.permissions))].filter((c) => !known.has(c))
       .map((code, i) => ({ id: -1 - i, code, description: '' }));
-    const q = search?.trim().toLowerCase();
-    return [...permissions, ...extra]
-      .filter((p) => !q || p.code.toLowerCase().includes(q) || p.description.toLowerCase().includes(q))
-      .sort((a, b) => a.code.localeCompare(b.code));
+    return [...permissions, ...extra];
   }, [roles, permissions, search]);
 
   const granted = useMemo(() => new Map(roles.map((r) => [r.code, new Set(r.permissions)])), [roles]);
@@ -79,7 +77,7 @@ const Matrix = ({ roles, permissions, search }: { roles: RoleDef[]; permissions:
 export const RolesPage = () => {
   const { get } = useTableParams();
   const roles = useRoles();
-  const permissions = usePermissions();
+  const permissions = usePermissions(get('search'));
   // One loading/error state for both requests.
   const query = {
     data: roles.data && permissions.data ? { roles: [...roles.data].sort(byRank), permissions: permissions.data } : undefined,

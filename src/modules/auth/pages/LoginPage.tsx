@@ -22,9 +22,9 @@ export const LoginPage = () => {
 
   const mutation = useMutation({
     mutationFn: login,
-    onSuccess: ({ token: t, refresh, user }) => {
-      setSession(t, refresh, user);
-      message.success(`Welcome back, ${user.fullName.split(' ')[0]}`);
+    onSuccess: ({ access, refresh, user }) => {
+      setSession(access, refresh, user);
+      message.success(`Welcome back, ${user.full_name.split(' ')[0]}`);
       navigate(sp.get('redirect') || ROUTES.HOME, { replace: true });
     },
     onError: (e) => message.error(errorMessage(e)),

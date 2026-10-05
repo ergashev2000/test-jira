@@ -1,9 +1,8 @@
 import Cookies from 'js-cookie';
 import { create } from 'zustand';
 
-import type { User } from '@/shared/types';
-
-import { bindActor, unbindActor } from './mock/session';
+import { primaryRole } from '@/shared/constants/roles';
+import type { Me, Role } from '@/shared/types';
 
 const ACCESS_COOKIE = 'pm.access';
 const REFRESH_COOKIE = 'pm.refresh';
@@ -12,11 +11,11 @@ const USER_KEY = 'pm.user';
 interface SessionState {
   token: string | null;
   refreshToken: string | null;
-  user: User | null;
-  setSession: (token: string, refreshToken: string, user: User) => void;
+  user: Me | null;
+  setSession: (token: string, refreshToken: string, user: Me) => void;
   /** Swaps tokens after a refresh (the backend may rotate the refresh token too). */
   setTokens: (token: string, refreshToken?: string | null) => void;
-  setUser: (user: User) => void;
+  setUser: (user: Me) => void;
   clear: () => void;
 }
 
@@ -38,16 +37,18 @@ const setTokenCookie = (name: string, token: string) =>
     secure: window.location.protocol === 'https:',
   });
 
-const readUser = (): User | null => {
+const readUser = (): Me | null => {
   try {
     const raw = localStorage.getItem(USER_KEY);
-    return raw ? (JSON.parse(raw) as User) : null;
+    const user = raw ? (JSON.parse(raw) as Me) : null;
+    // Ignore a profile saved in an older shape — GET /auth/me/ refills it.
+    return user && Array.isArray(user.roles) ? user : null;
   } catch {
     return null;
   }
 };
 
-const writeUser = (user: User | null) => {
+const writeUser = (user: Me | null) => {
   try {
     if (user) localStorage.setItem(USER_KEY, JSON.stringify(user));
     else localStorage.removeItem(USER_KEY);
@@ -67,13 +68,15 @@ const initial = {
 };
 const signedIn = !!(initial.token || initial.refreshToken);
 if (!signedIn) writeUser(null);
-// Modules not yet on the backend run on the mock API, which needs the signed-in user as its actor.
-if (signedIn && initial.user) bindActor(initial.user);
+
+/** Highest of the user's backend roles — drives menus and permission checks. */
+export const roleOf = (user: Pick<Me, 'roles'> | null | undefined): Role | undefined =>
+  user ? primaryRole(user.roles) : undefined;
 
 /** Signed in while either token is alive — an expired access token is renewed with the refresh token. */
 export const isSignedIn = (s: Pick<SessionState, 'token' | 'refreshToken'>) => !!(s.token || s.refreshToken);
 
-/** Session store: JWT tokens in cookies (js-cookie), the user profile in localStorage. */
+/** Session store: JWT tokens in cookies (js-cookie), the user (GET /auth/me/ as-is) in localStorage. */
 export const useSessionStore = create<SessionState>((set) => ({
   token: signedIn ? initial.token : null,
   refreshToken: initial.refreshToken,
@@ -82,7 +85,6 @@ export const useSessionStore = create<SessionState>((set) => ({
     setTokenCookie(ACCESS_COOKIE, token);
     setTokenCookie(REFRESH_COOKIE, refreshToken);
     writeUser(user);
-    bindActor(user);
     set({ token, refreshToken, user });
   },
   setTokens: (token, refreshToken) => {
@@ -92,14 +94,12 @@ export const useSessionStore = create<SessionState>((set) => ({
   },
   setUser: (user) => {
     writeUser(user);
-    bindActor(user);
     set({ user });
   },
   clear: () => {
     Cookies.remove(ACCESS_COOKIE, { path: '/' });
     Cookies.remove(REFRESH_COOKIE, { path: '/' });
     writeUser(null);
-    unbindActor();
     set({ token: null, refreshToken: null, user: null });
   },
 }));
