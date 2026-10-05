@@ -1,6 +1,8 @@
 import { api } from '@/shared/lib/axios';
 import type { Activity, ApiPaginated, ProjectBrief, Task, UserBrief } from '@/shared/types';
 
+import { DASHBOARD_MOCK } from './dashboardMock';
+
 /** GET /dashboard/?project= — NOT IN api.json; aggregates scoped to the caller's role on the backend. */
 export interface DashboardSummary {
   kpi: { active_projects: number; active_sprints: number; total_tasks: number; completed_today: number; overdue: number; blocked: number };
@@ -14,10 +16,12 @@ export interface DashboardSummary {
   activity: Activity[];
 }
 
-// GET /dashboard/?project=
-export const getDashboard = async (project?: number) => {
-  const { data } = await api.get<DashboardSummary>('/dashboard/', { params: { project } });
-  return data;
+// GET /dashboard/?project=  — not on the backend yet: serves demo data (dashboardMock.ts).
+// When the endpoint exists, replace the body with:
+//   const { data } = await api.get<DashboardSummary>('/dashboard/', { params: { project } }); return data;
+export const getDashboard = async (project?: number): Promise<DashboardSummary> => {
+  void project;
+  return structuredClone(DASHBOARD_MOCK);
 };
 
 // GET /me/tasks/?bucket=today&page_size=5
