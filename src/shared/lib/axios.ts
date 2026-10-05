@@ -4,11 +4,13 @@ import { queryClient } from '@/shared/lib/react-query';
 import { useSessionStore } from '@/shared/lib/session';
 
 import { ApiError } from './apiError';
+import { mockAwareAdapter } from './mockServer/adapter';
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? '/api';
 
 // Arrays go as repeated keys (`status=todo&status=done`) — what django-filter expects.
-export const api = axios.create({ baseURL: BASE_URL, timeout: 20_000, paramsSerializer: { indexes: null } });
+// The adapter serves mock data in demo mode or when the backend is unreachable / lacks an endpoint.
+export const api = axios.create({ baseURL: BASE_URL, timeout: 20_000, paramsSerializer: { indexes: null }, adapter: mockAwareAdapter });
 
 const AUTH_ENDPOINTS = ['/auth/login/', '/auth/refresh/'];
 const isAuthEndpoint = (url?: string) => !!url && AUTH_ENDPOINTS.some((e) => url.includes(e));
