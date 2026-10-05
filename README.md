@@ -125,6 +125,22 @@ violations as **warnings**: they are visible in the editor and in `npm run lint`
   any 401 triggers one shared `POST /auth/refresh/`, logout blacklists the refresh token.
 - **Errors.** `{ error: { status_code, detail } }` is turned into an `ApiError` with a readable message by the axios interceptor.
 
+### Demo data (mock server)
+
+[`src/shared/lib/mockServer`](src/shared/lib/mockServer) is an in-memory backend with the same endpoints and response
+shapes (filters, search, ordering, pagination, workflow rules, activity). An axios adapter decides per request:
+
+| Situation | Data source |
+| --------- | ----------- |
+| **Demo data ON** — the database button in the header, or the switch on the login page | Mock only, no network |
+| Logged in through the mock (token starts with `mock.`) | Mock |
+| Backend unreachable | That request falls back to mock (orange dot on the header button) |
+| Endpoint not in `api.json` yet (dashboard, notifications, audit log, settings…) returns 404/405/501 | Mock |
+| Everything else | Real backend |
+
+Mock users: `superadmin`, `admin`, `bekzod` (PM), `akmal` (Team Lead), `shohrux` (Employee) — password `123456`.
+Mock data resets on page reload.
+
 What the backend still has to add (fields, filters, ordering fields, missing endpoints) is listed per tag in
 [`docs/BACKEND_REQUIREMENTS.md`](docs/BACKEND_REQUIREMENTS.md).
 
@@ -166,7 +182,7 @@ commit; warnings do not.
 
 ## Known limitations
 
-- Dashboard, notifications, audit log, settings, comment editing, blocker history and project activity call endpoints that are not in `api.json` yet — they show an error until the backend adds them (see `docs/BACKEND_REQUIREMENTS.md`).
+- Dashboard, notifications, audit log, settings, comment editing, blocker history and project activity are not in `api.json` yet — they run on the mock server until the backend adds them (see `docs/BACKEND_REQUIREMENTS.md`).
 - No automated tests yet.
 - UI copy is English only (antd locale `en_US`).
 

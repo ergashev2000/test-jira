@@ -1,6 +1,6 @@
 import { HugeiconsIcon } from '@hugeicons/react';
-import { Logout03Icon, Moon02Icon, Notification03Icon, SidebarLeftIcon, Sun03Icon, UserCircleIcon } from '@hugeicons/core-free-icons';
-import { Button, Dropdown, Tooltip } from 'antd';
+import { DatabaseIcon, Logout03Icon, Moon02Icon, Notification03Icon, SidebarLeftIcon, Sun03Icon, UserCircleIcon } from '@hugeicons/core-free-icons';
+import { App, Badge, Button, Dropdown, Tooltip } from 'antd';
 import { useNavigate } from 'react-router-dom';
 
 import { logout } from '@/modules/auth';
@@ -10,6 +10,9 @@ import { useCurrentUser } from '@/shared/hooks';
 import { primaryRole, ROLES, ROUTES } from '@/shared/constants';
 
 import { UserAvatar } from '@/shared/components/ui/UserAvatar';
+import { useDemoMode } from '@/shared/lib/demoMode';
+import { queryClient } from '@/shared/lib/react-query';
+import { useSessionStore } from '@/shared/lib/session';
 import { useThemeStore } from '@/shared/lib/theme';
 import { cn } from '@/shared/utils';
 
@@ -28,6 +31,24 @@ export const Header = ({ collapsed, onToggleSidebar }: Props) => {
   const { data: settings } = useAppSettings();
   const themeMode = useThemeStore((s) => s.mode);
   const toggleTheme = useThemeStore((s) => s.toggle);
+  const { message } = App.useApp();
+  const demo = useDemoMode((s) => s.enabled);
+  const fallback = useDemoMode((s) => s.fallback);
+  const toggleDemo = useDemoMode((s) => s.toggle);
+
+  /** Switches every request between the mock server and the real backend, then reloads all data. */
+  const onToggleDemo = () => {
+    toggleDemo();
+    // A mock session's token means nothing to the real backend — sign in again there.
+    if (demo && useSessionStore.getState().token?.startsWith('mock.')) {
+      logout();
+      navigate(ROUTES.LOGIN, { replace: true });
+      message.info('Demo data off — log in with your backend account');
+      return;
+    }
+    void queryClient.resetQueries();
+    message.info(demo ? 'Demo data off — using the backend' : 'Demo data on — all pages use mock data');
+  };
 
   return (
     <header className="flex h-12 shrink-0 items-center gap-2 px-3">
@@ -39,6 +60,22 @@ export const Header = ({ collapsed, onToggleSidebar }: Props) => {
         <Button type="text" size="small" icon={<HugeiconsIcon icon={SidebarLeftIcon} size={16} className="hicon" strokeWidth={1.7} />} onClick={onToggleSidebar} />
       </Tooltip>
       <div className="flex flex-1 justify-center"><GlobalSearch /></div>
+      <Tooltip title={demo
+        ? 'Demo data: ON — every page uses mock data, no API requests'
+        : fallback
+          ? 'Demo data: OFF — some data is mock (backend unreachable or endpoint missing). Click to use mock everywhere'
+          : 'Demo data: OFF — click to use mock data everywhere'}>
+        <Badge dot={!demo && fallback} color="var(--c-warn)" offset={[-6, 6]}>
+          <Button
+            type="text"
+            className={cn('header-action', demo && '!bg-warn/15 !text-warn')}
+            aria-label={demo ? 'Turn demo data off' : 'Turn demo data on'}
+            aria-pressed={demo}
+            icon={<HugeiconsIcon icon={DatabaseIcon} size={16} className="hicon" strokeWidth={1.7} />}
+            onClick={onToggleDemo}
+          />
+        </Badge>
+      </Tooltip>
       <Tooltip title={themeMode === 'dark' ? 'Light mode' : 'Dark mode'}>
         <Button
           type="text"
