@@ -9,6 +9,7 @@ import { BlockerHistory } from './BlockerHistory';
 import { TaskAlerts } from './TaskAlerts';
 import { TaskAttachments } from './TaskAttachments';
 import { TaskComments } from './TaskComments';
+import { TaskDescription } from './TaskDescription';
 import { TaskHeader } from './TaskHeader';
 import { TaskMeta } from './TaskMeta';
 
@@ -39,12 +40,7 @@ export const TaskDetailView = ({ taskKey, inDrawer }: { taskKey: string; inDrawe
       <TaskAlerts task={task} />
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_280px]">
         <div className="flex min-w-0 flex-col gap-6">
-          <section>
-            <h4 className="mb-2 text-xs font-medium text-fg-3">Description</h4>
-            <p className="m-0 whitespace-pre-wrap text-[14px] leading-6 text-fg">
-              {task.description || <span className="text-fg-3">No description</span>}
-            </p>
-          </section>
+          <TaskDescription task={task} />
           <section>
             <h4 className="mb-2 text-xs font-medium text-fg-3">Attachments</h4>
             <TaskAttachments taskId={task.id} disabled={task.project.status === 'archived'} />

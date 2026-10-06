@@ -15,11 +15,13 @@ interface Props {
   className?: string;
   /** Hide tooltip (e.g. when name is shown next to it). */
   noTooltip?: boolean;
+  /** Long names wrap onto the next line instead of being cut with "…". */
+  wrap?: boolean;
 }
 
 const nameOf = (u: Pick<UserBrief, 'full_name' | 'username'>) => u.full_name || u.username;
 
-export const UserAvatar = ({ user, inactive, size = 20, showName, className, noTooltip }: Props) => {
+export const UserAvatar = ({ user, inactive, size = 20, showName, className, noTooltip, wrap }: Props) => {
   if (!user) {
     const empty = (
       <Avatar size={size} icon={<HugeiconsIcon icon={UserIcon} size={16} className="hicon" strokeWidth={1.7} />} className="!border !border-dashed !border-line !bg-transparent !text-fg-3" />
@@ -49,9 +51,9 @@ export const UserAvatar = ({ user, inactive, size = 20, showName, className, noT
     return noTooltip ? avatar : <Tooltip title={`${name}${inactive ? ' (inactive)' : ''}`}>{avatar}</Tooltip>;
   }
   return (
-    <span className={cn('inline-flex min-w-0 items-center gap-2', className)}>
-      {avatar}
-      <span className={cn('truncate', inactive ? 'text-fg-3' : 'text-fg')}>
+    <span className={cn('inline-flex min-w-0 gap-2', wrap ? 'items-start' : 'items-center', className)}>
+      <span className="flex shrink-0">{avatar}</span>
+      <span className={cn(wrap ? 'min-w-0 wrap-break-word' : 'truncate', inactive ? 'text-fg-3' : 'text-fg')}>
         {name}
         {inactive && <span className="ml-1 text-fg-3">(inactive)</span>}
       </span>
