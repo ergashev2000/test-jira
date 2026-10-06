@@ -30,7 +30,7 @@ export const SprintsTable = ({ query, showProject }: { query: PagedQuery; showPr
 
   const columns: ColumnsType<Sprint> = [
     ...(showProject ? [{ title: 'Project', key: 'project__key', width: 110, sorter: true, render: (_: unknown, s: Sprint) => (
-      <Link to={ROUTES.project(s.project.key, 'sprints')} className="flex items-center gap-1.5 !text-fg"><ProjectIcon projectKey={s.project.key} size={14} />{s.project.key}</Link>) }] : []),
+      <Link to={ROUTES.project(s.project.id, 'sprints')} className="flex items-center gap-1.5 !text-fg"><ProjectIcon projectKey={s.project.key} size={14} />{s.project.key}</Link>) }] : []),
     { title: 'Name', dataIndex: 'name', width: 120, sorter: true, render: (n: string) => <span className="font-medium">{n}</span> },
     { title: 'Goal', dataIndex: 'goal', ellipsis: true, render: (g: string) => <span className="text-fg-2">{g || '—'}</span> },
     { title: 'Dates', key: 'start_date', width: 200, sorter: true, render: (_, s) => <span className="text-fg-2">{formatDate(s.start_date)} — {formatDate(s.end_date)}</span> },

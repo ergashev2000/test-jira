@@ -19,7 +19,7 @@ export const ActiveSprintCard = ({ s }: { s: DashboardSummary['active_sprint'] }
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-2">
         <HugeiconsIcon icon={Rocket01Icon} size={16} className="hicon text-primary" strokeWidth={1.7} />
-        <Link to={ROUTES.project(s.project.key, 'board')} className="font-medium !text-fg">{s.project.key} · {s.name}</Link>
+        <Link to={ROUTES.project(s.project.id, 'board')} className="font-medium !text-fg">{s.project.key} · {s.name}</Link>
         <Tag className="!ml-auto" color={s.days_left <= 2 ? 'red' : 'default'}>{s.days_left >= 0 ? `${s.days_left} days left` : 'Past end date'}</Tag>
       </div>
       <p className="m-0 text-fg-2">{s.goal}</p>
@@ -48,7 +48,7 @@ export const MyTasksWidget = ({ items }: { items: Task[] }) => {
   return (
     <ul className="m-0 flex list-none flex-col p-0">
       {items.map((t) => (
-        <li key={t.id} onClick={() => openTask(t.key)} className="-mx-2 flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-surface-2">
+        <li key={t.id} onClick={() => openTask(t.id)} className="-mx-2 flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-surface-2">
           <PriorityTag priority={t.priority} iconOnly />
           <span className="w-16 font-mono text-xs text-fg-3">{t.key}</span>
           <span className="flex-1 truncate text-[13px]">{t.title}</span>
@@ -85,7 +85,7 @@ export const BlockersTable = ({ rows }: { rows: Task[] }) => {
     <Table className="app-table" size="small" rowKey="id" dataSource={rows} pagination={false} scroll={{ x: 700 }}
       locale={{ emptyText: <EmptyState description="No active blockers 🎉" /> }}
       rowClassName={(r) => `row-clickable ${stale(r) ? 'row-blocker-stale' : ''}`}
-      onRow={(r) => ({ onClick: () => openTask(r.key) })}
+      onRow={(r) => ({ onClick: () => openTask(r.id) })}
       columns={[
         { title: 'Task', dataIndex: 'key', render: (k: string, r) => <span><span className="font-mono text-xs text-fg-3">{k}</span> {r.title}</span> },
         { title: 'User', dataIndex: 'assignee', width: 60, render: (u: UserBrief | null) => <UserAvatar user={u} /> },
@@ -102,7 +102,7 @@ export const OverdueList = ({ rows }: { rows: Task[] }) => {
   return (
     <ul className="m-0 flex list-none flex-col p-0">
       {rows.map((t) => (
-        <li key={t.key} onClick={() => openTask(t.key)} className="-mx-2 flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-surface-2">
+        <li key={t.key} onClick={() => openTask(t.id)} className="-mx-2 flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-surface-2">
           <span className="w-16 font-mono text-xs text-fg-3">{t.key}</span>
           <span className="flex-1 truncate text-[13px]">{t.title}</span>
           <UserAvatar user={t.assignee} />

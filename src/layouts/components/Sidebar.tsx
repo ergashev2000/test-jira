@@ -84,7 +84,7 @@ const CollapsedProject = ({
   project,
   active,
 }: {
-  project: { key: string; name: string };
+  project: { id: number; key: string; name: string };
   active: boolean;
 }) => (
   <Popover
@@ -99,13 +99,13 @@ const CollapsedProject = ({
           <span className="truncate">{project.name}</span>
         </div>
         {PROJECT_TABS.map(({ tab, label, icon }) => (
-          <Item key={tab} collapsed={false} item={{ to: ROUTES.project(project.key, tab), label, icon }} />
+          <Item key={tab} collapsed={false} item={{ to: ROUTES.project(project.id, tab), label, icon }} />
         ))}
       </div>
     }
   >
     <NavLink
-      to={ROUTES.project(project.key)}
+      to={ROUTES.project(project.id)}
       aria-label={project.name}
       className={cn(
         'flex h-8 items-center justify-center rounded-md transition-colors hover:bg-surface-2',
@@ -158,7 +158,7 @@ const ProjectsNav = ({ collapsed }: { collapsed: boolean }) => {
           <CollapsedProject
             key={p.id}
             project={p}
-            active={pathname.startsWith(`${ROUTES.PROJECTS}/${p.key}/`)}
+            active={pathname.startsWith(`${ROUTES.PROJECTS}/${p.id}/`)}
           />
         ))}
       </Section>
@@ -180,7 +180,7 @@ const ProjectsNav = ({ collapsed }: { collapsed: boolean }) => {
           <Collapsible open={expanded === p.key}>
             <div className="ml-4 flex flex-col gap-0.5 border-l border-line py-0.5 pl-2">
               {PROJECT_TABS.map(({ tab, label, icon }) => (
-                <Item key={tab} collapsed={false} item={{ to: ROUTES.project(p.key, tab), label, icon }} />
+                <Item key={tab} collapsed={false} item={{ to: ROUTES.project(p.id, tab), label, icon }} />
               ))}
             </div>
           </Collapsible>

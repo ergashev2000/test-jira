@@ -78,7 +78,7 @@ export const ActivityTimeline = ({ items, showTask }: { items: Activity[]; showT
           <div className="min-w-0 flex-1 text-[13px] leading-5 text-fg-2">
             <b className="font-medium text-fg">{a.actor?.full_name ?? 'System'}</b>{' '}
             {showTask && a.task && (
-              <Link to={`${location.pathname}?task=${a.task.key}`} className="mr-1 font-mono text-xs !text-fg-2 hover:!text-fg">
+              <Link to={`${location.pathname}?task=${a.task.id}`} className="mr-1 font-mono text-xs !text-fg-2 hover:!text-fg">
                 {a.task.key}
               </Link>
             )}

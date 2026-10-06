@@ -44,8 +44,8 @@ export const useCancelTask = () =>
 export const usePendingCancelRequest = (taskId: number) =>
   useQuery({
     queryKey: [...QUERY_KEYS.tasks.all, 'cancel-requests', taskId],
-    queryFn: () => listCancelRequests(taskId, { status: 'pending', page_size: 1 }),
-    select: (d) => d.results[0] ?? null,
+    queryFn: () => listCancelRequests(taskId),
+    select: (d) => d.find((request) => request.status === 'pending') ?? null,
   });
 
 export const useComments = (taskId: number) =>

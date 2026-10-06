@@ -31,7 +31,7 @@ export const router = createBrowserRouter([
       { path: 'my-tasks', element: <MyTasksPage /> },
       { path: 'projects', element: guard('project.view', <ProjectsPage />) },
       {
-        path: 'projects/:projectKey',
+        path: 'projects/:projectId',
         element: guard('project.view', <ProjectLayout />),
         children: [
           { index: true, element: <Navigate to="overview" replace /> },
@@ -46,7 +46,7 @@ export const router = createBrowserRouter([
       },
       { path: 'sprints', element: guard('sprint.view', page(sprintsPages, 'SprintsPage')) },
       { path: 'board', element: guard('board.view', page(boardPages, 'GlobalBoardPage')) },
-      { path: 'tasks/:taskKey', element: page(() => import('@/modules/tasks/pages/TaskPage'), 'TaskPage') },
+      { path: 'tasks/:taskId', element: page(() => import('@/modules/tasks/pages/TaskPage'), 'TaskPage') },
       { path: 'users', element: guard('user.manage', page(() => import('@/modules/users/pages/UsersPage'), 'UsersPage')) },
       { path: 'roles', element: guard('user.manage', page(() => import('@/modules/roles/pages/RolesPage'), 'RolesPage')) },
       { path: 'teams', element: guard('team.manage', page(() => import('@/modules/teams/pages/TeamsPage'), 'TeamsPage')) },

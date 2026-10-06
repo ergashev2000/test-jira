@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { QUERY_KEYS } from '@/shared/constants';
 import { api } from '@/shared/lib/axios';
-import type { ApiPaginated, Project, Role, Sprint, SprintStatus, Team, TeamBrief, UserBrief } from '@/shared/types';
+import type { ApiPaginated, Project, Role, Sprint, SprintStatus, Team, TeamBrief, UserBrief, UserStatus } from '@/shared/types';
 
 export const LOOKUP_PAGE_SIZE = 100;
 
@@ -14,16 +14,23 @@ export interface UserOptionsParams {
   search?: string;
 }
 
-export type UserOptionRow = UserBrief & { team?: TeamBrief | null; roles?: Role[] };
+export type UserOptionRow = UserBrief & { status?: UserStatus; team?: TeamBrief | null; roles?: Role[] };
 
 export const fetchUserOptions = async ({ projectId, teamId, roles, onlyActive, search }: UserOptionsParams) => {
   const url = projectId ? `/projects/${projectId}/members/` : teamId ? `/teams/${teamId}/members/` : '/users/';
+  if (projectId || teamId) {
+    const { data } = await api.get<UserOptionRow[]>(url);
+    const term = search?.trim().toLowerCase();
+    return data.filter((user) =>
+      (!onlyActive || user.status === 'active') &&
+      (!term || user.full_name.toLowerCase().includes(term) || user.username.toLowerCase().includes(term)));
+  }
   const base = { search: search || undefined, page_size: 50, status: onlyActive ? 'active' : undefined };
   const get = async (role?: Role) => {
     const { data } = await api.get<ApiPaginated<UserOptionRow>>(url, { params: { ...base, role } });
     return data.results;
   };
-  if (projectId || teamId || !roles?.length) return get();
+  if (!roles?.length) return get();
   const lists = await Promise.all(roles.map(get));
   return [...new Map(lists.flat().map((u) => [u.id, u])).values()];
 };

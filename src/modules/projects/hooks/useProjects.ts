@@ -29,9 +29,9 @@ const useInvalidate = () => {
 export const useProjectList = (params: ProjectListParams) =>
   useQuery({ queryKey: QUERY_KEYS.projects.list(params), queryFn: () => listProjects(params), placeholderData: (p) => p });
 
-/** GET /projects/:key/ — also used to load a fresh copy before editing. */
-export const useProject = (key: string | undefined) =>
-  useQuery({ queryKey: QUERY_KEYS.projects.detail(key ?? ''), queryFn: () => getProject(key!), enabled: !!key });
+/** GET /projects/:id/ — also used to load a fresh copy before editing. */
+export const useProject = (id: string | undefined) =>
+  useQuery({ queryKey: QUERY_KEYS.projects.detail(id ?? ''), queryFn: () => getProject(id!), enabled: !!id });
 
 export const useProjectStats = (id: number | undefined) =>
   useQuery({ queryKey: QUERY_KEYS.projects.stats(String(id ?? '')), queryFn: () => getProjectReport(id!), enabled: !!id });

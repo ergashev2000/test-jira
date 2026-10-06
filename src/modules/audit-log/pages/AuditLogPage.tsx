@@ -83,8 +83,8 @@ export const AuditLogPage = () => {
               { title: 'Action', dataIndex: 'action', width: 210, sorter: true, render: (a: string) => <span className="font-mono text-xs">{a}</span> },
               { title: 'Entity', dataIndex: 'entity_type', width: 90, sorter: true, render: (e: string) => <Tag className="!m-0">{e}</Tag> },
               { title: 'Entity ID', dataIndex: 'entity_label', width: 150, render: (l: string, r) =>
-                r.entity_type === 'task' ? <Link to={ROUTES.task(l)} className="font-mono text-xs">{l}</Link>
-                  : r.entity_type === 'project' ? <Link to={ROUTES.project(l)} className="font-mono text-xs">{l}</Link>
+                r.entity_type === 'task' ? <Link to={ROUTES.task(r.entity_id)} className="font-mono text-xs">{l}</Link>
+                  : r.entity_type === 'project' ? <Link to={ROUTES.project(r.entity_id)} className="font-mono text-xs">{l}</Link>
                     : <span className="text-xs text-fg-2">{l}</span> },
               { title: 'Old → New', key: 'diff', render: (_, r) => <Diff row={r} /> },
               { title: 'Source', dataIndex: 'source', width: 110, sorter: true, render: (s: Source) => <Tag color={SOURCE_COLORS[s]} className="!m-0"><SourceBadge source={s} /></Tag> },

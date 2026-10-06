@@ -9,14 +9,14 @@ import { checkTransition, errorMessage } from '@/shared/utils';
 
 import { useChangeStatus } from './useTasks';
 
-/** Opens the Task drawer by adding `?task=KEY` to the current URL (shareable). */
+/** Opens the Task drawer by adding `?task=ID` to the current URL (shareable). */
 export const useTaskDrawer = () => {
   const [sp, setSp] = useSearchParams();
   const openTask = useCallback(
-    (key: string) =>
+    (id: number | string) =>
       setSp((prev) => {
         const next = new URLSearchParams(prev);
-        next.set('task', key);
+        next.set('task', String(id));
         return next;
       }),
     [setSp],
@@ -30,7 +30,7 @@ export const useTaskDrawer = () => {
       }),
     [setSp],
   );
-  return { taskKey: sp.get('task'), openTask, closeTask };
+  return { taskId: sp.get('task'), openTask, closeTask };
 };
 
 /**

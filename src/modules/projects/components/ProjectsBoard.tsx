@@ -18,7 +18,7 @@ const COLORS: Record<ProjectStatus, string> = {
 const Card = ({ p }: { p: Project }) => {
   const navigate = useNavigate();
   return (
-    <button type="button" onClick={() => navigate(ROUTES.project(p.key))}
+    <button type="button" onClick={() => navigate(ROUTES.project(p.id))}
       className="flex w-full cursor-pointer flex-col gap-2 rounded-xl border border-line bg-surface p-3 text-left transition-colors hover:border-line-strong hover:bg-surface-2">
       <div className="flex items-center gap-2">
         <ProjectIcon projectKey={p.key} />

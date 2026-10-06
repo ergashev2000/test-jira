@@ -31,7 +31,7 @@ export const TeamCard = ({ team, onEdit }: { team: Team; onEdit: () => void }) =
       <div className="flex items-center justify-between border-t border-line pt-3">
         <span className="text-xs text-fg-2">{team.members_count} members</span>
         <Avatar.Group max={{ count: 6, style: { backgroundColor: 'var(--c-surface-3)', color: 'var(--c-fg-2)', fontSize: 11 } }} size={22}>
-          {(members?.results ?? []).map((m) => (
+          {(members ?? []).map((m) => (
             <Tooltip key={m.id} title={m.full_name || m.username}>
               <Avatar size={22} style={{ backgroundColor: colorFromId(String(m.id)), fontSize: 22 * 0.42 }}>{initials(m.full_name || m.username)}</Avatar>
             </Tooltip>

@@ -49,7 +49,7 @@ export const ProjectOverviewTab = () => {
         </Panel>
       </div>
       <div className="flex flex-col gap-4">
-        <Panel title="Active sprint" extra={sprint && <Link to={ROUTES.project(project.key, 'board')}>Open board</Link>}>
+        <Panel title="Active sprint" extra={sprint && <Link to={ROUTES.project(project.id, 'board')}>Open board</Link>}>
           {sprint ? (
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2 font-medium"><HugeiconsIcon icon={Rocket01Icon} size={15} className="hicon" strokeWidth={1.7} />{sprint.name}</div>
@@ -67,7 +67,7 @@ export const ProjectOverviewTab = () => {
                   <li key={b.key} className="flex gap-2">
                     <UserAvatar user={b.assignee} />
                     <div className="min-w-0 text-[13px]">
-                      <Link to={`?task=${b.key}`} className="font-mono text-xs">{b.key}</Link> <span className="text-fg">{b.title}</span>
+                      <Link to={`?task=${b.id}`} className="font-mono text-xs">{b.key}</Link> <span className="text-fg">{b.title}</span>
                       <div className="text-xs text-fg-2">{b.active_blocker?.reason}</div>
                       <div className="text-[11px] text-fg-3">since {fromNow(b.active_blocker?.created_at ?? b.updated_at)}</div>
                     </div>

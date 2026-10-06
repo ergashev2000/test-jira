@@ -15,8 +15,8 @@ export type {
 /** GET /tasks/ query params — all filtering happens on the backend. */
 export interface TaskListParams extends ListParams {
   project?: number;
-  /** Sprint id, or `backlog` (no sprint) / `active` (project's active sprint). */
-  sprint?: number | 'backlog' | 'active';
+  /** Sprint ID. */
+  sprint?: number;
   status?: TaskStatus[];
   assignee?: number[];
   priority?: Priority[];
@@ -66,5 +66,5 @@ export interface SearchResults {
   users: (UserBrief & { email?: string; position?: string })[];
   teams: Team[];
   /** NOT IN api.json — comment search (GET /search/?q=). */
-  comments?: (Comment & { task: { key: string; title: string } })[];
+  comments?: (Comment & { task: { id: number; key: string; title: string } })[];
 }
