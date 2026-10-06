@@ -25,7 +25,7 @@ const NO_TEAM = 'No team';
 
 const toOption = (u: UserOptionRow) => ({
   value: u.id,
-  label: <UserAvatar user={u} showName size={18} noTooltip />,
+  label: <UserAvatar user={u} showName size={18} noTooltip className="max-w-full" />,
   title: u.full_name || u.username,
   role: u.roles?.length ? ROLES[primaryRole(u.roles)]?.label : undefined,
 });
@@ -66,7 +66,7 @@ export const UserSelect = ({ projectId, teamId, roles, onlyActive = true, initia
       options={options}
       optionRender={(o) => (
         <span className="flex min-w-0 items-center gap-2">
-          <span className="min-w-0 flex-1">{o.label}</span>
+          <span className="flex min-w-0 flex-1 overflow-hidden">{o.label}</span>
           {o.data.role && <span className="shrink-0 text-[11px] text-fg-3">{o.data.role}</span>}
         </span>
       )}
