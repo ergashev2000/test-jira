@@ -61,7 +61,7 @@ export const ReportsPage = () => {
           <span className="mx-1 h-4 w-px bg-line" />
           {type === 'daily' && (
             <>
-              <UserSelect size="small" className="min-w-52" value={userId ?? user.id} disabled={!canPickUser} allowClear={false}
+              <UserSelect size="small" className="min-w-52" value={userId ?? user.id} disabled={!canPickUser} allowClear={false} popupMatchSelectWidth={320}
                 teamId={seesAll ? undefined : myTeams[0]?.id} onlyActive={false} initial={[user]}
                 onChange={(v) => set({ user: v === user.id ? undefined : (v as number) }, false)} />
               {datePicker}
