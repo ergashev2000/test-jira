@@ -22,6 +22,8 @@ const Row = ({ label, children }: { label: string; children: ReactNode }) => (
 );
 
 const BACKLOG = 0;
+/** The meta column is narrow — the user list opens wider so names and roles fit. */
+const USER_POPUP_WIDTH = 300;
 
 /** Right-hand property panel; every field is inline-editable for leads/managers. */
 export const TaskMeta = ({ task }: { task: Task }) => {
@@ -44,17 +46,17 @@ export const TaskMeta = ({ task }: { task: Task }) => {
       </Row>
       <Row label="Assignee">
         {editable ? (
-          <UserSelect size="small" variant="borderless" className={inline} value={task.assignee?.id}
+          <UserSelect size="small" variant="borderless" className={inline} value={task.assignee?.id} popupMatchSelectWidth={USER_POPUP_WIDTH}
             projectId={task.project.id} initial={task.assignee ? [task.assignee] : []} placeholder="Unassigned"
             onChange={(v) => patch({ assignee: (v as number | undefined) ?? null })} />
         ) : (
           <UserAvatar user={task.assignee} showName />
         )}
       </Row>
-      <Row label="Reporter"><UserAvatar user={task.reporter} showName /></Row>
+      <Row label="Reporter"><UserAvatar user={task.reporter} showName wrap /></Row>
       <Row label="Reviewer">
         {editable ? (
-          <UserSelect size="small" variant="borderless" className={inline} value={task.reviewer?.id}
+          <UserSelect size="small" variant="borderless" className={inline} value={task.reviewer?.id} popupMatchSelectWidth={USER_POPUP_WIDTH}
             projectId={task.project.id} initial={task.reviewer ? [task.reviewer] : []} placeholder="No reviewer"
             onChange={(v) => patch({ reviewer: (v as number | undefined) ?? null })} />
         ) : (

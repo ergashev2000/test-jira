@@ -8,10 +8,9 @@ import {
   archiveProject,
   createProject,
   getProject,
-  getProjectReport,
+  getProjectOverview,
   listMembers,
   listProjects,
-  listTopBlockers,
   removeMember,
   updateProject,
 } from '../api/projectsApi';
@@ -42,17 +41,11 @@ export const useProject = (id: number | string | undefined) =>
     enabled: !!id,
   });
 
-export const useProjectStats = (id: number | undefined) =>
+/** GET /projects/{id}/overview/ */
+export const useProjectOverview = (id: number | undefined) =>
   useQuery({
     queryKey: QUERY_KEYS.projects.stats(String(id ?? '')),
-    queryFn: () => getProjectReport(id!),
-    enabled: !!id,
-  });
-
-export const useTopBlockers = (id: number | undefined) =>
-  useQuery({
-    queryKey: [...QUERY_KEYS.projects.all, 'blockers', id],
-    queryFn: () => listTopBlockers(id!),
+    queryFn: () => getProjectOverview(id!),
     enabled: !!id,
   });
 

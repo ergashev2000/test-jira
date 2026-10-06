@@ -135,6 +135,27 @@ export interface ProjectWrite {
   review_mode?: ReviewMode;
 }
 
+/** GET /projects/{id}/overview/ — About, tasks by status, active sprint, top blockers. */
+export interface ProjectOverview {
+  id: number;
+  key: string;
+  name: string;
+  description: string;
+  status: ProjectStatus;
+  start_date: string | null;
+  target_date: string | null;
+  lead: UserBrief;
+  tasks_by_status: Record<TaskStatus | 'blocked' | 'overdue' | 'total', number>;
+  active_sprint: { id: number; name: string; start_date: string; end_date: string; days_left: number } | null;
+  top_blockers: {
+    id: number;
+    task: { id: number; key: string; title: string };
+    reason: string;
+    blocked_by: UserBrief | null;
+    blocked_since: string;
+  }[];
+}
+
 /** GET /projects/:id/members/ */
 export interface ProjectMember {
   id: number;

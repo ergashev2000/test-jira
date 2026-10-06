@@ -1,16 +1,17 @@
 import { HugeiconsIcon } from '@hugeicons/react';
 import { Add01Icon, MoreHorizontalIcon } from '@hugeicons/core-free-icons';
 import { App, Button, Collapse, Dropdown, Input, Tag } from 'antd';
+import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 
 import { useCurrentProject } from '@/modules/projects';
 import { TaskFormModal, TaskListRow, useCreateTask, useMoveTask, useTaskList, type Task } from '@/modules/tasks';
 import { EmptyState, QueryState } from '@/shared/components/ui';
-import { MAX_PAGE_SIZE, SPRINT_STATUS } from '@/shared/constants';
+import { MAX_PAGE_SIZE, QUERY_KEYS, SPRINT_STATUS } from '@/shared/constants';
 import { usePermission } from '@/shared/hooks';
 import { errorMessage, formatDate } from '@/shared/utils';
 
-import type { Sprint } from '../api/sprintsApi';
+import { listProjectBacklog, type Sprint } from '../api/sprintsApi';
 import { SprintActions } from '../components/SprintActions';
 import { CompleteSprintModal, SprintFormModal } from '../components/SprintModals';
 import { useSprints } from '../hooks/useSprints';
@@ -52,9 +53,18 @@ const InlineCreate = ({ projectId, disabled }: { projectId: number; disabled: bo
   );
 };
 
-/** Tasks of one sprint (or the backlog) — GET /tasks/?project=&sprint=<id> | &backlog=true, most important first. */
-const useSectionTasks = (project: number, sprint: number | 'backlog') =>
-  useTaskList({ project, ...(sprint === 'backlog' ? { backlog: true } : { sprint }), page_size: SECTION_PAGE_SIZE, ordering: '-priority_order' });
+/** Tasks of one sprint — GET /tasks/?project=&sprint=<id>, most important first. */
+const useSectionTasks = (project: number, sprint: number) =>
+  useTaskList({ project, sprint, page_size: SECTION_PAGE_SIZE, ordering: '-priority_order' });
+
+/** The backlog section — GET /projects/{id}/backlog/ (backend orders it: critical first, then deadline). */
+const useBacklog = (project: number | undefined) =>
+  useQuery({
+    queryKey: [...QUERY_KEYS.tasks.all, 'project-backlog', project],
+    queryFn: () => listProjectBacklog(project!, { page_size: SECTION_PAGE_SIZE }),
+    enabled: !!project,
+    placeholderData: (prev) => prev,
+  });
 
 const TaskRows = ({ tasks, total, actions }: { tasks: Task[]; total: number; actions: (t: Task) => React.ReactNode }) =>
   tasks.length ? (
@@ -75,7 +85,7 @@ export const BacklogTab = () => {
   const canCreate = usePermission('task.create');
   const canManageSprints = usePermission('sprint.manage');
   const sprints = useSprints({ project: project?.id, status: ['active', 'planned'], ordering: 'start_date', page_size: 50 }, !!project);
-  const backlog = useSectionTasks(project?.id ?? 0, 'backlog');
+  const backlog = useBacklog(project?.id);
   const [sprintModal, setSprintModal] = useState<{ open: boolean; sprint?: Sprint }>({ open: false });
   const [completing, setCompleting] = useState<Sprint | null>(null);
   const [createOpen, setCreateOpen] = useState(false);

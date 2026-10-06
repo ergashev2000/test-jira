@@ -1,4 +1,5 @@
 import { api } from '@/shared/lib/axios';
+import { asPage } from '@/shared/lib/normalize';
 import type { Activity, ApiPaginated, Attachment, CancelRequest, CancelRequestStatus, Comment, ListParams, Task, TaskBlocker } from '@/shared/types';
 
 // POST /tasks/:id/block/  { reason }
@@ -27,16 +28,16 @@ export const reviewCancelRequest = async (taskId: number, approve: boolean) => {
 
 // GET /tasks/:id/cancel-requests/?status=
 export const listCancelRequests = async (id: number, params: ListParams & { status?: CancelRequestStatus } = {}) => {
-  const { data } = await api.get<ApiPaginated<CancelRequest>>(`/tasks/${id}/cancel-requests/`, { params });
-  return data;
+  const { data } = await api.get<CancelRequest[] | ApiPaginated<CancelRequest>>(`/tasks/${id}/cancel-requests/`, { params });
+  return asPage(data);
 };
 
 // GET /tasks/:id/comments/?ordering=created_at
 export const listComments = async (taskId: number, params: ListParams = {}) => {
-  const { data } = await api.get<ApiPaginated<Comment>>(`/tasks/${taskId}/comments/`, {
+  const { data } = await api.get<Comment[] | ApiPaginated<Comment>>(`/tasks/${taskId}/comments/`, {
     params: { ordering: 'created_at', page_size: 100, ...params },
   });
-  return data;
+  return asPage(data);
 };
 
 // POST /tasks/:id/comments/  { text }
@@ -53,9 +54,15 @@ export const editComment = async (taskId: number, commentId: number, text: strin
 
 // GET /tasks/:id/attachments/?ordering=-created_at
 export const listAttachments = async (taskId: number, params: ListParams = {}) => {
-  const { data } = await api.get<ApiPaginated<Attachment>>(`/tasks/${taskId}/attachments/`, {
+  const { data } = await api.get<Attachment[] | ApiPaginated<Attachment>>(`/tasks/${taskId}/attachments/`, {
     params: { ordering: '-created_at', page_size: 100, ...params },
   });
+  return asPage(data);
+};
+
+// GET /tasks/{id}/attachments/{aid}/download/  — needs the JWT, so it's fetched as a blob (a plain href can't send it)
+export const downloadAttachment = async (taskId: number, attachmentId: number) => {
+  const { data } = await api.get<Blob>(`/tasks/${taskId}/attachments/${attachmentId}/download/`, { responseType: 'blob' });
   return data;
 };
 
@@ -69,16 +76,16 @@ export const uploadAttachment = async (taskId: number, file: File) => {
 
 // GET /tasks/:id/activity/?ordering=-created_at
 export const listTaskActivity = async (taskId: number, params: ListParams = {}) => {
-  const { data } = await api.get<ApiPaginated<Activity>>(`/tasks/${taskId}/activity/`, {
+  const { data } = await api.get<Activity[] | ApiPaginated<Activity>>(`/tasks/${taskId}/activity/`, {
     params: { ordering: '-created_at', page_size: 100, ...params },
   });
-  return data;
+  return asPage(data);
 };
 
 // GET /tasks/:id/blockers/  — NOT IN api.json (full blocker history)
 export const listBlockers = async (taskId: number) => {
-  const { data } = await api.get<ApiPaginated<TaskBlocker>>(`/tasks/${taskId}/blockers/`, { params: { ordering: '-created_at' } });
-  return data;
+  const { data } = await api.get<TaskBlocker[] | ApiPaginated<TaskBlocker>>(`/tasks/${taskId}/blockers/`, { params: { ordering: '-created_at' } });
+  return asPage(data);
 };
 
 export interface ProjectActivityParams extends ListParams {
@@ -91,8 +98,8 @@ export interface ProjectActivityParams extends ListParams {
 
 // GET /projects/:id/activity/?actor=&action=&date_from=&date_to=  — NOT IN api.json
 export const listProjectActivity = async ({ projectId, ...params }: ProjectActivityParams) => {
-  const { data } = await api.get<ApiPaginated<Activity>>(`/projects/${projectId}/activity/`, {
+  const { data } = await api.get<Activity[] | ApiPaginated<Activity>>(`/projects/${projectId}/activity/`, {
     params: { ordering: '-created_at', ...params },
   });
-  return data;
+  return asPage(data);
 };

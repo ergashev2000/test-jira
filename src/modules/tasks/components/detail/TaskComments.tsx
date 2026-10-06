@@ -60,7 +60,7 @@ export const TaskComments = ({ taskId }: { taskId: number }) => {
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 pt-4">
       <QueryState query={query} isEmpty={(d) => !d.results.length} empty={<EmptyState description="No comments yet" />}>
         {(d) => <div className="flex flex-col gap-3">{d.results.map((c) => <CommentItem key={c.id} c={c} taskId={taskId} />)}</div>}
       </QueryState>
