@@ -9,7 +9,6 @@ import { cn } from '@/shared/utils';
 
 import { EmptyState, QueryState } from './feedback';
 
-// antd's own default when `pagination` doesn't set a page size.
 const DEFAULT_CLIENT_PAGE_SIZE = 10;
 
 interface PagedQuery<T> {
@@ -25,7 +24,6 @@ type BaseProps<T> = Omit<TableProps<T>, 'dataSource' | 'columns'> & {
   columns: ColumnsType<T>;
   emptyText?: ReactNode;
   onRowClick?: (row: T) => void;
-  /** Leading "#" column numbered across pages (1, 2, 3 …). On by default. */
   rowNumbers?: boolean;
 };
 
