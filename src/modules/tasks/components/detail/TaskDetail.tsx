@@ -14,7 +14,7 @@ import { TaskMeta } from './TaskMeta';
 
 const Activity = ({ taskId }: { taskId: number }) => {
   const query = useTaskActivity(taskId);
-  return <QueryState query={query}>{(d) => <ActivityTimeline items={d.results} />}</QueryState>;
+  return <QueryState query={query}>{(d) => <ActivityTimeline items={d} />}</QueryState>;
 };
 
 /** Shared by the Drawer (?task=ID) and the full page (/tasks/:id). */

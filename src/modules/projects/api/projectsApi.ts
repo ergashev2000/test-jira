@@ -1,5 +1,5 @@
 import { api } from '@/shared/lib/axios';
-import type { ApiPaginated, ListParams, Project, ProjectMember, ProjectReport, ProjectWrite, Task } from '@/shared/types';
+import type { ApiPaginated, Project, ProjectMember, ProjectReport, ProjectWrite, Task } from '@/shared/types';
 
 import type { ProjectListParams } from '../types/project.types';
 
@@ -45,8 +45,8 @@ export const listTopBlockers = async (project: number) => {
 };
 
 // GET /projects/:id/members/
-export const listMembers = async (id: number, params: ListParams = {}) => {
-  const { data } = await api.get<ApiPaginated<ProjectMember>>(`/projects/${id}/members/`, { params: { page_size: 100, ...params } });
+export const listMembers = async (id: number) => {
+  const { data } = await api.get<ProjectMember[]>(`/projects/${id}/members/`);
   return data;
 };
 

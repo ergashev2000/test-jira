@@ -144,7 +144,7 @@ on('PATCH', '/teams/:id/', ({ params, body }) => {
 on('GET', '/teams/:id/members/', ({ params, query }) => {
   const status = one(query, 'status');
   const rows = teamMembers(findTeam(params[0]).id).filter((u) => !status || u.status === status).map(userOut);
-  return list(rows, query, { search: ['full_name', 'username', 'email'], ordering: 'full_name' });
+  return list(rows, query, { search: ['full_name', 'username', 'email'], ordering: 'full_name', paginate: false });
 });
 on('POST', '/teams/:id/members/', ({ params, body }) => {
   const t = findTeam(params[0]);
@@ -218,7 +218,7 @@ on('GET', '/projects/:id/members/', ({ params, query }) => {
   const p = findProject(params[0]);
   const status = one(query, 'status');
   const rows = p.members.map((m) => memberOut(p, m.user_id)).filter((m) => !status || m.status === status);
-  return list(rows, query, { search: ['full_name', 'username'], ordering: 'full_name' });
+  return list(rows, query, { search: ['full_name', 'username'], ordering: 'full_name', paginate: false });
 });
 on('POST', '/projects/:id/members/', ({ params, body }) => {
   const p = findProject(params[0]);
@@ -524,10 +524,10 @@ on('POST', '/tasks/:id/cancel-reject/', ({ params, me }) => reviewCancel(params[
 on('GET', '/tasks/:id/cancel-requests/', ({ params, query }) => {
   const t = findTask(params[0]);
   const status = one(query, 'status');
-  return list(db.cancelRequests.filter((r) => r.task_id === t.id && (!status || r.status === status)).map(cancelRequestOut), query, { ordering: '-created_at' });
+  return list(db.cancelRequests.filter((r) => r.task_id === t.id && (!status || r.status === status)).map(cancelRequestOut), query, { ordering: '-created_at', paginate: false });
 });
 on('GET', '/tasks/:id/comments/', ({ params, query }) =>
-  list(db.comments.filter((c) => c.task_id === findTask(params[0]).id).map(commentOut), query, { search: ['text'], ordering: 'created_at' }));
+  list(db.comments.filter((c) => c.task_id === findTask(params[0]).id).map(commentOut), query, { search: ['text'], ordering: 'created_at', paginate: false }));
 on('POST', '/tasks/:id/comments/', ({ params, body, me }) => {
   const t = findTask(params[0]);
   if (!str(body.text).trim()) throw badRequest({ text: ['Comment is empty'] });
@@ -546,7 +546,7 @@ on('PATCH', '/tasks/:id/comments/:comment_id/', ({ params, body, me }) => {
   return commentOut(c);
 });
 on('GET', '/tasks/:id/attachments/', ({ params, query }) =>
-  list(db.attachments.filter((a) => a.task_id === findTask(params[0]).id).map(attachmentOut), query, { search: ['file_name'], ordering: '-created_at' }));
+  list(db.attachments.filter((a) => a.task_id === findTask(params[0]).id).map(attachmentOut), query, { search: ['file_name'], ordering: '-created_at', paginate: false }));
 on('POST', '/tasks/:id/attachments/', ({ params, body, me }) => {
   const t = findTask(params[0]);
   const file = body.file as File | undefined;
@@ -557,9 +557,9 @@ on('POST', '/tasks/:id/attachments/', ({ params, body, me }) => {
   return { status: 201, data: attachmentOut(a) };
 });
 on('GET', '/tasks/:id/activity/', ({ params, query }) =>
-  list(db.activity.filter((a) => a.task_id === findTask(params[0]).id).map(activityOut), query, { ordering: '-created_at' }));
+  list(db.activity.filter((a) => a.task_id === findTask(params[0]).id).map(activityOut), query, { ordering: '-created_at', paginate: false }));
 on('GET', '/tasks/:id/blockers/', ({ params, query }) =>
-  list(db.blockers.filter((b) => b.task_id === findTask(params[0]).id).map(blockerOut), query, { ordering: '-created_at' }));
+  list(db.blockers.filter((b) => b.task_id === findTask(params[0]).id).map(blockerOut), query, { ordering: '-created_at', paginate: false }));
 
 // ───────────── me ─────────────
 

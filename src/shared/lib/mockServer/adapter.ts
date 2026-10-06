@@ -22,7 +22,6 @@ const NOT_IN_API: [string, RegExp][] = [
   ['PATCH', /^\/auth\/me\/$/],
   ['POST', /^\/auth\/password-change\/$/],
   ['PATCH', /^\/tasks\/[^/]+\/comments\/[^/]+\/$/],
-  ['GET', /^\/tasks\/[^/]+\/blockers\/$/],
   ['GET', /^\/projects\/[^/]+\/activity\/$/],
 ];
 

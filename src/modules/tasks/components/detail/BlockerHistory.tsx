@@ -10,10 +10,10 @@ export const BlockerHistory = ({ taskId }: { taskId: number }) => {
   const query = useBlockerHistory(taskId);
 
   return (
-    <QueryState query={query} isEmpty={(d) => !d.results.length} empty={<EmptyState description="This task has never been blocked" />}>
+    <QueryState query={query} isEmpty={(d) => !d.length} empty={<EmptyState description="This task has never been blocked" />}>
       {(d) => (
         <div className="flex flex-col gap-2">
-          {d.results.map((b) => (
+          {d.map((b) => (
             <div key={b.id} className="rounded-xl border border-line bg-surface p-3">
               <div className="mb-1 flex items-center gap-2">
                 {b.resolved_at ? <Tag color="green">Resolved</Tag> : <Tag color="red">Active</Tag>}

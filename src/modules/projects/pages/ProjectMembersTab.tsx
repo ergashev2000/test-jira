@@ -4,8 +4,6 @@ import { App, Button, Modal, Popconfirm, Table, Tag } from 'antd';
 import { useState } from 'react';
 
 import { QueryState, UserAvatar, UserSelect } from '@/shared/components/ui';
-import { ROLES } from '@/shared/constants';
-import type { Role, TeamBrief } from '@/shared/types';
 import { errorMessage, formatDate } from '@/shared/utils';
 
 import { useAddMembers, useProjectAccess, useProjectMembers, useRemoveMember } from '../hooks/useProjects';
@@ -23,13 +21,13 @@ export const ProjectMembersTab = () => {
   const [selected, setSelected] = useState<number[]>([]);
   if (!project) return null;
 
-  const existing = new Set((query.data?.results ?? []).map((m) => m.id));
+  const existing = new Set((query.data ?? []).map((m) => m.id));
   const isManager = (m: ProjectMember) => m.id === project.manager.id;
 
   return (
     <div className="p-5">
       <div className="mb-3 flex items-center">
-        <span className="text-fg-2">{query.data?.count ?? project.members_count} people</span>
+        <span className="text-fg-2">{query.data?.length ?? project.members_count} people</span>
         {canManageMembers && (
           <Button className="!ml-auto" size="small" type="primary" icon={<HugeiconsIcon icon={Add01Icon} size={14} className="hicon" strokeWidth={1.7} />} onClick={() => { setSelected([]); setOpen(true); }}>
             Add members
@@ -38,27 +36,26 @@ export const ProjectMembersTab = () => {
       </div>
       <QueryState query={query}>
         {(data) => (
-          <Table<ProjectMember> className="app-table" size="middle" rowKey="id" dataSource={data.results} pagination={false} scroll={{ x: 800 }}
+          <Table<ProjectMember> className="app-table" size="middle" rowKey="id" dataSource={data} pagination={false} scroll={{ x: 800 }}
             columns={[
               { title: 'User', dataIndex: 'full_name', render: (_, m) => <UserAvatar user={m} inactive={m.status === 'inactive'} showName /> },
-              { title: 'Position', dataIndex: 'position', render: (v?: string) => <span className="text-fg-2">{v}</span> },
+              { title: 'Position', render: () => <span className="text-fg-2">###</span> },
               {
-                title: 'Role', dataIndex: 'roles', render: (roles: Role[] | undefined, m) => (
+                title: 'Role', render: (_, m) => (
                   <>
                     {isManager(m) && <Tag color="purple">Lead</Tag>}
-                    {m.role_in_project && <Tag>{m.role_in_project}</Tag>}
-                    {(roles ?? []).map((r) => <Tag key={r} color={ROLES[r]?.color}>{ROLES[r]?.label ?? r}</Tag>)}
+                    {m.role_in_project ? <Tag>{m.role_in_project}</Tag> : <span className="text-fg-2">###</span>}
                   </>
                 ),
               },
-              { title: 'Team', dataIndex: 'team', render: (t?: TeamBrief | null) => t?.name ?? <span className="text-fg-3">—</span> },
-              { title: 'Active tasks', dataIndex: 'active_tasks', width: 110 },
+              { title: 'Team', render: () => <span className="text-fg-2">###</span> },
+              { title: 'Active tasks', width: 110, render: () => <span className="text-fg-2">###</span> },
               { title: 'Added', dataIndex: 'added_at', width: 110, render: (d: string) => formatDate(d) },
               {
                 title: '', key: 'x', width: 60, render: (_, m) => canManageMembers && !isManager(m) && (
                   <Popconfirm
                     title={`Remove ${m.full_name}?`}
-                    description={m.active_tasks ? `⚠ ${m.active_tasks} active task(s) in this project stay assigned to them.` : 'They will lose access to this project.'}
+                    description="They will lose access to this project."
                     okButtonProps={{ danger: true }} okText="Remove"
                     onConfirm={() => remove.mutateAsync({ id: project.id, userId: m.id }).then(() => message.success('Member removed')).catch((e) => message.error(errorMessage(e)))}>
                     <Button size="small" type="text" danger icon={<HugeiconsIcon icon={Cancel01Icon} size={14} className="hicon" strokeWidth={1.7} />} />

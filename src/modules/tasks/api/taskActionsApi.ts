@@ -26,16 +26,14 @@ export const reviewCancelRequest = async (taskId: number, approve: boolean) => {
 };
 
 // GET /tasks/:id/cancel-requests/?status=
-export const listCancelRequests = async (id: number, params: ListParams & { status?: CancelRequestStatus } = {}) => {
-  const { data } = await api.get<ApiPaginated<CancelRequest>>(`/tasks/${id}/cancel-requests/`, { params });
+export const listCancelRequests = async (id: number, params: { status?: CancelRequestStatus } = {}) => {
+  const { data } = await api.get<CancelRequest[]>(`/tasks/${id}/cancel-requests/`, { params });
   return data;
 };
 
-// GET /tasks/:id/comments/?ordering=created_at
-export const listComments = async (taskId: number, params: ListParams = {}) => {
-  const { data } = await api.get<ApiPaginated<Comment>>(`/tasks/${taskId}/comments/`, {
-    params: { ordering: 'created_at', page_size: 100, ...params },
-  });
+// GET /tasks/:id/comments/
+export const listComments = async (taskId: number) => {
+  const { data } = await api.get<Comment[]>(`/tasks/${taskId}/comments/`);
   return data;
 };
 
@@ -51,11 +49,9 @@ export const editComment = async (taskId: number, commentId: number, text: strin
   return data;
 };
 
-// GET /tasks/:id/attachments/?ordering=-created_at
-export const listAttachments = async (taskId: number, params: ListParams = {}) => {
-  const { data } = await api.get<ApiPaginated<Attachment>>(`/tasks/${taskId}/attachments/`, {
-    params: { ordering: '-created_at', page_size: 100, ...params },
-  });
+// GET /tasks/:id/attachments/
+export const listAttachments = async (taskId: number) => {
+  const { data } = await api.get<Attachment[]>(`/tasks/${taskId}/attachments/`);
   return data;
 };
 
@@ -67,17 +63,15 @@ export const uploadAttachment = async (taskId: number, file: File) => {
   return data;
 };
 
-// GET /tasks/:id/activity/?ordering=-created_at
-export const listTaskActivity = async (taskId: number, params: ListParams = {}) => {
-  const { data } = await api.get<ApiPaginated<Activity>>(`/tasks/${taskId}/activity/`, {
-    params: { ordering: '-created_at', page_size: 100, ...params },
-  });
+// GET /tasks/:id/activity/
+export const listTaskActivity = async (taskId: number) => {
+  const { data } = await api.get<Activity[]>(`/tasks/${taskId}/activity/`);
   return data;
 };
 
-// GET /tasks/:id/blockers/  — NOT IN api.json (full blocker history)
+// GET /tasks/:id/blockers/
 export const listBlockers = async (taskId: number) => {
-  const { data } = await api.get<ApiPaginated<TaskBlocker>>(`/tasks/${taskId}/blockers/`, { params: { ordering: '-created_at' } });
+  const { data } = await api.get<TaskBlocker[]>(`/tasks/${taskId}/blockers/`);
   return data;
 };
 

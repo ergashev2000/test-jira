@@ -29,7 +29,7 @@ export const updateTeam = async (id: number, body: Partial<TeamWrite>) => {
 
 // GET /teams/:id/members/
 export const listTeamMembers = async (id: number) => {
-  const { data } = await api.get<ApiPaginated<TeamMember>>(`/teams/${id}/members/`, { params: { page_size: 100 } });
+  const { data } = await api.get<TeamMember[]>(`/teams/${id}/members/`);
   return data;
 };
 
