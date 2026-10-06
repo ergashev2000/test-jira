@@ -1,5 +1,7 @@
 import type { Role } from '@/shared/types';
 
+import { primaryRole } from './roles';
+
 export const PERMISSIONS = [
   'dashboard.view',
   'project.view',
@@ -74,5 +76,57 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
   EMPLOYEE: BASE,
 };
 
-export const hasPermission = (role: Role | undefined, permission: Permission): boolean =>
-  !!role && ROLE_PERMISSIONS[role].includes(permission);
+/** Who is asking: GET /auth/me/ (or any object carrying its roles / permissions). */
+export type PermissionSubject = { roles: string[]; permissions?: string[]; is_superuser?: boolean };
+
+const ALWAYS = () => true;
+
+/**
+ * UI permission → backend permission codes (`Me.permissions`, see backend `accounts/rbac.py`).
+ * Capabilities every signed-in user has are `ALWAYS`; the backend still checks each request.
+ */
+const FROM_BACKEND: Record<Permission, (codes: Set<string>) => boolean> = {
+  'dashboard.view': (c) => c.has('dashboard.view'),
+  'project.view': ALWAYS,
+  'project.create': (c) => c.has('projects.manage'),
+  'project.edit': (c) => c.has('projects.manage'),
+  'project.archive': (c) => c.has('projects.manage'),
+  'project.members.manage': (c) => c.has('projects.manage'),
+  'sprint.view': ALWAYS,
+  'sprint.manage': (c) => c.has('sprints.manage'),
+  'board.view': ALWAYS,
+  'task.create': (c) => c.has('tasks.create'),
+  'task.assign': (c) => c.has('tasks.assign'),
+  'task.edit': (c) => c.has('tasks.manage'),
+  'task.changeStatus': (c) => c.has('tasks.manage'),
+  'task.review.approve': (c) => c.has('tasks.manage'),
+  'task.cancel': (c) => c.has('tasks.cancel_approve'),
+  'task.block': (c) => c.has('tasks.manage'),
+  'comment.create': ALWAYS,
+  'attachment.add': ALWAYS,
+  'user.manage': (c) => c.has('users.manage'),
+  'team.manage': (c) => c.has('teams.manage'),
+  'report.view': ALWAYS,
+  'report.daily.all': (c) => c.has('reports.view_all'),
+  'report.teamDaily': (c) => c.has('reports.view_team') || c.has('reports.view_all'),
+  'report.sprint': (c) => c.has('reports.view_all') || c.has('sprints.manage'),
+  'report.project': (c) => c.has('reports.view_all') || c.has('projects.manage'),
+  'auditLog.view': (c) => c.has('audit.view'),
+  'settings.manage': (c) => c.has('settings.manage'),
+};
+
+/**
+ * Driven by `Me.permissions` (works for Django superusers and custom roles too);
+ * the role table above is only the fallback when the backend sent no permission list.
+ */
+export const hasPermission = (subject: PermissionSubject | null | undefined, permission: Permission): boolean => {
+  if (!subject) return false;
+  if (subject.is_superuser) return true;
+  const codes = subject.permissions;
+  if (codes?.length) {
+    const set = new Set(codes);
+    // The demo server sends UI codes as-is.
+    return set.has(permission) || FROM_BACKEND[permission](set);
+  }
+  return ROLE_PERMISSIONS[primaryRole(subject.roles)].includes(permission);
+};

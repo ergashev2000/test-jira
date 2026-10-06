@@ -13,8 +13,8 @@ export const TaskListRow = ({ task, actions }: { task: Task; actions?: ReactNode
     <div
       role="button"
       tabIndex={0}
-      onClick={() => openTask(task.key)}
-      onKeyDown={(e) => e.key === 'Enter' && openTask(task.key)}
+      onClick={() => openTask(task.id)}
+      onKeyDown={(e) => e.key === 'Enter' && openTask(task.id)}
       className="group flex h-11 cursor-pointer items-center gap-3 border-b border-line px-5 text-[13px] last:border-b-0 hover:bg-surface-2"
     >
       <span className="w-16 shrink-0 font-mono text-xs text-fg-3">{task.key}</span>

@@ -29,12 +29,12 @@ export const SprintsTable = ({ query, showProject }: { query: PagedQuery; showPr
   const activeByProject = new Set(items.filter((s) => s.status === 'active').map((s) => s.project.id));
 
   const columns: ColumnsType<Sprint> = [
-    ...(showProject ? [{ title: 'Project', key: 'project__key', width: 110, sorter: true, render: (_: unknown, s: Sprint) => (
-      <Link to={ROUTES.project(s.project.key, 'sprints')} className="flex items-center gap-1.5 !text-fg"><ProjectIcon projectKey={s.project.key} size={14} />{s.project.key}</Link>) }] : []),
-    { title: 'Name', dataIndex: 'name', width: 120, sorter: true, render: (n: string) => <span className="font-medium">{n}</span> },
+    ...(showProject ? [{ title: 'Project', key: 'project__key', width: 110, render: (_: unknown, s: Sprint) => (
+      <Link to={ROUTES.project(s.project.id, 'sprints')} className="flex items-center gap-1.5 !text-fg"><ProjectIcon projectKey={s.project.key} size={14} />{s.project.key}</Link>) }] : []),
+    { title: 'Name', dataIndex: 'name', width: 120, render: (n: string) => <span className="font-medium">{n}</span> },
     { title: 'Goal', dataIndex: 'goal', ellipsis: true, render: (g: string) => <span className="text-fg-2">{g || '—'}</span> },
     { title: 'Dates', key: 'start_date', width: 200, sorter: true, render: (_, s) => <span className="text-fg-2">{formatDate(s.start_date)} — {formatDate(s.end_date)}</span> },
-    { title: 'Status', dataIndex: 'status', width: 110, sorter: true, render: (st: SprintStatus) => <Tag color={SPRINT_STATUS[st].color}>{SPRINT_STATUS[st].label}</Tag> },
+    { title: 'Status', dataIndex: 'status', width: 110, render: (st: SprintStatus) => <Tag color={SPRINT_STATUS[st].color}>{SPRINT_STATUS[st].label}</Tag> },
     { title: 'Tasks', key: 'tasks', width: 170, render: (_, s) => (
       <span className="flex items-center gap-2"><Progress percent={percent(s.tasks_done ?? 0, s.tasks_total ?? 0)} size="small" showInfo={false} className="!m-0 w-20" strokeColor="#165dff" />
         <span className="text-xs tabular-nums text-fg-2">{s.tasks_done ?? 0}/{s.tasks_total ?? 0}</span></span>) },

@@ -1,5 +1,5 @@
 import { HugeiconsIcon, type IconSvgElement } from '@hugeicons/react';
-import { Alert02Icon, AlertCircleIcon, Analytics01Icon, CheckListIcon, CheckmarkCircle02Icon, Clock01Icon, Edit02Icon, Rocket01Icon, StopCircleIcon, UserIcon, UserMultipleIcon } from '@hugeicons/core-free-icons';
+import { Alert02Icon, AlertCircleIcon, AtIcon, Analytics01Icon, CheckListIcon, CheckmarkCircle02Icon, Clock01Icon, Edit02Icon, Rocket01Icon, StopCircleIcon, UserIcon, UserMultipleIcon } from '@hugeicons/core-free-icons';
 import type { AppNotification, NotificationType } from '@/shared/types';
 import { cn, fromNow } from '@/shared/utils';
 
@@ -11,6 +11,7 @@ export const NOTIFICATION_META: Record<NotificationType, { icon: IconSvgElement;
   task_blocked: { icon: Alert02Icon, color: '#eb5757', label: 'Task blocked' },
   blocker_resolved: { icon: CheckmarkCircle02Icon, color: '#4cb782', label: 'Blocker resolved' },
   comment_added: { icon: Edit02Icon, color: '#26b5ce', label: 'Comment added' },
+  user_mentioned: { icon: AtIcon, color: '#26b5ce', label: 'Mentioned you' },
   sprint_started: { icon: Rocket01Icon, color: '#4cb782', label: 'Sprint started' },
   sprint_ending: { icon: Rocket01Icon, color: '#f2994a', label: 'Sprint ending' },
   daily_reminder: { icon: CheckListIcon, color: '#9c9ca3', label: 'Daily reminder' },

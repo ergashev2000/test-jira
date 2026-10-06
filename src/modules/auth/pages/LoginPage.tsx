@@ -5,7 +5,7 @@ import { useMutation } from '@tanstack/react-query';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 
 import { ROUTES } from '@/shared/constants';
-import { useDemoMode } from '@/shared/lib/demoMode';
+import { MOCK_ENABLED, useDemoMode } from '@/shared/lib/demoMode';
 import { MOCK_PASSWORD } from '@/shared/lib/mockServer/db';
 import { isSignedIn } from '@/shared/lib/session';
 import { errorMessage, rules } from '@/shared/utils';
@@ -71,7 +71,7 @@ export const LoginPage = () => {
         >
           Log in
         </Button>
-        <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-lg border border-line px-3 py-2.5 text-[13px] text-fg-2">
+        {MOCK_ENABLED && <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-lg border border-line px-3 py-2.5 text-[13px] text-fg-2">
           <Switch size="small" className="mt-0.5" checked={demo} onChange={setDemo} />
           <span>
             <span className="text-fg">Demo data</span> — work on mock data, no backend needed
@@ -81,7 +81,7 @@ export const LoginPage = () => {
               </span>
             )}
           </span>
-        </label>
+        </label>}
       </Form>
     </AuthLayout>
   );

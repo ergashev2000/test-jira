@@ -9,7 +9,7 @@ import { cn } from '@/shared/utils';
 
 interface Props {
   task: Task;
-  onOpen?: (key: string) => void;
+  onOpen?: (id: number) => void;
   overlay?: boolean;
 }
 
@@ -52,7 +52,7 @@ export const TaskCard = ({ task, onOpen }: Props) => {
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      onClick={() => onOpen?.(task.key)}
+      onClick={() => onOpen?.(task.id)}
       className={cn('cursor-pointer touch-none outline-none', isDragging && 'opacity-30')}
     >
       <TaskCardView task={task} />

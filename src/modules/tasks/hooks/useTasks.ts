@@ -109,7 +109,7 @@ type ListSnapshot = [readonly unknown[], unknown][];
 export const useChangeStatus = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, status }: { id: number; status: TaskStatus }) => transitionTask(id, status),
+    mutationFn: ({ id, status, from }: { id: number; status: TaskStatus; from?: TaskStatus }) => transitionTask(id, status, from),
     onMutate: async ({ id, status }) => {
       await Promise.all([qc.cancelQueries({ queryKey: ['tasks', 'list'] }), qc.cancelQueries({ queryKey: ['board'] })]);
       const snapshot = [

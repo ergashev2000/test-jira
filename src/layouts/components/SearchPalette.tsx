@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { globalSearch } from '@/modules/tasks';
 import { hasPermission, PROJECT_STATUS, QUERY_KEYS, ROUTES, SPRINT_STATUS } from '@/shared/constants';
 import { useDebounce } from '@/shared/hooks';
-import { roleOf, useSessionStore } from '@/shared/lib/session';
+import { useSessionStore } from '@/shared/lib/session';
 import { useThemeStore } from '@/shared/lib/theme';
 import { cn, TASK_KEY_RE } from '@/shared/utils';
 
@@ -62,7 +62,7 @@ const Kbd = ({ children }: { children: ReactNode }) => (
 /** Command palette: searches everything in the workspace, keyboard driven. */
 export const SearchPalette = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
   const navigate = useNavigate();
-  const role = useSessionStore((s) => roleOf(s.user));
+  const user = useSessionStore((s) => s.user);
   const toggleTheme = useThemeStore((s) => s.toggle);
   const themeMode = useThemeStore((s) => s.mode);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -87,7 +87,7 @@ export const SearchPalette = ({ open, onClose }: { open: boolean; onClose: () =>
   const go = (to: string) => () => { close(); navigate(to); };
 
   const items = useMemo<PaletteItem[]>(() => {
-    const can = (p: Parameters<typeof hasPermission>[1]) => hasPermission(role, p);
+    const can = (p: Parameters<typeof hasPermission>[1]) => hasPermission(user, p);
     const matches = (text: string) => tokens.every((t) => text.toLowerCase().includes(t));
     const list: PaletteItem[] = [];
 
@@ -98,7 +98,7 @@ export const SearchPalette = ({ open, onClose }: { open: boolean; onClose: () =>
         code: t.key, title: t.title,
         hint: t.project.name,
         trailing: <span className="flex items-center gap-2"><PriorityIcon priority={t.priority} size={13} />{t.assignee && <UserAvatar user={t.assignee} size={18} noTooltip />}</span>,
-        run: go(ROUTES.task(t.key)),
+        run: go(ROUTES.task(t.id)),
       });
     }
     for (const p of data?.projects ?? []) {
@@ -106,14 +106,14 @@ export const SearchPalette = ({ open, onClose }: { open: boolean; onClose: () =>
         id: `project:${p.id}`, group: 'Projects',
         icon: <span className="flex size-7 items-center justify-center"><ProjectIcon projectKey={p.key} size={16} /></span>,
         title: p.name, meta: `${p.key} · ${PROJECT_STATUS[p.status].label}`, hint: p.description || undefined,
-        run: go(ROUTES.project(p.key)),
+        run: go(ROUTES.project(p.id)),
       });
     }
     for (const s of data?.sprints ?? []) {
       list.push({
         id: `sprint:${s.id}`, group: 'Sprints', icon: <NavIcon icon={Rocket01Icon} />,
         title: s.name, meta: `${s.project.name} · ${SPRINT_STATUS[s.status].label}`, hint: s.goal || undefined,
-        run: go(ROUTES.project(s.project.key, 'sprints')),
+        run: go(ROUTES.project(s.project.id, 'sprints')),
       });
     }
     for (const u of data?.users ?? []) {
@@ -139,7 +139,7 @@ export const SearchPalette = ({ open, onClose }: { open: boolean; onClose: () =>
         id: `comment:${c.id}`, group: 'Comments',
         icon: <span className="flex size-7 items-center justify-center"><UserAvatar user={c.author} size={22} noTooltip /></span>,
         code: c.task.key, title: c.task.title, hint: c.text,
-        run: go(ROUTES.task(c.task.key)),
+        run: go(ROUTES.task(c.task.id)),
       });
     }
 
@@ -159,7 +159,7 @@ export const SearchPalette = ({ open, onClose }: { open: boolean; onClose: () =>
     return list;
     // `go`/`close` are recreated each render but only call stable setters/navigate.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, q, tokens, role, themeMode, toggleTheme]);
+  }, [data, q, tokens, user, themeMode, toggleTheme]);
 
   const current = Math.min(active, Math.max(items.length - 1, 0));
 
@@ -175,9 +175,10 @@ export const SearchPalette = ({ open, onClose }: { open: boolean; onClose: () =>
     if (e.key === 'ArrowUp') { e.preventDefault(); move(-1); }
     if (e.key === 'Enter') {
       e.preventDefault();
+      // A typed task key opens that task (found by the search, opened by its id).
       const key = value.trim().toUpperCase();
-      if (TASK_KEY_RE.test(key) && !items.some((i) => i.code === key)) go(ROUTES.task(key))();
-      else items[current]?.run();
+      const exact = TASK_KEY_RE.test(key) ? items.find((i) => i.code === key) : undefined;
+      (exact ?? items[current])?.run();
     }
   };
 

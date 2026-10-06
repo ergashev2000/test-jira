@@ -1,4 +1,5 @@
 import { api } from '@/shared/lib/axios';
+import { asPage } from '@/shared/lib/normalize';
 import type { ApiPaginated, Role } from '@/shared/types';
 
 import type { MemberAdd, Team, TeamListParams, TeamMember, TeamWrite } from '../types/team.types';
@@ -27,10 +28,10 @@ export const updateTeam = async (id: number, body: Partial<TeamWrite>) => {
   return data;
 };
 
-// GET /teams/:id/members/
+// GET /teams/:id/members/  — a plain array today
 export const listTeamMembers = async (id: number) => {
-  const { data } = await api.get<ApiPaginated<TeamMember>>(`/teams/${id}/members/`, { params: { page_size: 100 } });
-  return data;
+  const { data } = await api.get<TeamMember[] | ApiPaginated<TeamMember>>(`/teams/${id}/members/`, { params: { page_size: 100 } });
+  return asPage(data);
 };
 
 // POST /teams/:id/members/  — moves the user out of their current team

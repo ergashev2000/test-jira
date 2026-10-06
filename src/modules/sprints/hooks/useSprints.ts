@@ -11,6 +11,7 @@ import {
   getSprintReport,
   listSprints,
   listUnfinishedTasks,
+  moveTaskToSprint,
   startSprint,
   updateSprint,
   type SprintListParams,
@@ -54,7 +55,11 @@ export const useStartSprint = () => useSprintMutation((id: number) => startSprin
 /** Completes the sprint, then loads its report snapshot for the success dialog. */
 export const useCompleteSprint = () =>
   useSprintMutation(async ({ id, moveTo }: { id: number; moveTo: 'backlog' | number }) => {
+    // The backend ignores `move_to` for now and always sends unfinished tasks to the backlog —
+    // when a next sprint was picked, move them there afterwards.
+    const unfinished = moveTo === 'backlog' ? [] : (await listUnfinishedTasks(id)).results;
     await completeSprint(id, moveTo);
+    for (const t of unfinished) await moveTaskToSprint(t.id, moveTo as number);
     return getSprintReport(id);
   });
 export const useCancelSprint = () => useSprintMutation((id: number) => cancelSprint(id));

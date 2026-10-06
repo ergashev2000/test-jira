@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { useCurrentProject } from '@/modules/projects';
 import { TaskFormModal, TaskListRow, useCreateTask, useMoveTask, useTaskList, type Task } from '@/modules/tasks';
 import { EmptyState, QueryState } from '@/shared/components/ui';
-import { SPRINT_STATUS } from '@/shared/constants';
+import { MAX_PAGE_SIZE, SPRINT_STATUS } from '@/shared/constants';
 import { usePermission } from '@/shared/hooks';
 import { errorMessage, formatDate } from '@/shared/utils';
 
@@ -15,8 +15,8 @@ import { SprintActions } from '../components/SprintActions';
 import { CompleteSprintModal, SprintFormModal } from '../components/SprintModals';
 import { useSprints } from '../hooks/useSprints';
 
-/** Rendered in full — the backlog is a planning view, not a paged table. */
-const SECTION_PAGE_SIZE = 500;
+/** The backlog is a planning view, not a paged table — one page of the backend maximum (100). */
+const SECTION_PAGE_SIZE = MAX_PAGE_SIZE;
 
 type Target = { id: number | null; name: string };
 
@@ -52,17 +52,21 @@ const InlineCreate = ({ projectId, disabled }: { projectId: number; disabled: bo
   );
 };
 
-/** Tasks of one sprint (or the backlog) — GET /tasks/?project=&sprint=<id|backlog>. */
+/** Tasks of one sprint (or the backlog) — GET /tasks/?project=&sprint=<id> | &backlog=true, most important first. */
 const useSectionTasks = (project: number, sprint: number | 'backlog') =>
-  useTaskList({ project, sprint, page_size: SECTION_PAGE_SIZE, ordering: 'priority' });
+  useTaskList({ project, ...(sprint === 'backlog' ? { backlog: true } : { sprint }), page_size: SECTION_PAGE_SIZE, ordering: '-priority_order' });
 
-const TaskRows = ({ tasks, actions }: { tasks: Task[]; actions: (t: Task) => React.ReactNode }) =>
-  tasks.length ? <>{tasks.map((t) => <TaskListRow key={t.id} task={t} actions={actions(t)} />)}</>
-    : <div className="px-5 py-4 text-xs text-fg-3">No tasks — move some here from the backlog.</div>;
+const TaskRows = ({ tasks, total, actions }: { tasks: Task[]; total: number; actions: (t: Task) => React.ReactNode }) =>
+  tasks.length ? (
+    <>
+      {tasks.map((t) => <TaskListRow key={t.id} task={t} actions={actions(t)} />)}
+      {total > tasks.length && <div className="px-5 py-2 text-xs text-fg-3">Showing {tasks.length} of {total} — use the board filters to narrow down.</div>}
+    </>
+  ) : <div className="px-5 py-4 text-xs text-fg-3">No tasks — move some here from the backlog.</div>;
 
 const SprintTasks = ({ project, sprint, actions }: { project: number; sprint: number; actions: (t: Task) => React.ReactNode }) => {
   const query = useSectionTasks(project, sprint);
-  return <QueryState query={query} skeletonRows={2}>{(d) => <TaskRows tasks={d.results} actions={actions} />}</QueryState>;
+  return <QueryState query={query} skeletonRows={2}>{(d) => <TaskRows tasks={d.results} total={d.count} actions={actions} />}</QueryState>;
 };
 
 export const BacklogTab = () => {
@@ -120,7 +124,7 @@ export const BacklogTab = () => {
                 <span className="font-medium">Backlog</span>
                 <span className="text-xs text-fg-3">{backlogCount}</span>
               </header>
-              {backlogCount ? <TaskRows tasks={backlog.data?.results ?? []} actions={actions} /> : <EmptyState description="Backlog is empty" />}
+              {backlogCount ? <TaskRows tasks={backlog.data?.results ?? []} total={backlogCount} actions={actions} /> : <EmptyState description="Backlog is empty" />}
               {canCreate && <InlineCreate projectId={project.id} disabled={archived} />}
             </section>
           </>

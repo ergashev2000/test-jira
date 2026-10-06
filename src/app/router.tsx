@@ -31,7 +31,7 @@ export const router = createBrowserRouter([
       { path: 'my-tasks', element: <MyTasksPage /> },
       { path: 'projects', element: guard('project.view', <ProjectsPage />) },
       {
-        path: 'projects/:projectKey',
+        path: 'projects/:projectId',
         element: guard('project.view', <ProjectLayout />),
         children: [
           { index: true, element: <Navigate to="overview" replace /> },
@@ -61,6 +61,4 @@ export const router = createBrowserRouter([
       { path: '*', element: <NotFound /> },
     ],
   },
-], {
-  future: { v7_relativeSplatPath: true, v7_fetcherPersist: true, v7_normalizeFormMethod: true, v7_partialHydration: true, v7_skipActionErrorRevalidation: true },
-});
+]);

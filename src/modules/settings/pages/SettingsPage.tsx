@@ -8,6 +8,7 @@ import dayjs, { type Dayjs } from '@/shared/lib/dayjs';
 import type { AppSettings } from '@/shared/types';
 import { errorMessage, rules } from '@/shared/utils';
 
+import type { SettingsSection } from '../api/settingsApi';
 import { useAppSettings, useUpdateSettings } from '../hooks/useSettings';
 
 const TIMEZONES = ['Asia/Tashkent', 'Asia/Almaty', 'Europe/Moscow', 'Europe/Istanbul', 'Europe/London', 'UTC'];
@@ -23,7 +24,7 @@ const Section = ({ title, description, children }: { title: string; description?
   </div>
 );
 
-const useSave = <S extends keyof AppSettings>(section: S) => {
+const useSave = <S extends SettingsSection>(section: S) => {
   const { message } = App.useApp();
   const m = useUpdateSettings(section);
   return {
@@ -57,13 +58,17 @@ const GeneralForm = ({ s }: { s: AppSettings['general'] }) => {
 const TelegramForm = ({ s }: { s: AppSettings['telegram'] }) => {
   const [form] = Form.useForm();
   const { save, loading } = useSave('telegram');
-  useEffect(() => form.setFieldsValue({ ...s, morning_time: t(s.morning_time), evening_time: t(s.evening_time) }), [s, form]);
+  useEffect(() => form.setFieldsValue({
+    morning_time: t(s.morning_time), reminders_time: s.reminders_time ? t(s.reminders_time) : undefined, evening_time: t(s.evening_time),
+  }), [s, form]);
   return (
-    <Form form={form} layout="vertical" onFinish={(v) => save({ ...s, ...v, morning_time: f(v.morning_time), evening_time: f(v.evening_time) })}>
-      <Form.Item label="Bot username"><Input value={`@${s.bot_username}`} readOnly disabled /></Form.Item>
-      <Form.Item name="enabled" label="Bot enabled" valuePropName="checked"><Switch /></Form.Item>
-      <div className="grid grid-cols-2 gap-4">
-        <Form.Item name="morning_time" label="Morning notification" rules={[rules.required('Time')]}><TimePicker format="HH:mm" className="w-full" /></Form.Item>
+    <Form form={form} layout="vertical" onFinish={(v) => save({
+      ...s, morning_time: f(v.morning_time), reminders_time: v.reminders_time ? f(v.reminders_time) : undefined, evening_time: f(v.evening_time),
+    })}>
+      {s.bot_username && <Form.Item label="Bot username"><Input value={`@${s.bot_username}`} readOnly disabled /></Form.Item>}
+      <div className="grid grid-cols-3 gap-4">
+        <Form.Item name="morning_time" label="Morning plan" rules={[rules.required('Time')]}><TimePicker format="HH:mm" className="w-full" /></Form.Item>
+        <Form.Item name="reminders_time" label="Reminders"><TimePicker format="HH:mm" className="w-full" /></Form.Item>
         <Form.Item name="evening_time" label="Evening report" rules={[rules.required('Time')]}><TimePicker format="HH:mm" className="w-full" /></Form.Item>
       </div>
       <Form.Item><Checkbox checked disabled>Send only on working days</Checkbox></Form.Item>
@@ -81,8 +86,8 @@ const TasksForm = ({ s }: { s: AppSettings['tasks'] }) => {
       <Form.Item name="default_priority" label="Default priority"><Select options={PRIORITY_OPTIONS} /></Form.Item>
       <Form.Item name="require_review" label="Require review before Done" valuePropName="checked"
         extra="Tasks moved to Done go to Review first; only reviewer / lead / manager can approve."><Switch /></Form.Item>
-      <Form.Item name="max_attachment_mb" label="Max attachment size (MB)" rules={[rules.required('Size')]}><InputNumber min={1} max={100} /></Form.Item>
-      <Form.Item name="allowed_file_types" label="Allowed file types"><Select mode="tags" tokenSeparators={[',', ' ']} /></Form.Item>
+      <Form.Item name="max_attachment_mb" label="Max attachment size (MB)" extra="Fixed on the server"><InputNumber disabled /></Form.Item>
+      <Form.Item name="allowed_file_types" label="Allowed file types" extra="Fixed on the server"><Select mode="tags" disabled /></Form.Item>
       <Button type="primary" htmlType="submit" loading={loading}>Save</Button>
     </Form>
   );
