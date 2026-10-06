@@ -13,7 +13,6 @@ import { useProject, useProjectAccess } from '../hooks/useProjects';
 
 const TABS = ['overview', 'board', 'backlog', 'sprints', 'members', 'reports', 'activity'] as const;
 
-/** Project of the current /projects/:projectId/* route — GET /projects/{id}/. */
 export const useCurrentProject = () => {
   const { projectId = '' } = useParams();
   return useProject(projectId);

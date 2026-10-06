@@ -271,6 +271,40 @@ on('GET', '/projects/:id/board/', ({ params, query }) => {
   };
 });
 
+/** Backlog: no sprint, not done / cancelled — critical first, then earlier deadline. */
+on('GET', '/projects/:id/backlog/', ({ params, query }) => {
+  const p = findProject(params[0]);
+  const weight = { critical: 0, high: 1, medium: 2, low: 3 };
+  const rows = filterTasks(db.tasks.filter((t) => t.project_id === p.id && t.sprint_id === null && t.status !== 'done' && t.status !== 'cancelled'), query)
+    .sort((a, b) => weight[a.priority] - weight[b.priority] || (a.deadline ?? '9999').localeCompare(b.deadline ?? '9999'))
+    .map(taskOut);
+  return list(rows, query, { search: ['key', 'title'] });
+});
+
+on('GET', '/projects/:id/overview/', ({ params }) => {
+  const p = findProject(params[0]);
+  const tasks = db.tasks.filter((t) => t.project_id === p.id);
+  const count = (s: TaskStatus) => tasks.filter((t) => t.status === s).length;
+  const sprint = activeSprintOf(p.id);
+  const blocked = tasks.filter((t) => isOpen(t) && activeBlocker(t.id));
+  return {
+    id: p.id, key: p.key, name: p.name, description: p.description, status: p.status,
+    start_date: p.start_date, target_date: p.end_date, lead: brief(p.manager_id),
+    tasks_by_status: {
+      backlog: count('backlog'), todo: count('todo'), in_progress: count('in_progress'), review: count('review'), done: count('done'), cancelled: count('cancelled'),
+      blocked: blocked.length, overdue: tasks.filter(isOverdue).length, total: tasks.length,
+    },
+    active_sprint: sprint ? {
+      id: sprint.id, name: sprint.name, start_date: sprint.start_date, end_date: sprint.end_date,
+      days_left: dayjs(sprint.end_date).diff(dayjs().startOf('day'), 'day'),
+    } : null,
+    top_blockers: blocked.slice(0, 5).map((t) => {
+      const b = activeBlocker(t.id)!;
+      return { id: b.id, task: { id: t.id, key: t.key, title: t.title }, reason: b.reason, blocked_by: brief(b.created_by), blocked_since: b.created_at };
+    }),
+  };
+});
+
 // ───────────── sprints ─────────────
 
 const findSprint = (id: string) => db.sprints.find((s) => s.id === Number(id)) ?? (() => { throw notFound('Sprint not found'); })();

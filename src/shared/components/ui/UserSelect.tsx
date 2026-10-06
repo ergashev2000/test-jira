@@ -9,15 +9,10 @@ import type { Role, UserBrief } from '@/shared/types';
 import { UserAvatar } from './UserAvatar';
 
 type Props = Omit<SelectProps<number | number[]>, 'options'> & {
-  /** Only members of this project — GET /projects/:id/members/. */
   projectId?: number;
-  /** Only members of this team — GET /teams/:id/members/. */
   teamId?: number;
-  /** GET /users/?role= — one request per role. */
   roles?: Role[];
-  /** Default true — inactive users can't be assigned (GET /users/?status=active). */
   onlyActive?: boolean;
-  /** Users already selected — keeps their labels before the search results arrive. */
   initial?: UserBrief[];
 };
 
@@ -30,10 +25,6 @@ const toOption = (u: UserOptionRow) => ({
   role: u.roles?.length ? ROLES[primaryRole(u.roles)]?.label : undefined,
 });
 
-/**
- * User picker; filtering happens on the backend (`?search=`). When the endpoint returns teams
- * (GET /users/), the dropdown is grouped by team and shows each person's role.
- */
 export const UserSelect = ({ projectId, teamId, roles, onlyActive = true, initial = [], ...rest }: Props) => {
   const [search, setSearch] = useState('');
   const q = useDebounce(search, 300);

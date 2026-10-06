@@ -5,9 +5,8 @@ import type {
   ListParams,
   Project,
   ProjectMember,
-  ProjectReport,
+  ProjectOverview,
   ProjectWrite,
-  Task,
 } from '@/shared/types';
 
 import type { ProjectListParams } from '../types/project.types';
@@ -38,17 +37,9 @@ export const updateProject = async (id: number, body: Partial<ProjectWrite>) => 
 // PATCH /projects/:id/  { status: 'archived' }
 export const archiveProject = (id: number) => updateProject(id, { status: 'archived' });
 
-// GET /reports/projects/:id/  — status counts, blocked / overdue for the overview tab
-export const getProjectReport = async (id: number) => {
-  const { data } = await api.get<ProjectReport>(`/reports/projects/${id}/`);
-  return data;
-};
-
-// GET /tasks/?project=&blocked=true  — open blocked tasks
-export const listTopBlockers = async (project: number) => {
-  const { data } = await api.get<ApiPaginated<Task>>('/tasks/', {
-    params: { project, blocked: true, ordering: '-created_at', page_size: 5 },
-  });
+// GET /projects/{id}/overview/  — the Overview tab in one request (about, tasks by status, active sprint, top blockers)
+export const getProjectOverview = async (id: number) => {
+  const { data } = await api.get<ProjectOverview>(`/projects/${id}/overview/`);
   return data;
 };
 

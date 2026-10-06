@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { QUERY_KEYS } from '@/shared/constants';
+import { ApiError } from '@/shared/lib/apiError';
 import { api } from '@/shared/lib/axios';
 import { asList } from '@/shared/lib/normalize';
 import type { ApiPaginated, Project, Role, SprintStatus, Team, TeamBrief, UserBrief } from '@/shared/types';
@@ -19,14 +20,23 @@ export interface UserOptionsParams {
 
 export type UserOptionRow = UserBrief & { team?: TeamBrief | null; roles?: Role[] };
 
-export const fetchUserOptions = async ({ projectId, teamId, roles, onlyActive, search }: UserOptionsParams) => {
+export const fetchUserOptions = async ({ projectId, teamId, roles, onlyActive, search }: UserOptionsParams): Promise<UserOptionRow[]> => {
   const url = projectId ? `/projects/${projectId}/members/` : teamId ? `/teams/${teamId}/members/` : '/users/';
   const base = { search: search || undefined, page_size: 50, status: onlyActive ? 'active' : undefined };
   const get = async (role?: Role) => {
     const { data } = await api.get<UserOptionRow[] | ApiPaginated<UserOptionRow>>(url, { params: { ...base, role } });
     return asList(data);
   };
-  if (projectId || teamId || !roles?.length) return get();
+  if (projectId || teamId) {
+    try {
+      return await get();
+    } catch (e) {
+      // Members list not reachable for this user (404 / 403) — offer everyone instead.
+      if (!(e instanceof ApiError) || ![403, 404].includes(e.status)) throw e;
+      return fetchUserOptions({ roles, onlyActive, search });
+    }
+  }
+  if (!roles?.length) return get();
   const lists = await Promise.all(roles.map(get));
   return [...new Map(lists.flat().map((u) => [u.id, u])).values()];
 };
