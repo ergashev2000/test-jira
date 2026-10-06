@@ -24,6 +24,7 @@ export const SprintFormModal = ({ open, projectId, sprint, onClose }: {
   // Edit works on a fresh copy: GET /sprints/:id/.
   const detail = useSprint(open ? sprint?.id : undefined);
   const current = detail.data ?? sprint;
+  const activeSprint = current?.status === 'active';
   const create = useCreateSprint();
   const update = useUpdateSprint();
 
@@ -39,7 +40,13 @@ export const SprintFormModal = ({ open, projectId, sprint, onClose }: {
   }, [open, current, last.data, form]);
 
   const submit = ({ name, goal, range }: FormShape) => {
-    const body = { project: projectId, name, goal: goal ?? '', start_date: range[0].format('YYYY-MM-DD'), end_date: range[1].format('YYYY-MM-DD') };
+    const body = {
+      project: projectId,
+      name,
+      goal: goal ?? '',
+      start_date: activeSprint && current ? current.start_date : range[0].format('YYYY-MM-DD'),
+      end_date: range[1].format('YYYY-MM-DD'),
+    };
     const opts = { onSuccess: () => { message.success(sprint ? 'Sprint updated' : `${name} created`); onClose(); }, onError: (e: unknown) => message.error(errorMessage(e)) };
     if (sprint) update.mutate({ id: sprint.id, body }, opts);
     else create.mutate(body, opts);
@@ -52,8 +59,9 @@ export const SprintFormModal = ({ open, projectId, sprint, onClose }: {
         <Form.Item name="name" label="Name" rules={[rules.required('Name')]}><Input /></Form.Item>
         <Form.Item name="goal" label="Goal"><Input.TextArea rows={3} placeholder="What should this sprint achieve?" /></Form.Item>
         <Form.Item name="range" label="Dates" rules={[rules.required('Dates')]}>
-          <DatePicker.RangePicker format="DD.MM.YYYY" className="w-full" />
+          <DatePicker.RangePicker format="DD.MM.YYYY" className="w-full" disabled={[!!activeSprint, false]} />
         </Form.Item>
+        {activeSprint && <div className="-mt-3 mb-3 text-xs text-fg-3">The start date cannot be changed after the sprint starts.</div>}
         {current && <div className="text-xs text-fg-3">Status: {current.status}</div>}
       </Form>
     </Modal>
