@@ -1,20 +1,17 @@
-import { ApiError } from '@/shared/lib/apiError';
 import { api } from '@/shared/lib/axios';
+import { toAppSettings, toBackendPatch, type BackendSettings } from '@/shared/lib/settingsShape';
 import type { AppSettings } from '@/shared/types';
 
-export type SettingsSection = keyof AppSettings;
+export type SettingsSection = Exclude<keyof AppSettings, 'workflow_settings'>;
 
-// GET /settings/  — NOT IN api.json; readable by every signed-in user (task rules, company name)
+// GET /settings/  — flat object on the backend, grouped into sections for the UI
 export const getSettings = async () => {
-  const { data } = await api.get<AppSettings>('/settings/');
-  // Until the backend ships this endpoint the response may be anything (404 page, other shape).
-  const valid = !!data && typeof data === 'object' && (['general', 'telegram', 'tasks', 'sprint'] as const).every((k) => data[k] && typeof data[k] === 'object');
-  if (!valid) throw new ApiError(501, 'Settings endpoint is not implemented on the backend yet (GET /settings/)');
-  return data;
+  const { data } = await api.get<BackendSettings | AppSettings>('/settings/');
+  return toAppSettings(data);
 };
 
-// PATCH /settings/  { <section>: {...} }  — NOT IN api.json; returns the full settings object
-export const updateSettings = async <S extends SettingsSection>(section: S, values: AppSettings[S]) => {
-  const { data } = await api.patch<AppSettings>('/settings/', { [section]: values });
-  return data;
+// PATCH /settings/  — SUPER_ADMIN only; sends the section's fields in the backend's flat shape
+export const updateSettings = async <S extends SettingsSection>(section: S, values: AppSettings[S], current?: AppSettings) => {
+  const { data } = await api.patch<BackendSettings | AppSettings>('/settings/', toBackendPatch(section, values, current));
+  return toAppSettings(data);
 };

@@ -39,11 +39,11 @@ export const ProjectsPage = () => {
     { title: 'Project', dataIndex: 'name', sorter: true, render: (_: unknown, p: Project) => (
       <span className="flex items-center gap-2"><ProjectIcon projectKey={p.key} /><span className="font-medium text-fg">{p.name}</span></span>) },
     { title: 'Key', dataIndex: 'key', width: 80, sorter: true, render: (k: string) => <span className="font-mono text-xs text-fg-2">{k}</span> },
-    { title: 'Manager', dataIndex: 'manager', key: 'manager__full_name', width: 190, sorter: true, render: (_: unknown, p: Project) => <UserAvatar user={p.manager} showName /> },
-    { title: 'Members', dataIndex: 'members', key: 'members_count', width: 130, sorter: true, render: (_: unknown, p: Project) => <UserAvatarGroup users={p.members ?? []} /> },
+    { title: 'Manager', dataIndex: 'manager', key: 'manager__full_name', width: 190, render: (_: unknown, p: Project) => <UserAvatar user={p.manager} showName /> },
+    { title: 'Members', dataIndex: 'members', key: 'members_count', width: 130, render: (_: unknown, p: Project) => <UserAvatarGroup users={p.members ?? []} /> },
     { title: 'Active sprint', dataIndex: 'active_sprint', width: 130, render: (s: Project['active_sprint']) =>
       s ? <span className="flex items-center gap-1.5 text-fg-2"><HugeiconsIcon icon={Rocket01Icon} size={13} className="hicon" strokeWidth={1.7} />{s.name}</span> : <span className="text-fg-3">—</span> },
-    { title: 'Progress', dataIndex: 'progress', width: 170, sorter: true, render: (_: unknown, p: Project) => (
+    { title: 'Progress', dataIndex: 'progress', width: 170, render: (_: unknown, p: Project) => (
       <Tooltip title={`${p.tasks_done ?? 0} of ${p.tasks_total ?? 0} done (cancelled excluded)`}>
         <Progress percent={p.progress ?? 0} size="small" strokeColor="#165dff" className="!m-0" />
       </Tooltip>) },

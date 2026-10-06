@@ -85,7 +85,7 @@ export const CompleteSprintModal = ({ sprint, onClose }: { sprint: Sprint | null
           title: `${sprint.name} completed`,
           content: `Completion: ${report.completion_percent}%. ${report.unfinished} unfinished task(s) moved. A sprint report was generated.`,
           okText: 'View report',
-          onOk: () => navigate(`${ROUTES.REPORTS}?type=sprint&projectId=${sprint.project.id}&sprintId=${sprint.id}`),
+          onOk: () => navigate(`${ROUTES.REPORTS}?type=sprint&project=${sprint.project.id}&sprint=${sprint.id}`),
           closable: true,
         });
       },

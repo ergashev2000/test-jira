@@ -1,10 +1,12 @@
 import axios, { type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios';
 
+import { MAX_PAGE_SIZE } from '@/shared/constants';
 import { queryClient } from '@/shared/lib/react-query';
 import { useSessionStore } from '@/shared/lib/session';
 
 import { ApiError } from './apiError';
 import { mockAwareAdapter } from './mockServer/adapter';
+import { normalizeResponse } from './normalize';
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? '/api';
 
@@ -45,7 +47,8 @@ const toApiError = (error: unknown): unknown => {
   if (!axios.isAxiosError(error)) return error;
   if (!error.response) return new ApiError(0, 'Cannot reach the server. Check your connection and try again.');
   const { status, data } = error.response;
-  return new ApiError(status, extractMessage(data) ?? STATUS_FALLBACK[status] ?? `Request failed (${status})`);
+  const notImplemented = !!data && typeof data === 'object' && 'not_implemented' in data;
+  return new ApiError(status, extractMessage(data) ?? STATUS_FALLBACK[status] ?? `Request failed (${status})`, notImplemented);
 };
 
 const forceLogout = () => {
@@ -74,13 +77,19 @@ const refreshAccessToken = (): Promise<string> => {
 };
 
 api.interceptors.request.use((config) => {
+  // The backend caps page_size at MAX_PAGE_SIZE; asking for more silently returns fewer rows.
+  const params = config.params as Record<string, unknown> | undefined;
+  if (params && Number(params.page_size) > MAX_PAGE_SIZE) config.params = { ...params, page_size: MAX_PAGE_SIZE };
   const token = useSessionStore.getState().token;
   if (token && !isAuthEndpoint(config.url)) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
 api.interceptors.response.use(
-  (r) => r,
+  (r) => {
+    normalizeResponse(r.data);
+    return r;
+  },
   async (error: unknown) => {
     if (!axios.isAxiosError(error) || !error.config) return Promise.reject(toApiError(error));
     const original = error.config as RetriableConfig;

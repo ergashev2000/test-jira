@@ -42,7 +42,7 @@ export const TaskTable = ({ query, hideProject, hideAssignee, emptyText, ...rest
       ),
     },
     ...(!hideProject ? [{
-      title: 'Project', key: 'project__key', width: 150, ellipsis: true, sorter: true,
+      title: 'Project', key: 'project__key', width: 150, ellipsis: true,
       render: (_: unknown, t: Task) => <span className="flex items-center gap-1.5 text-fg-2"><ProjectIcon projectKey={t.project.key} size={13} />{t.project.key}</span>,
     }] : []),
     { title: 'Status', dataIndex: 'status', width: 140, sorter: true, render: (_, t) => <StatusDropdown task={t} /> },

@@ -75,8 +75,8 @@ const TaskLine = ({ t, trailing }: { t: Task; trailing: React.ReactNode }) => (
 export const ProjectReportView = ({ projectId }: { projectId: number }) => {
   const query = useQuery({ queryKey: QUERY_KEYS.reports.project(String(projectId)), queryFn: () => getProjectReport(projectId) });
   const sprints = useSprints({ project: projectId, ordering: '-start_date', page_size: 50 });
-  const blockers = useTaskList({ project: projectId, is_blocked: true, ordering: 'updated_at', page_size: 50 });
-  const overdue = useTaskList({ project: projectId, deadline: 'overdue', ordering: 'deadline', page_size: 50 });
+  const blockers = useTaskList({ project: projectId, blocked: true, ordering: '-created_at', page_size: 50 });
+  const overdue = useTaskList({ project: projectId, overdue: true, ordering: 'deadline', page_size: 50 });
   return (
     <QueryState query={query}>
       {(r) => {

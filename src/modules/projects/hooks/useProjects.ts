@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { hasPermission, QUERY_KEYS } from '@/shared/constants';
-import { roleOf, useSessionStore } from '@/shared/lib/session';
+import { useSessionStore } from '@/shared/lib/session';
 
 import {
   addMember,
@@ -82,10 +82,9 @@ export const useRemoveMember = () => {
 /** What the current user may do with a project (the backend re-checks every request). */
 export const useProjectAccess = (project: Project | undefined) => {
   const me = useSessionStore((s) => s.user);
-  const role = roleOf(me);
   const open = !!project && project.status !== 'archived';
   return {
-    canEdit: open && (hasPermission(role, 'project.create') || (hasPermission(role, 'project.edit') && project.manager.id === me?.id)),
-    canManageMembers: open && hasPermission(role, 'project.members.manage'),
+    canEdit: open && (hasPermission(me, 'project.create') || (hasPermission(me, 'project.edit') && project.manager.id === me?.id)),
+    canManageMembers: open && hasPermission(me, 'project.members.manage'),
   };
 };

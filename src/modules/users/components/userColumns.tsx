@@ -20,11 +20,11 @@ interface Options {
 
 export const getUserColumns = ({ meId, isLocked, onEdit, onToggleStatus, pendingId }: Options): ColumnsType<User> => [
   { title: 'Full name', dataIndex: 'full_name', width: 210, sorter: true, render: (_, u) => <NameAvatar id={u.id} name={u.full_name || u.username} inactive={u.status === 'inactive'} /> },
-  { title: 'Username', dataIndex: 'username', width: 120, sorter: true, render: (v: string) => <span className="text-fg-2">@{v}</span> },
-  { title: 'Email', dataIndex: 'email', width: 200, sorter: true },
+  { title: 'Username', dataIndex: 'username', width: 120, render: (v: string) => <span className="text-fg-2">@{v}</span> },
+  { title: 'Email', dataIndex: 'email', width: 200 },
   { title: 'Phone', dataIndex: 'phone', width: 160, render: (v: string) => (v ? formatPhone(v) : <EmptyCell />) },
-  { title: 'Position', dataIndex: 'position', width: 170, sorter: true, render: (v: string) => v || <EmptyCell /> },
-  { title: 'Team', dataIndex: 'team', key: 'team__name', width: 120, sorter: true, render: (t: TeamBrief | null) => t?.name ?? <EmptyCell /> },
+  { title: 'Position', dataIndex: 'position', width: 170, render: (v: string) => v || <EmptyCell /> },
+  { title: 'Team', dataIndex: 'team', key: 'team__name', width: 120, render: (t: TeamBrief | null) => t?.name ?? <EmptyCell /> },
   {
     title: 'Roles', dataIndex: 'roles', width: 200, render: (roles: Role[]) => (roles.length
       ? <span className="flex flex-wrap gap-1">{roles.map((r) => <Tag key={r} color={ROLES[r]?.color} className="m-0!">{ROLES[r]?.label ?? r}</Tag>)}</span>

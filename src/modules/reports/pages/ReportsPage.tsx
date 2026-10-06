@@ -8,7 +8,7 @@ import { EmptyState, PageHeader, UserSelect } from '@/shared/components/ui';
 import { hasPermission, type Permission } from '@/shared/constants';
 import { useCurrentUser, useTableParams } from '@/shared/hooks';
 import dayjs from '@/shared/lib/dayjs';
-import { roleOf, useSessionStore } from '@/shared/lib/session';
+import { useSessionStore } from '@/shared/lib/session';
 
 import { DailyReportView, TeamDailyReportView } from '../components/DailyReports';
 import { ProjectReportView, SprintReportView } from '../components/ProjectReports';
@@ -26,14 +26,13 @@ const num = (v: string | undefined) => (v ? Number(v) : undefined);
 export const ReportsPage = () => {
   const { get, set } = useTableParams();
   const user = useCurrentUser();
-  const role = roleOf(user);
   const { data: teams = [] } = useTeamLookups();
   const { data: projects = [] } = useProjectLookups();
-  const allowed = TYPES.filter((t) => hasPermission(role, t.permission));
+  const allowed = TYPES.filter((t) => hasPermission(user, t.permission));
   const type = allowed.find((t) => t.value === get('type'))?.value ?? 'daily';
   const date = get('date') ?? dayjs().format('YYYY-MM-DD');
-  const seesAll = hasPermission(role, 'report.daily.all');
-  const canPickUser = seesAll || role === 'TEAM_LEAD';
+  const seesAll = hasPermission(user, 'report.daily.all');
+  const canPickUser = seesAll || hasPermission(user, 'report.teamDaily');
   const myTeams = teams.filter((t) => seesAll || t.lead?.id === user.id);
   // No user picked → own report via GET /me/daily-report/.
   const userId = canPickUser ? num(get('user')) : undefined;
@@ -97,8 +96,8 @@ export const ReportsPage = () => {
 /** Project → Reports tab. */
 export const ProjectReportsTab = () => {
   const { data: project } = useCurrentProject();
-  const role = useSessionStore((s) => roleOf(s.user));
+  const user = useSessionStore((s) => s.user);
   if (!project) return null;
-  if (!hasPermission(role, 'report.project')) return <EmptyState description="Project reports are available to managers" />;
+  if (!hasPermission(user, 'report.project')) return <EmptyState description="Project reports are available to managers" />;
   return <div className="p-5"><ProjectReportView projectId={project.id} /></div>;
 };

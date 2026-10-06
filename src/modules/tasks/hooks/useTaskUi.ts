@@ -53,7 +53,7 @@ export const useStatusChanger = () => {
       }
       const run = () =>
         mutation.mutate(
-          { id: task.id, status: to },
+          { id: task.id, status: to, from: task.status },
           {
             onSuccess: (saved) =>
               saved.status !== to

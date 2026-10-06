@@ -11,3 +11,5 @@ export const TIME_FORMAT = 'HH:mm';
 export const DATETIME_FORMAT = 'DD.MM.YYYY HH:mm';
 export const REFETCH_INTERVAL = 15_000;
 export const DEFAULT_PAGE_SIZE = 20;
+/** Backend `max_page_size` (to be raised to 500). */
+export const MAX_PAGE_SIZE = 100;

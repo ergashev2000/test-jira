@@ -1,7 +1,8 @@
-import { api } from '@/shared/lib/axios';
-import type { Activity, ApiPaginated, ProjectBrief, Task, UserBrief } from '@/shared/types';
+import type { Activity, ProjectBrief, UserBrief } from '@/shared/types';
 
-/** GET /dashboard/?project= — NOT IN api.json; aggregates scoped to the caller's role on the backend. */
+import { BLOCKERS_MOCK, DASHBOARD_MOCK, MY_TASKS_MOCK, OVERDUE_MOCK } from './dashboardMock';
+
+/** Dashboard aggregates — the shape of the future GET /dashboard/?project=. */
 export interface DashboardSummary {
   kpi: { active_projects: number; active_sprints: number; total_tasks: number; completed_today: number; overdue: number; blocked: number };
   active_sprint: {
@@ -14,26 +15,22 @@ export interface DashboardSummary {
   activity: Activity[];
 }
 
-// GET /dashboard/?project=  — answered by the mock server until the backend ships it
-export const getDashboard = async (project?: number) => {
-  const { data } = await api.get<DashboardSummary>('/dashboard/', { params: { project } });
-  return data;
+// The dashboard shows demo data only (dashboardMock.ts) — no backend requests.
+// When GET /dashboard/ ships, replace these bodies with the API calls.
+
+export const getDashboard = async (project?: number): Promise<DashboardSummary> => {
+  void project;
+  return structuredClone(DASHBOARD_MOCK);
 };
 
-// GET /me/tasks/?bucket=today&page_size=5
-export const getMyTodayTasks = async () => {
-  const { data } = await api.get<ApiPaginated<Task>>('/me/tasks/', { params: { bucket: 'today', page_size: 5, ordering: 'deadline' } });
-  return data.results;
-};
+export const getMyTodayTasks = async () => structuredClone(MY_TASKS_MOCK);
 
-// GET /tasks/?is_blocked=true&project=&ordering=updated_at  — oldest blockers first
 export const getBlockedTasks = async (project?: number) => {
-  const { data } = await api.get<ApiPaginated<Task>>('/tasks/', { params: { project, is_blocked: true, ordering: 'updated_at', page_size: 20 } });
-  return data.results;
+  void project;
+  return structuredClone(BLOCKERS_MOCK);
 };
 
-// GET /tasks/?deadline=overdue&project=&ordering=deadline
 export const getOverdueTasks = async (project?: number) => {
-  const { data } = await api.get<ApiPaginated<Task>>('/tasks/', { params: { project, deadline: 'overdue', ordering: 'deadline', page_size: 8 } });
-  return data.results;
+  void project;
+  return structuredClone(OVERDUE_MOCK);
 };

@@ -7,7 +7,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 
 import { useProjectLookups } from '@/shared/api/lookups';
 import { hasPermission, ROUTES } from '@/shared/constants';
-import { roleOf, useSessionStore } from '@/shared/lib/session';
+import { useSessionStore } from '@/shared/lib/session';
 import { cn } from '@/shared/utils';
 
 import { ProjectIcon } from '@/shared/components/ui/ProjectIcon';
@@ -192,9 +192,9 @@ const ProjectsNav = ({ collapsed }: { collapsed: boolean }) => {
 
 /** Role-filtered navigation — items without permission are not rendered at all. */
 export const Sidebar = ({ collapsed }: { collapsed: boolean }) => {
-  const role = useSessionStore((s) => roleOf(s.user));
+  const user = useSessionStore((s) => s.user);
   const visible = (items: NavItem[]) =>
-    items.filter((i) => !i.permission || hasPermission(role, i.permission));
+    items.filter((i) => !i.permission || hasPermission(user, i.permission));
   const admin = visible(ADMIN);
   return (
     <nav className="flex h-full flex-col gap-4 overflow-y-auto px-2 py-3">

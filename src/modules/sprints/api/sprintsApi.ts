@@ -1,19 +1,13 @@
+import { fetchSprints, type SprintQuery } from '@/shared/api/sprints';
 import { api } from '@/shared/lib/axios';
-import type { ApiPaginated, ListParams, Sprint, SprintReport, SprintStatus, SprintWrite, Task } from '@/shared/types';
+import type { ApiPaginated, Sprint, SprintReport, SprintWrite, Task } from '@/shared/types';
 
 export type { Sprint, SprintWrite } from '@/shared/types';
 
-export interface SprintListParams extends ListParams {
-  project?: number;
-  /** One status or several (repeated ?status=). */
-  status?: SprintStatus | SprintStatus[];
-}
+export type SprintListParams = SprintQuery;
 
-// GET /sprints/?project=&status=&search=&ordering=
-export const listSprints = async (params: SprintListParams = {}) => {
-  const { data } = await api.get<ApiPaginated<Sprint>>('/sprints/', { params });
-  return data;
-};
+// GET /sprints/?status=&ordering=  |  /projects/:id/sprints/?status=&search=&ordering=  (see fetchSprints)
+export const listSprints = (params: SprintListParams = {}) => fetchSprints(params);
 
 // GET /sprints/:id/
 export const getSprint = async (id: number) => {
@@ -49,6 +43,11 @@ export const cancelSprint = async (id: number) => {
 export const completeSprint = async (id: number, moveTo: 'backlog' | number) => {
   const { data } = await api.post<Sprint>(`/sprints/${id}/complete/`, { move_to: moveTo });
   return data;
+};
+
+// POST /tasks/:id/move-sprint/  { sprint }
+export const moveTaskToSprint = async (taskId: number, sprint: number) => {
+  await api.post(`/tasks/${taskId}/move-sprint/`, { sprint });
 };
 
 // GET /reports/sprints/:id/  — live preview for an active sprint, snapshot once completed

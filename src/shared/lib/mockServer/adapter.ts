@@ -1,6 +1,6 @@
 import axios, { AxiosError, type AxiosAdapter, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios';
 
-import { useDemoMode } from '../demoMode';
+import { MOCK_ENABLED, useDemoMode } from '../demoMode';
 import { useSessionStore } from '../session';
 import { dispatch } from './handlers';
 import { HttpError } from './utils';
@@ -8,17 +8,16 @@ import { HttpError } from './utils';
 /**
  * Axios adapter that decides per request: real backend or the in-memory mock server.
  *
+ * - Mock disabled (production, see MOCK_ENABLED) → always the real backend; an endpoint the backend
+ *   doesn't have yet fails with a "not available on the backend yet" error.
  * - Demo mode on (header / login switch), or a session started on the mock → mock only, no network.
  * - Otherwise the real backend. If it can't be reached, or the endpoint isn't implemented there yet
- *   (404/405/501 on a route from docs/BACKEND_REQUIREMENTS.md), that request is answered by the mock.
+ *   (404/405/501 on a route from docs/FRONTEND_INTEGRATION_GUIDE.md), that request is answered by the mock.
  */
 
 /** Endpoints the UI needs that are not in api.json yet. */
 const NOT_IN_API: [string, RegExp][] = [
-  ['GET', /^\/dashboard\/$/],
-  ['*', /^\/notifications\//],
-  ['*', /^\/audit-logs\//],
-  ['*', /^\/settings\/$/],
+  ['GET', /^\/audit-logs\/actions\/$/],
   ['PATCH', /^\/auth\/me\/$/],
   ['POST', /^\/auth\/password-change\/$/],
   ['PATCH', /^\/tasks\/[^/]+\/comments\/[^/]+\/$/],
@@ -77,8 +76,11 @@ const respond = async (config: InternalAxiosRequestConfig): Promise<AxiosRespons
 
 const realAdapter = axios.getAdapter(axios.defaults.adapter);
 
+/** Error body for an endpoint the backend hasn't shipped yet — `toApiError` turns it into `ApiError.notImplemented`. */
+export const NOT_IMPLEMENTED_BODY = { not_implemented: true, detail: 'Not available on the backend yet' };
+
 export const mockAwareAdapter: AxiosAdapter = async (config) => {
-  const mockSession = tokenOf(config)?.startsWith('mock.') ?? false;
+  const mockSession = MOCK_ENABLED && (tokenOf(config)?.startsWith('mock.') ?? false);
   if (useDemoMode.getState().enabled || mockSession) return respond(config);
   try {
     return await realAdapter(config);
@@ -86,7 +88,8 @@ export const mockAwareAdapter: AxiosAdapter = async (config) => {
     if (!axios.isAxiosError(e)) throw e;
     const unreachable = !e.response && e.code !== AxiosError.ERR_CANCELED;
     const missing = !!e.response && [404, 405, 501].includes(e.response.status) && isNotInApi(methodOf(config), pathOf(config));
-    if (!unreachable && !missing) throw e;
+    if (missing && e.response) e.response.data = NOT_IMPLEMENTED_BODY;
+    if (!MOCK_ENABLED || (!unreachable && !missing)) throw e;
     useDemoMode.getState().markFallback();
     return respond(config);
   }

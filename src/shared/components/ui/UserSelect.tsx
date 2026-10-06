@@ -62,7 +62,7 @@ export const UserSelect = ({ projectId, teamId, roles, onlyActive = true, initia
       placeholder="Select user"
       filterOption={false}
       onSearch={setSearch}
-      onDropdownVisibleChange={(open) => !open && setSearch('')}
+      onOpenChange={(open) => !open && setSearch('')}
       options={options}
       optionRender={(o) => (
         <span className="flex min-w-0 items-center gap-2">
