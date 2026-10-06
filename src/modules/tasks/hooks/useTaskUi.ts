@@ -9,14 +9,14 @@ import { checkTransition, errorMessage } from '@/shared/utils';
 
 import { useChangeStatus } from './useTasks';
 
-/** Opens the Task drawer by adding `?task=KEY` to the current URL (shareable). */
+/** Opens the Task drawer by adding `?task=<id>` to the current URL (shareable) — loaded with GET /tasks/{id}/. */
 export const useTaskDrawer = () => {
   const [sp, setSp] = useSearchParams();
   const openTask = useCallback(
-    (key: string) =>
+    (id: number | string) =>
       setSp((prev) => {
         const next = new URLSearchParams(prev);
-        next.set('task', key);
+        next.set('task', String(id));
         return next;
       }),
     [setSp],
@@ -53,7 +53,7 @@ export const useStatusChanger = () => {
       }
       const run = () =>
         mutation.mutate(
-          { id: task.id, status: to },
+          { id: task.id, status: to, from: task.status },
           {
             onSuccess: (saved) =>
               saved.status !== to

@@ -5,21 +5,21 @@ import type { Me, Task, TaskStatus } from '@/shared/types';
  * Contextual task rules for the UI (hide/disable actions). The backend enforces the same rules
  * and has the final word — e.g. it decides whether "done" goes through review.
  */
-export type Actor = Pick<Me, 'id' | 'roles'>;
+export type Actor = Pick<Me, 'id' | 'roles'> & Partial<Pick<Me, 'permissions' | 'is_superuser'>>;
 type TaskLike = Pick<Task, 'assignee' | 'reviewer' | 'status'>;
 
 const role = (a: Actor) => primaryRole(a.roles);
 
 export const isManager = (a: Actor) => MANAGER_ROLES.includes(role(a));
 
-export const canEditTask = (a: Actor) => hasPermission(role(a), 'task.edit');
+export const canEditTask = (a: Actor) => hasPermission(a, 'task.edit');
 
 export const canChangeStatus = (a: Actor, t: TaskLike) =>
-  hasPermission(role(a), 'task.changeStatus') || t.assignee?.id === a.id || t.reviewer?.id === a.id;
+  hasPermission(a, 'task.changeStatus') || t.assignee?.id === a.id || t.reviewer?.id === a.id;
 
-export const canBlock = (a: Actor, t: TaskLike) => hasPermission(role(a), 'task.block') || t.assignee?.id === a.id;
+export const canBlock = (a: Actor, t: TaskLike) => hasPermission(a, 'task.block') || t.assignee?.id === a.id;
 
-export const canCancelDirect = (a: Actor) => hasPermission(role(a), 'task.cancel');
+export const canCancelDirect = (a: Actor) => hasPermission(a, 'task.cancel');
 
 export const canRequestCancel = (a: Actor, t: TaskLike) => !canCancelDirect(a) && t.assignee?.id === a.id;
 

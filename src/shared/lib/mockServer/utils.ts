@@ -72,7 +72,8 @@ export const list = <T extends object>(rows: T[], q: Query, opts: ListOptions<T>
     out = out.sort((a, b) => {
       for (const o of ordering) {
         const desc = o.startsWith('-');
-        const field = desc ? o.slice(1) : o;
+        // Backend's weighted priority ordering is called priority_order.
+        const field = (desc ? o.slice(1) : o).replace(/^priority_order$/, 'priority');
         const get = opts.sortKeys?.[field] ?? ((r: T) => pick(r, field));
         const c = compare(get(a), get(b), field);
         if (c) return desc ? -c : c;

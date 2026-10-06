@@ -1,11 +1,12 @@
 import { BOARD_COLUMNS, TASK_STATUS } from '@/shared/constants/taskStatus';
 import dayjs from '@/shared/lib/dayjs';
+import { ATTACHMENT_RULES, toAppSettings, type BackendSettings } from '@/shared/lib/settingsShape';
 import type { ActivityAction, AuditEntityType, DailyPlanStatus, NotificationType, Role, TaskStatus } from '@/shared/types';
 
 import { d, db, MOCK_PASSWORD, nextId, now, NOTIFICATION_TYPES, type DbProject, type DbSprint, type DbTask, type DbUser } from './db';
 import {
   activeBlocker, activeSprintOf, activityOut, attachmentOut, blockerOut, brief, cancelRequestOut, commentOut, isOpen, isOverdue,
-  memberOut, meOut, projectBrief as projectBriefOf, projectOut, sprintOut, taskOut, teamMembers, teamOut, userById, userOut,
+  memberOut, meOut, projectOut, sprintOut, taskOut, teamMembers, teamOut, userById, userOut,
 } from './serializers';
 import { badRequest, bool, HttpError, list, many, notFound, num, one, percent, type Query } from './utils';
 
@@ -286,6 +287,14 @@ on('GET', '/sprints/', ({ query, me }) => {
     .map(sprintOut);
   return list(rows, query, { search: ['name', 'goal'], ordering: '-start_date' });
 });
+on('GET', '/projects/:id/sprints/', ({ params, query }) => {
+  const status = many(query, 'status');
+  const rows = db.sprints
+    .filter((s) => s.project_id === Number(params[0]))
+    .filter((s) => !status.length || status.includes(s.status))
+    .map(sprintOut);
+  return list(rows, query, { search: ['name', 'goal'], ordering: '-start_date' });
+});
 on('GET', '/sprints/:id/', ({ params }) => sprintOut(findSprint(params[0])));
 on('POST', '/sprints/', ({ body, me }) => {
   if (str(body.end_date) < str(body.start_date)) throw badRequest({ end_date: ['End date must be after start date'] });
@@ -376,7 +385,9 @@ function filterTasks(rows: DbTask[], q: Query) {
   const assignee = many(q, 'assignee').map(Number);
   const priority = many(q, 'priority');
   const type = one(q, 'type');
-  const blocked = bool(q, 'is_blocked');
+  const blocked = bool(q, 'blocked') ?? bool(q, 'is_blocked');
+  const backlog = bool(q, 'backlog');
+  const deadlineFrom = one(q, 'deadline_from');
   const overdue = bool(q, 'overdue');
   const deadline = one(q, 'deadline');
   const deadlineTo = one(q, 'deadline_to');
@@ -385,6 +396,8 @@ function filterTasks(rows: DbTask[], q: Query) {
   const sprint = one(q, 'sprint');
   return rows
     .filter((t) => !project || t.project_id === project)
+    .filter((t) => !backlog || t.sprint_id === null)
+    .filter((t) => !deadlineFrom || (!!t.deadline && t.deadline >= deadlineFrom))
     .filter((t) => {
       if (!sprint) return true;
       if (sprint === 'backlog') return t.sprint_id === null;
@@ -725,50 +738,6 @@ on('POST', '/telegram/link-token/', ({ me }) => {
 });
 on('DELETE', '/telegram/account/', ({ me }) => { me.telegram = null; return NO_CONTENT; });
 
-// ───────────── dashboard ─────────────
-
-on('GET', '/dashboard/', ({ query, me }) => {
-  const project = num(query, 'project');
-  const projects = visibleProjects(me).filter((p) => !project || p.id === project);
-  const ids = new Set(projects.map((p) => p.id));
-  const tasks = db.tasks.filter((t) => ids.has(t.project_id) && t.status !== 'cancelled');
-  const open = tasks.filter(isOpen);
-  const sprint = db.sprints.find((s) => ids.has(s.project_id) && s.status === 'active');
-  const st = sprint ? tasks.filter((t) => t.sprint_id === sprint.id) : [];
-  const people = [...new Set(tasks.map((t) => t.assignee_id).filter((x): x is number => !!x))];
-  return {
-    kpi: {
-      active_projects: projects.filter((p) => p.status === 'active').length,
-      active_sprints: db.sprints.filter((s) => ids.has(s.project_id) && s.status === 'active').length,
-      total_tasks: tasks.length,
-      completed_today: tasks.filter((t) => t.status === 'done' && t.completed_at?.slice(0, 10) === d(0)).length,
-      overdue: tasks.filter(isOverdue).length,
-      blocked: open.filter((t) => activeBlocker(t.id)).length,
-    },
-    active_sprint: sprint ? {
-      id: sprint.id, name: sprint.name, goal: sprint.goal, start_date: sprint.start_date, end_date: sprint.end_date,
-      project: projectBriefOf(sprint.project_id),
-      progress: percent(st.filter((t) => t.status === 'done').length, st.length),
-      days_left: dayjs(sprint.end_date).diff(dayjs().startOf('day'), 'day'),
-    } : null,
-    sprint_progress: {
-      completed: st.filter((t) => t.status === 'done').length,
-      blocked: st.filter((t) => isOpen(t) && activeBlocker(t.id)).length,
-      in_progress: st.filter((t) => !activeBlocker(t.id) && (t.status === 'in_progress' || t.status === 'review')).length,
-      todo: st.filter((t) => !activeBlocker(t.id) && (t.status === 'todo' || t.status === 'backlog')).length,
-    },
-    team: people.map((id) => {
-      const mine = tasks.filter((t) => t.assignee_id === id);
-      return {
-        user: brief(id)!, assigned: mine.length, completed: mine.filter((t) => t.status === 'done').length, unfinished: mine.filter(isOpen).length,
-        blocked: mine.filter((t) => isOpen(t) && activeBlocker(t.id)).length, overdue: mine.filter(isOverdue).length,
-      };
-    }).sort((a, b) => b.assigned - a.assigned),
-    workload: people.map((id) => ({ user: brief(id)!, active: open.filter((t) => t.assignee_id === id).length })).filter((w) => w.active).sort((a, b) => b.active - a.active),
-    activity: db.activity.filter((a) => tasks.some((t) => t.id === a.task_id)).sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 10).map(activityOut),
-  };
-});
-
 // ───────────── notifications ─────────────
 
 const mine = (me: DbUser) => db.notifications.filter((x) => x.user_id === me.id);
@@ -788,10 +757,17 @@ on('POST', '/notifications/:id/read/', ({ params, me }) => {
 on('POST', '/notifications/read-all/', ({ me }) => { mine(me).forEach((x) => (x.is_read = true)); return NO_CONTENT; });
 const notifSettings = (me: DbUser) =>
   (db.notificationSettings[me.id] ??= NOTIFICATION_TYPES.map((event) => ({ event, telegram: !!me.telegram, web: true })));
-on('GET', '/notifications/settings/', ({ me }) => ({ telegram_linked: !!me.telegram, items: notifSettings(me) }));
-on('PUT', '/notifications/settings/', ({ body, me }) => {
-  db.notificationSettings[me.id] = (body.items as ReturnType<typeof notifSettings>) ?? notifSettings(me);
-  return { telegram_linked: !!me.telegram, items: db.notificationSettings[me.id] };
+/** Backend shape: `[{ event_type, label, web_enabled, telegram_enabled }]`. */
+const notifSettingsOut = (me: DbUser) =>
+  notifSettings(me).map((s) => ({ event_type: s.event, label: s.event.replace(/_/g, ' '), web_enabled: s.web, telegram_enabled: s.telegram }));
+on('GET', '/notification-settings/', ({ me }) => notifSettingsOut(me));
+on('PUT', '/notification-settings/', ({ body, me }) => {
+  const items = (body.items as { event_type: NotificationType; web_enabled: boolean; telegram_enabled: boolean }[] | undefined) ?? [];
+  db.notificationSettings[me.id] = notifSettings(me).map((s) => {
+    const x = items.find((i) => i.event_type === s.event);
+    return x ? { event: s.event, web: x.web_enabled, telegram: x.telegram_enabled } : s;
+  });
+  return notifSettingsOut(me);
 });
 
 // ───────────── audit log ─────────────
@@ -813,17 +789,24 @@ on('GET', '/audit-logs/actions/', () => [...new Set(db.auditLogs.map((a) => a.ac
 
 // ───────────── settings ─────────────
 
-on('GET', '/settings/', () => db.settings);
+/** Backend shape: one flat object (api.json → SystemSetting). */
+const settingsOut = (): BackendSettings => {
+  const s = db.settings;
+  return {
+    company_name: s.general.company_name, timezone: s.general.timezone, working_days: s.general.working_days,
+    work_start_time: `${s.general.work_start}:00`, work_end_time: `${s.general.work_end}:00`,
+    morning_notification_time: `${s.telegram.morning_time}:00`, reminders_time: `${s.telegram.reminders_time ?? '13:00'}:00`,
+    evening_report_time: `${s.telegram.evening_time}:00`, default_priority: s.tasks.default_priority,
+    default_sprint_duration_days: s.sprint.default_duration_days, workflow_settings: { require_review: s.tasks.require_review }, updated_at: now(),
+  };
+};
+on('GET', '/settings/', () => settingsOut());
 on('PATCH', '/settings/', ({ body, me }) => {
-  for (const [section, values] of Object.entries(body)) {
-    if (section in db.settings) {
-      const key = section as keyof typeof db.settings;
-      const old = { ...db.settings[key] };
-      db.settings = { ...db.settings, [key]: { ...db.settings[key], ...(values as object) } };
-      logAudit(me, 'SETTINGS_UPDATED', 'settings', key, `${key} settings`, old, { ...db.settings[key] });
-    }
-  }
-  return db.settings;
+  const old = settingsOut();
+  const next = toAppSettings({ ...old, ...(body as Partial<BackendSettings>) });
+  db.settings = { ...next, telegram: { ...next.telegram, bot_username: db.settings.telegram.bot_username }, tasks: { ...db.settings.tasks, ...next.tasks, ...ATTACHMENT_RULES } };
+  logAudit(me, 'SETTINGS_UPDATED', 'settings', 'system', 'System settings', old as unknown as Record<string, unknown>, settingsOut() as unknown as Record<string, unknown>);
+  return settingsOut();
 });
 
 // ───────────── dispatch ─────────────

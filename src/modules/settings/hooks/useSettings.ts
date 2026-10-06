@@ -10,7 +10,7 @@ export const useAppSettings = () => useQuery({ queryKey: QUERY_KEYS.settings, qu
 export const useUpdateSettings = <S extends SettingsSection>(section: S) => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (values: AppSettings[S]) => updateSettings(section, values),
+    mutationFn: (values: AppSettings[S]) => updateSettings(section, values, qc.getQueryData<AppSettings>(QUERY_KEYS.settings)),
     onSuccess: (data) => {
       qc.setQueryData(QUERY_KEYS.settings, data);
       qc.invalidateQueries({ queryKey: ['audit-log'] });

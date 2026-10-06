@@ -2,7 +2,14 @@ import { create } from 'zustand';
 
 const DEMO_KEY = 'pm.demo';
 
+/**
+ * Mock server availability: dev builds, or a build with VITE_MOCK_FALLBACK=true (staging demos).
+ * In production it's off — a missing endpoint shows a real error instead of fake data.
+ */
+export const MOCK_ENABLED = import.meta.env.DEV || import.meta.env.VITE_MOCK_FALLBACK === 'true';
+
 const readDemo = () => {
+  if (!MOCK_ENABLED) return false;
   try {
     return localStorage.getItem(DEMO_KEY) === 'true';
   } catch {

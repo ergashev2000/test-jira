@@ -429,7 +429,7 @@ export interface TelegramLinkToken {
   expires_at: string;
 }
 
-// ───────────── NOT IN api.json ─────────────
+// ───────────── notifications · audit · settings ─────────────
 
 export type NotificationType =
   | 'task_assigned'
@@ -439,6 +439,7 @@ export type NotificationType =
   | 'task_blocked'
   | 'blocker_resolved'
   | 'comment_added'
+  | 'user_mentioned'
   | 'sprint_started'
   | 'sprint_ending'
   | 'daily_reminder'
@@ -458,9 +459,11 @@ export interface AppNotification {
   created_at: string;
 }
 
-/** GET /notifications/settings/ item */
+/** GET /notification-settings/ item (UI shape). */
 export interface NotificationSetting {
   event: NotificationType;
+  /** Backend's human-readable event name. */
+  label?: string;
   telegram: boolean;
   web: boolean;
 }
@@ -482,10 +485,11 @@ export interface AuditLog {
   created_at: string;
 }
 
-/** GET /settings/ */
+/** GET /settings/ grouped for the settings UI (the backend returns a flat object — see shared/lib/settingsShape.ts). */
 export interface AppSettings {
   general: { company_name: string; timezone: string; working_days: number[]; work_start: string; work_end: string };
-  telegram: { bot_username: string; enabled: boolean; morning_time: string; evening_time: string };
+  telegram: { bot_username: string; enabled: boolean; morning_time: string; reminders_time?: string; evening_time: string };
   tasks: { default_priority: Priority; require_review: boolean; max_attachment_mb: number; allowed_file_types: string[] };
   sprint: { default_duration_days: number };
+  workflow_settings?: Record<string, unknown>;
 }

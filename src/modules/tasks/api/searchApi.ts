@@ -24,7 +24,9 @@ export const globalSearch = async (query: string): Promise<SearchResults> => {
   const [tasks, projects, sprints, users, teams] = await Promise.allSettled([
     list<Task>('/tasks/', q, { page_size: 8 }),
     list<Project>('/projects/', q),
-    list<Sprint>('/sprints/', q),
+    // GET /sprints/ ignores ?search= for now — match names here on the most recent sprints.
+    list<Sprint>('/sprints/', q, { page_size: 100, ordering: '-start_date' })
+      .then((rows) => rows.filter((s) => s.name.toLowerCase().includes(q.toLowerCase())).slice(0, LIMIT)),
     list<SearchResults['users'][number]>('/users/', q),
     list<Team>('/teams/', q),
   ]);
