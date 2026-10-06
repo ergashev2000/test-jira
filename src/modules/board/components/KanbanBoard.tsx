@@ -23,7 +23,7 @@ import { cn } from '@/shared/utils';
 import { TaskCard, TaskCardView } from './TaskCard';
 
 const Column = ({ status, tasks, onAdd, onOpen }: {
-  status: TaskStatus; tasks: Task[]; onAdd?: () => void; onOpen: (key: string) => void;
+  status: TaskStatus; tasks: Task[]; onAdd?: () => void; onOpen: (id: number) => void;
 }) => {
   const { setNodeRef, isOver } = useDroppable({ id: status });
   return (

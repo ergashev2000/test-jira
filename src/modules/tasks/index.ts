@@ -9,3 +9,4 @@ export { useTaskList, useBoard, useMyTasks, useCreateTask, useMoveTask, useChang
 export { useProjectActivity } from './hooks/useTaskActions';
 export { useTaskDrawer, useStatusChanger } from './hooks/useTaskUi';
 export { globalSearch } from './api/searchApi';
+export { findTaskIdByKey } from './api/tasksApi';

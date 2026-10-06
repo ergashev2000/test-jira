@@ -19,7 +19,7 @@ export const QUERY_KEYS = {
     all: ['tasks'] as const,
     list: (params: object) => ['tasks', 'list', params] as const,
     my: (params: object) => ['tasks', 'my', params] as const,
-    detail: (key: string) => ['tasks', 'detail', key] as const,
+    detail: (id: string) => ['tasks', 'detail', id] as const,
     comments: (id: string) => ['tasks', 'comments', id] as const,
     attachments: (id: string) => ['tasks', 'attachments', id] as const,
     activity: (id: string) => ['tasks', 'activity', id] as const,

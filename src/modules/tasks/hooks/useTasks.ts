@@ -54,11 +54,11 @@ export const useMyTasks = (params: MyTasksParams) =>
 export const useMyTasksSummary = () =>
   useQuery({ queryKey: [...QUERY_KEYS.tasks.all, 'summary'], queryFn: getMyTasksSummary, refetchInterval: REFETCH_INTERVAL });
 
-export const useTaskDetail = (key: string | null | undefined) =>
+export const useTaskDetail = (id: string | null | undefined) =>
   useQuery({
-    queryKey: QUERY_KEYS.tasks.detail(key ?? ''),
-    queryFn: () => getTask(key!),
-    enabled: !!key,
+    queryKey: QUERY_KEYS.tasks.detail(id ?? ''),
+    queryFn: () => getTask(id!),
+    enabled: !!id,
     refetchInterval: REFETCH_INTERVAL,
   });
 

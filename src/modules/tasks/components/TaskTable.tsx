@@ -60,7 +60,7 @@ export const TaskTable = ({ query, hideProject, hideAssignee, emptyText, ...rest
       query={query}
       columns={columns}
       emptyText={emptyText}
-      onRowClick={(t) => openTask(t.key)}
+      onRowClick={(t) => openTask(t.id)}
       scroll={{ x: 900 }}
       {...rest}
     />

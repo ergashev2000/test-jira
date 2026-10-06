@@ -27,10 +27,15 @@ export const getMyTasksSummary = async () => {
   return data;
 };
 
-// GET /tasks/:key/
-export const getTask = async (key: string) => {
-  const { data } = await api.get<Task>(`/tasks/${key}/`);
+// GET /tasks/:id/
+export const getTask = async (id: string) => {
+  const { data } = await api.get<Task>(`/tasks/${id}/`);
   return data;
+};
+
+export const findTaskIdByKey = async (key: string) => {
+  const { data } = await api.get<ApiPaginated<Task>>('/tasks/', { params: { search: key, page_size: 100 } });
+  return data.results.find((task) => task.key.toUpperCase() === key.toUpperCase())?.id;
 };
 
 // POST /tasks/

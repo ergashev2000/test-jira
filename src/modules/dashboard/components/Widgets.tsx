@@ -48,7 +48,7 @@ export const MyTasksWidget = ({ items }: { items: Task[] }) => {
   return (
     <ul className="m-0 flex list-none flex-col p-0">
       {items.map((t) => (
-        <li key={t.id} onClick={() => openTask(t.key)} className="-mx-2 flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-surface-2">
+        <li key={t.id} onClick={() => openTask(t.id)} className="-mx-2 flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-surface-2">
           <PriorityTag priority={t.priority} iconOnly />
           <span className="w-16 font-mono text-xs text-fg-3">{t.key}</span>
           <span className="flex-1 truncate text-[13px]">{t.title}</span>
@@ -85,7 +85,7 @@ export const BlockersTable = ({ rows }: { rows: Task[] }) => {
     <Table className="app-table" size="small" rowKey="id" dataSource={rows} pagination={false} scroll={{ x: 700 }}
       locale={{ emptyText: <EmptyState description="No active blockers 🎉" /> }}
       rowClassName={(r) => `row-clickable ${stale(r) ? 'row-blocker-stale' : ''}`}
-      onRow={(r) => ({ onClick: () => openTask(r.key) })}
+      onRow={(r) => ({ onClick: () => openTask(r.id) })}
       columns={[
         { title: 'Task', dataIndex: 'key', render: (k: string, r) => <span><span className="font-mono text-xs text-fg-3">{k}</span> {r.title}</span> },
         { title: 'User', dataIndex: 'assignee', width: 60, render: (u: UserBrief | null) => <UserAvatar user={u} /> },
@@ -102,7 +102,7 @@ export const OverdueList = ({ rows }: { rows: Task[] }) => {
   return (
     <ul className="m-0 flex list-none flex-col p-0">
       {rows.map((t) => (
-        <li key={t.key} onClick={() => openTask(t.key)} className="-mx-2 flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-surface-2">
+        <li key={t.key} onClick={() => openTask(t.id)} className="-mx-2 flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-surface-2">
           <span className="w-16 font-mono text-xs text-fg-3">{t.key}</span>
           <span className="flex-1 truncate text-[13px]">{t.title}</span>
           <UserAvatar user={t.assignee} />

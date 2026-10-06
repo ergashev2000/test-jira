@@ -67,7 +67,7 @@ export const ProjectOverviewTab = () => {
                   <li key={b.key} className="flex gap-2">
                     <UserAvatar user={b.assignee} />
                     <div className="min-w-0 text-[13px]">
-                      <Link to={`?task=${b.key}`} className="font-mono text-xs">{b.key}</Link> <span className="text-fg">{b.title}</span>
+                      <Link to={`?task=${b.id}`} className="font-mono text-xs">{b.key}</Link> <span className="text-fg">{b.title}</span>
                       <div className="text-xs text-fg-2">{b.active_blocker?.reason}</div>
                       <div className="text-[11px] text-fg-3">since {fromNow(b.active_blocker?.created_at ?? b.updated_at)}</div>
                     </div>
