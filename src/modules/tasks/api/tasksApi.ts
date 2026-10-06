@@ -1,5 +1,4 @@
 import { api } from '@/shared/lib/axios';
-import { getByKey } from '@/shared/api/getByKey';
 import { ApiError } from '@/shared/lib/apiError';
 import type { ApiPaginated, Board, DailyPlan, MyTasksSummary, Task, TaskStatus, TaskWrite } from '@/shared/types';
 
@@ -29,8 +28,11 @@ export const getMyTasksSummary = async () => {
   return data;
 };
 
-// GET /tasks/:key/  — falls back to GET /tasks/?search=<key> while the backend looks up by id only
-export const getTask = (key: string) => getByKey<Task>(key, `/tasks/${key}/`, '/tasks/');
+// GET /tasks/{id}/
+export const getTask = async (id: number | string) => {
+  const { data } = await api.get<Task>(`/tasks/${id}/`);
+  return data;
+};
 
 // POST /tasks/
 export const createTask = async (body: TaskWrite) => {

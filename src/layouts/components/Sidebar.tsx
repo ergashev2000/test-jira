@@ -84,7 +84,7 @@ const CollapsedProject = ({
   project,
   active,
 }: {
-  project: { key: string; name: string };
+  project: { id: number; key: string; name: string };
   active: boolean;
 }) => (
   <Popover
@@ -99,13 +99,13 @@ const CollapsedProject = ({
           <span className="truncate">{project.name}</span>
         </div>
         {PROJECT_TABS.map(({ tab, label, icon }) => (
-          <Item key={tab} collapsed={false} item={{ to: ROUTES.project(project.key, tab), label, icon }} />
+          <Item key={tab} collapsed={false} item={{ to: ROUTES.project(project.id, tab), label, icon }} />
         ))}
       </div>
     }
   >
     <NavLink
-      to={ROUTES.project(project.key)}
+      to={ROUTES.project(project.id)}
       aria-label={project.name}
       className={cn(
         'flex h-8 items-center justify-center rounded-md transition-colors hover:bg-surface-2',
@@ -158,7 +158,7 @@ const ProjectsNav = ({ collapsed }: { collapsed: boolean }) => {
           <CollapsedProject
             key={p.id}
             project={p}
-            active={pathname.startsWith(`${ROUTES.PROJECTS}/${p.key}/`)}
+            active={pathname.startsWith(`${ROUTES.PROJECTS}/${p.id}/`)}
           />
         ))}
       </Section>
@@ -170,17 +170,17 @@ const ProjectsNav = ({ collapsed }: { collapsed: boolean }) => {
         <div key={p.id}>
           <button
             type="button"
-            onClick={() => setExpanded(expanded === p.key ? null : p.key)}
+            onClick={() => setExpanded(expanded === String(p.id) ? null : String(p.id))}
             className="flex h-8 w-full cursor-pointer items-center gap-2.5 rounded-md border-0 bg-transparent px-2 text-left text-[13px] text-fg-2 hover:bg-surface-2 hover:text-fg"
           >
             <ProjectIcon projectKey={p.key} size={15} />
             <span className="flex-1 truncate">{p.name}</span>
-            <Chevron open={expanded === p.key} className="text-fg-3" />
+            <Chevron open={expanded === String(p.id)} className="text-fg-3" />
           </button>
-          <Collapsible open={expanded === p.key}>
+          <Collapsible open={expanded === String(p.id)}>
             <div className="ml-4 flex flex-col gap-0.5 border-l border-line py-0.5 pl-2">
               {PROJECT_TABS.map(({ tab, label, icon }) => (
-                <Item key={tab} collapsed={false} item={{ to: ROUTES.project(p.key, tab), label, icon }} />
+                <Item key={tab} collapsed={false} item={{ to: ROUTES.project(p.id, tab), label, icon }} />
               ))}
             </div>
           </Collapsible>

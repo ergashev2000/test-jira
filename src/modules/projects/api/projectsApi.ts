@@ -1,21 +1,27 @@
 import { api } from '@/shared/lib/axios';
-import { getByKey } from '@/shared/api/getByKey';
 import { asPage } from '@/shared/lib/normalize';
-import type { ApiPaginated, ListParams, Project, ProjectMember, ProjectReport, ProjectWrite, Task } from '@/shared/types';
+import type {
+  ApiPaginated,
+  ListParams,
+  Project,
+  ProjectMember,
+  ProjectReport,
+  ProjectWrite,
+  Task,
+} from '@/shared/types';
 
 import type { ProjectListParams } from '../types/project.types';
 
-// GET /projects/?search=&status=&manager=&member=&ordering=  (ordering: name, key, created_at, status)
-// The backend has no default order yet, so pages can shift — always send one.
 export const listProjects = async (params: ProjectListParams = {}) => {
-  const { data } = await api.get<ApiPaginated<Project>>('/projects/', { params: { ...params, ordering: params.ordering || '-created_at' } });
+  const { data } = await api.get<ApiPaginated<Project>>('/projects/', { params });
   return data;
 };
 
-// GET /projects/:key/  — routes use the project key. Until the backend accepts a key there
-// (it looks up by id only, 404), the key is resolved through GET /projects/?search=.
-export const getProject = (key: string) =>
-  getByKey<Project>(key, `/projects/${key}/`, '/projects/');
+// GET /projects/{id}/
+export const getProject = async (id: number | string) => {
+  const { data } = await api.get<Project>(`/projects/${id}/`);
+  return data;
+};
 
 // POST /projects/
 export const createProject = async (body: ProjectWrite) => {
@@ -48,7 +54,9 @@ export const listTopBlockers = async (project: number) => {
 
 // GET /projects/:id/members/  — a plain array today, paginated later
 export const listMembers = async (id: number, params: ListParams = {}) => {
-  const { data } = await api.get<ProjectMember[] | ApiPaginated<ProjectMember>>(`/projects/${id}/members/`, { params: { page_size: 100, ...params } });
+  const { data } = await api.get<ProjectMember[] | ApiPaginated<ProjectMember>>(`/projects/${id}/members/`, {
+    params: { page_size: 100, ...params },
+  });
   return asPage(data);
 };
 

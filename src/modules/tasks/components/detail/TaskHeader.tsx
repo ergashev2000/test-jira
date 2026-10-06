@@ -51,7 +51,7 @@ export const TaskHeader = ({ task, inDrawer }: { task: Task; inDrawer?: boolean 
         <span className="font-mono">{task.key}</span>
         <Tooltip title="Copy link">
           <Button size="small" type="text" icon={<HugeiconsIcon icon={Link01Icon} size={16} className="hicon" strokeWidth={1.7} />} onClick={() => {
-            copyToClipboard(`${window.location.origin}${ROUTES.task(task.key)}`);
+            copyToClipboard(`${window.location.origin}${ROUTES.task(task.id)}`);
             message.success('Link copied');
           }} />
         </Tooltip>
@@ -63,7 +63,7 @@ export const TaskHeader = ({ task, inDrawer }: { task: Task; inDrawer?: boolean 
           {editable && <Button size="small" icon={<HugeiconsIcon icon={Edit02Icon} size={16} className="hicon" strokeWidth={1.7} />} onClick={() => setModal('edit')}>Edit</Button>}
           {inDrawer && (
             <Tooltip title="Open in full page">
-              <Button size="small" type="text" icon={<HugeiconsIcon icon={ArrowExpand01Icon} size={16} className="hicon" strokeWidth={1.7} />} onClick={() => navigate(ROUTES.task(task.key))} />
+              <Button size="small" type="text" icon={<HugeiconsIcon icon={ArrowExpand01Icon} size={16} className="hicon" strokeWidth={1.7} />} onClick={() => navigate(ROUTES.task(task.id))} />
             </Tooltip>
           )}
           {menu.length > 0 && (

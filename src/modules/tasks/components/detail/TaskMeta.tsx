@@ -71,7 +71,7 @@ export const TaskMeta = ({ task }: { task: Task }) => {
         )}
       </Row>
       <Row label="Project">
-        <Link to={ROUTES.project(task.project.key)} className="inline-flex items-center gap-1.5 !text-fg">
+        <Link to={ROUTES.project(task.project.id)} className="inline-flex items-center gap-1.5 !text-fg">
           <ProjectIcon projectKey={task.project.key} size={14} />{task.project.name}
         </Link>
       </Row>
