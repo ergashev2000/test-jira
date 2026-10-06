@@ -4,7 +4,7 @@ import { App, Button, Collapse, Dropdown, Input, Tag } from 'antd';
 import { useState } from 'react';
 
 import { useCurrentProject } from '@/modules/projects';
-import { TaskFormModal, TaskListRow, useCreateTask, useMoveTask, useTaskList, type Task } from '@/modules/tasks';
+import { TaskFormModal, TaskListRow, useAllTaskList, useCreateTask, useMoveTask, useProjectBacklog, type Task } from '@/modules/tasks';
 import { EmptyState, QueryState } from '@/shared/components/ui';
 import { SPRINT_STATUS } from '@/shared/constants';
 import { usePermission } from '@/shared/hooks';
@@ -14,9 +14,6 @@ import type { Sprint } from '../api/sprintsApi';
 import { SprintActions } from '../components/SprintActions';
 import { CompleteSprintModal, SprintFormModal } from '../components/SprintModals';
 import { useSprints } from '../hooks/useSprints';
-
-/** Rendered in full — the backlog is a planning view, not a paged table. */
-const SECTION_PAGE_SIZE = 500;
 
 type Target = { id: number | null; name: string };
 
@@ -52,9 +49,9 @@ const InlineCreate = ({ projectId, disabled }: { projectId: number; disabled: bo
   );
 };
 
-/** Tasks of one sprint (or the backlog) — GET /tasks/?project=&sprint=<id|backlog>. */
-const useSectionTasks = (project: number, sprint: number | 'backlog') =>
-  useTaskList({ project, sprint, page_size: SECTION_PAGE_SIZE, ordering: 'priority' });
+/** Tasks assigned to one sprint. */
+const useSectionTasks = (project: number, sprint: number) =>
+  useAllTaskList({ project, sprint, ordering: 'priority_order' });
 
 const TaskRows = ({ tasks, actions }: { tasks: Task[]; actions: (t: Task) => React.ReactNode }) =>
   tasks.length ? <>{tasks.map((t) => <TaskListRow key={t.id} task={t} actions={actions(t)} />)}</>
@@ -71,7 +68,7 @@ export const BacklogTab = () => {
   const canCreate = usePermission('task.create');
   const canManageSprints = usePermission('sprint.manage');
   const sprints = useSprints({ project: project?.id, status: ['active', 'planned'], ordering: 'start_date', page_size: 50 }, !!project);
-  const backlog = useSectionTasks(project?.id ?? 0, 'backlog');
+  const backlog = useProjectBacklog(project?.id);
   const [sprintModal, setSprintModal] = useState<{ open: boolean; sprint?: Sprint }>({ open: false });
   const [completing, setCompleting] = useState<Sprint | null>(null);
   const [createOpen, setCreateOpen] = useState(false);

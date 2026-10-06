@@ -5,7 +5,7 @@ export { TaskFormModal } from './components/TaskFormModal';
 export { TaskTable } from './components/TaskTable';
 export { TaskListRow } from './components/TaskListRow';
 export { StatusDropdown } from './components/StatusDropdown';
-export { useTaskList, useBoard, useMyTasks, useCreateTask, useMoveTask, useChangeStatus, invalidateTaskData } from './hooks/useTasks';
+export { useTaskList, useAllTaskList, useProjectBacklog, useBoard, useMyTasks, useCreateTask, useMoveTask, useChangeStatus, invalidateTaskData } from './hooks/useTasks';
 export { useProjectActivity } from './hooks/useTaskActions';
 export { useTaskDrawer, useStatusChanger } from './hooks/useTaskUi';
 export { globalSearch } from './api/searchApi';

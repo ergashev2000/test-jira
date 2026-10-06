@@ -12,6 +12,8 @@ import {
   getMyTasksSummary,
   getTask,
   listMyTasks,
+  listAllTasks,
+  listProjectBacklog,
   listTasks,
   moveTask,
   transitionTask,
@@ -32,6 +34,23 @@ export const useTaskList = (params: TaskListParams, options: { live?: boolean; e
     queryFn: () => listTasks(params),
     refetchInterval: options.live ? REFETCH_INTERVAL : false,
     enabled: options.enabled ?? true,
+    placeholderData: (prev) => prev,
+  });
+
+/** Loads all pages for a screen that displays a complete task section. */
+export const useAllTaskList = (params: TaskListParams, enabled = true) =>
+  useQuery({
+    queryKey: ['tasks', 'all-pages', params],
+    queryFn: () => listAllTasks(params),
+    enabled,
+    placeholderData: (prev) => prev,
+  });
+
+export const useProjectBacklog = (projectId: number | undefined) =>
+  useQuery({
+    queryKey: ['projects', projectId, 'backlog'],
+    queryFn: () => listProjectBacklog(projectId!),
+    enabled: !!projectId,
     placeholderData: (prev) => prev,
   });
 

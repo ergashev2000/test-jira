@@ -15,8 +15,8 @@ export type {
 /** GET /tasks/ query params — all filtering happens on the backend. */
 export interface TaskListParams extends ListParams {
   project?: number;
-  /** Sprint id, or `backlog` (no sprint) / `active` (project's active sprint). */
-  sprint?: number | 'backlog' | 'active';
+  /** Sprint ID. */
+  sprint?: number;
   status?: TaskStatus[];
   assignee?: number[];
   priority?: Priority[];

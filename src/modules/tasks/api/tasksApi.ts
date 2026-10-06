@@ -9,6 +9,27 @@ export const listTasks = async (params: TaskListParams = {}) => {
   return data;
 };
 
+const listAllPages = async (url: string, params: TaskListParams = {}) => {
+  // TODO: Replace eager loading with infinite scroll or Load more.
+  const results: Task[] = [];
+  let page = 1;
+  let data: ApiPaginated<Task>;
+
+  do {
+    ({ data } = await api.get<ApiPaginated<Task>>(url, { params: { ...params, page, page_size: 100 } }));
+    results.push(...data.results);
+    page += 1;
+  } while (data.next);
+
+  return { ...data, next: null, previous: null, results };
+};
+
+/** Fetch every page for views that render a complete task section. */
+export const listAllTasks = (params: TaskListParams = {}) => listAllPages('/tasks/', params);
+
+/** GET /projects/:id/backlog/ — open tasks without a sprint. */
+export const listProjectBacklog = (projectId: number) => listAllPages(`/projects/${projectId}/backlog/`);
+
 // GET /projects/:id/board/?sprint=&assignee=&priority=&blocked=&deadline_to=&search=
 export const getBoard = async (projectId: number, params: BoardParams = {}) => {
   const { data } = await api.get<Board>(`/projects/${projectId}/board/`, { params });
