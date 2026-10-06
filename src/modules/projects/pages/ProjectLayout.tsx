@@ -14,16 +14,16 @@ import { useProject, useProjectAccess } from '../hooks/useProjects';
 const TABS = ['overview', 'board', 'backlog', 'sprints', 'members', 'reports', 'activity'] as const;
 
 export const useCurrentProject = () => {
-  const { projectKey = '' } = useParams();
-  return useProject(projectKey);
+  const { projectId = '' } = useParams();
+  return useProject(projectId);
 };
 
 export const ProjectLayout = () => {
-  const { projectKey = '' } = useParams();
+  const { projectId = '' } = useParams();
   const { pathname, search } = useLocation();
   const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
-  const { data: project, isLoading, isError, error, refetch } = useProject(projectKey);
+  const { data: project, isLoading, isError, error, refetch } = useProject(projectId);
   const { canEdit } = useProjectAccess(project);
   const tab = TABS.find((t) => pathname.endsWith(`/${t}`)) ?? 'overview';
 
@@ -61,7 +61,7 @@ export const ProjectLayout = () => {
         <Tabs
           activeKey={tab}
           className="!-mb-px"
-          onChange={(k) => navigate({ pathname: ROUTES.project(project.key, k), search: k === tab ? search : '' })}
+          onChange={(k) => navigate({ pathname: ROUTES.project(project.id, k), search: k === tab ? search : '' })}
           items={TABS.map((t) => ({ key: t, label: t[0].toUpperCase() + t.slice(1) }))}
         />
       </div>

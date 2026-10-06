@@ -84,7 +84,7 @@ export const ProjectsPage = () => {
           <QueryState query={query}>{(data) => <ProjectsBoard items={data.results} />}</QueryState>
         ) : (
           <DataTable<Project> query={query} columns={columns} rowNumbers={false} scroll={{ x: 1100 }}
-            onRowClick={(p) => navigate(ROUTES.project(p.key))} emptyText="No projects found" />
+            onRowClick={(p) => navigate(ROUTES.project(p.id))} emptyText="No projects found" />
         )}
       </div>
       <ProjectFormModal open={modal.open} project={modal.project} onClose={() => setModal({ open: false })} />

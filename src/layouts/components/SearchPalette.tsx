@@ -106,14 +106,14 @@ export const SearchPalette = ({ open, onClose }: { open: boolean; onClose: () =>
         id: `project:${p.id}`, group: 'Projects',
         icon: <span className="flex size-7 items-center justify-center"><ProjectIcon projectKey={p.key} size={16} /></span>,
         title: p.name, meta: `${p.key} · ${PROJECT_STATUS[p.status].label}`, hint: p.description || undefined,
-        run: go(ROUTES.project(p.key)),
+        run: go(ROUTES.project(p.id)),
       });
     }
     for (const s of data?.sprints ?? []) {
       list.push({
         id: `sprint:${s.id}`, group: 'Sprints', icon: <NavIcon icon={Rocket01Icon} />,
         title: s.name, meta: `${s.project.name} · ${SPRINT_STATUS[s.status].label}`, hint: s.goal || undefined,
-        run: go(ROUTES.project(s.project.key, 'sprints')),
+        run: go(ROUTES.project(s.project.id, 'sprints')),
       });
     }
     for (const u of data?.users ?? []) {

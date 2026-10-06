@@ -34,8 +34,8 @@ export const ProjectFormModal = ({ open, onClose, project: listItem, onSaved }: 
   const [form] = Form.useForm<Shape>();
   const { message } = App.useApp();
   const save = useSaveProject();
-  // Edit works on a fresh copy: GET /projects/:key/ + /projects/:id/members/.
-  const detail = useProject(open ? listItem?.key : undefined);
+  // Edit works on a fresh copy: GET /projects/:id/ + /projects/:id/members/.
+  const detail = useProject(open ? String(listItem?.id) : undefined);
   const project = detail.data ?? listItem;
   const members = useProjectMembers(open ? listItem?.id : undefined);
   const memberList = members.data?.results ?? [];

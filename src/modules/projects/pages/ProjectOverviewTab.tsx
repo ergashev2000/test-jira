@@ -49,7 +49,7 @@ export const ProjectOverviewTab = () => {
         </Panel>
       </div>
       <div className="flex flex-col gap-4">
-        <Panel title="Active sprint" extra={sprint && <Link to={ROUTES.project(project.key, 'board')}>Open board</Link>}>
+        <Panel title="Active sprint" extra={sprint && <Link to={ROUTES.project(project.id, 'board')}>Open board</Link>}>
           {sprint ? (
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2 font-medium"><HugeiconsIcon icon={Rocket01Icon} size={15} className="hicon" strokeWidth={1.7} />{sprint.name}</div>

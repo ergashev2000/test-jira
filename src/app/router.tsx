@@ -31,7 +31,7 @@ export const router = createBrowserRouter([
       { path: 'my-tasks', element: <MyTasksPage /> },
       { path: 'projects', element: guard('project.view', <ProjectsPage />) },
       {
-        path: 'projects/:projectKey',
+        path: 'projects/:projectId',
         element: guard('project.view', <ProjectLayout />),
         children: [
           { index: true, element: <Navigate to="overview" replace /> },

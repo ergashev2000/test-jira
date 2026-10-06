@@ -28,7 +28,7 @@ export const ProjectBoardTab = () => {
       <EmptyState description="No active sprint in this project">
         {canManage && project.status !== 'archived' && (
           <div className="flex justify-center gap-2">
-            <Button onClick={() => navigate(ROUTES.project(project.key, 'backlog'))}>Go to backlog</Button>
+            <Button onClick={() => navigate(ROUTES.project(project.id, 'backlog'))}>Go to backlog</Button>
             <Button type="primary" onClick={() => setOpen(true)}>Start a sprint</Button>
           </div>
         )}

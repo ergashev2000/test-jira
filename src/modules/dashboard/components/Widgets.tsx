@@ -19,7 +19,7 @@ export const ActiveSprintCard = ({ s }: { s: DashboardSummary['active_sprint'] }
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-2">
         <HugeiconsIcon icon={Rocket01Icon} size={16} className="hicon text-primary" strokeWidth={1.7} />
-        <Link to={ROUTES.project(s.project.key, 'board')} className="font-medium !text-fg">{s.project.key} · {s.name}</Link>
+        <Link to={ROUTES.project(s.project.id, 'board')} className="font-medium !text-fg">{s.project.key} · {s.name}</Link>
         <Tag className="!ml-auto" color={s.days_left <= 2 ? 'red' : 'default'}>{s.days_left >= 0 ? `${s.days_left} days left` : 'Past end date'}</Tag>
       </div>
       <p className="m-0 text-fg-2">{s.goal}</p>

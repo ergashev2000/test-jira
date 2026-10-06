@@ -6,7 +6,7 @@ export const ROUTES = {
   DASHBOARD: '/dashboard',
   MY_TASKS: '/my-tasks',
   PROJECTS: '/projects',
-  project: (key: string, tab = 'overview') => `/projects/${key}/${tab}`,
+  project: (id: number | string, tab = 'overview') => `/projects/${id}/${tab}`,
   SPRINTS: '/sprints',
   BOARD: '/board',
   task: (key: string) => `/tasks/${key}`,

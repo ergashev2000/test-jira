@@ -9,7 +9,7 @@ export const TaskPage = () => {
   const { taskKey = '' } = useParams();
   return (
     <>
-      <PageHeader breadcrumb={[{ label: 'Projects', to: ROUTES.PROJECTS }, { label: taskKey.split('-')[0], to: ROUTES.project(taskKey.split('-')[0]) }]} title={taskKey} />
+      <PageHeader breadcrumb={[{ label: 'Projects', to: ROUTES.PROJECTS }, { label: taskKey.split('-')[0] }]} title={taskKey} />
       <div className="mx-auto max-w-[1100px] p-6">
         <TaskDetailView taskKey={taskKey} />
       </div>

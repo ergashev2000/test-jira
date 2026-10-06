@@ -9,9 +9,9 @@ export const listProjects = async (params: ProjectListParams = {}) => {
   return data;
 };
 
-// GET /projects/:key/  — routes use the project key
-export const getProject = async (key: string) => {
-  const { data } = await api.get<Project>(`/projects/${key}/`);
+// GET /projects/:id/  — routes use the project id
+export const getProject = async (id: string) => {
+  const { data } = await api.get<Project>(`/projects/${id}/`);
   return data;
 };
 
