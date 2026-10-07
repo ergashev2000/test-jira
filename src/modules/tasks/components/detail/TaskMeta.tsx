@@ -15,7 +15,7 @@ import type { Task } from '../../types/task.types';
 import { StatusDropdown } from '../StatusDropdown';
 
 const Row = ({ label, children }: { label: string; children: ReactNode }) => (
-  <div className="grid min-h-8 grid-cols-[96px_1fr] items-center gap-2">
+  <div className="grid min-h-8 grid-cols-[84px_1fr] items-center gap-2">
     <span className="text-xs text-fg-3">{label}</span>
     <div className="min-w-0 text-[13px]">{children}</div>
   </div>
@@ -35,7 +35,7 @@ export const TaskMeta = ({ task }: { task: Task }) => {
   const patch = (p: Partial<TaskWrite>) =>
     update.mutate({ task, patch: p }, { onSuccess: () => message.success('Saved'), onError: (e) => message.error(errorMessage(e)) });
 
-  const inline = 'chip-select w-full max-w-56';
+  const inline = 'chip-select w-full max-w-full';
 
   return (
     <div className="flex flex-col gap-0.5">
@@ -71,8 +71,9 @@ export const TaskMeta = ({ task }: { task: Task }) => {
         )}
       </Row>
       <Row label="Project">
-        <Link to={ROUTES.project(task.project.id)} className="inline-flex items-center gap-1.5 !text-fg">
-          <ProjectIcon projectKey={task.project.key} size={14} />{task.project.name}
+        <Link to={ROUTES.project(task.project.id)} className="inline-flex max-w-full min-w-0 items-center gap-1.5 !text-fg" title={task.project.name}>
+          <ProjectIcon projectKey={task.project.key} size={14} />
+          <span className="min-w-0 truncate">{task.project.name}</span>
         </Link>
       </Row>
       <Row label="Sprint">
@@ -81,7 +82,9 @@ export const TaskMeta = ({ task }: { task: Task }) => {
             onChange={(v: number) => patch({ sprint: v === BACKLOG ? null : v })}
             options={[{ value: BACKLOG, label: 'Backlog' }, ...sprints.map((s) => ({ value: s.id, label: s.name }))]} />
         ) : (
-          <span className="text-fg-2">{task.sprint?.name ?? 'Backlog'}</span>
+          <span className="block min-w-0 truncate text-fg-2" title={task.sprint?.name ?? 'Backlog'}>
+            {task.sprint?.name ?? 'Backlog'}
+          </span>
         )}
       </Row>
       <Row label="Deadline">
@@ -101,7 +104,7 @@ export const TaskMeta = ({ task }: { task: Task }) => {
               if (v !== (task.estimate == null ? null : Number(task.estimate)) && (v === null || !Number.isNaN(v))) patch({ estimate: v == null ? null : String(v) });
             }} />
         ) : (
-          <span>{task.estimate ? `${Number(task.estimate)}h` : '—'}</span>
+          <span>{task.estimate ? `${Number(task.estimate)}h0` : '—'}</span>
         )}
       </Row>
       <Row label="Labels">
@@ -109,15 +112,21 @@ export const TaskMeta = ({ task }: { task: Task }) => {
           <Select size="small" mode="tags" variant="borderless" className="w-full" value={task.labels ?? []} placeholder="Add labels"
             onChange={(v: string[]) => patch({ labels: v })} />
         ) : task.labels?.length ? (
-          <div className="flex flex-wrap gap-1">{task.labels.map((l) => <span key={l} className="rounded-full border border-line px-2 text-xs text-fg-2">{l}</span>)}</div>
+          <div className="flex min-w-0 flex-wrap gap-1">
+            {task.labels.map((l) => (
+              <span key={l} className="max-w-full truncate rounded-full border border-line px-2 text-xs text-fg-2" title={l}>
+                {l}
+              </span>
+            ))}
+          </div>
         ) : (
           <span className="text-fg-3">—</span>
         )}
       </Row>
       <div className="my-2 border-t border-line" />
-      <Row label="Created"><span className="text-xs text-fg-2">{formatDateTime(task.created_at)}</span></Row>
-      <Row label="Updated"><span className="text-xs text-fg-2">{formatDateTime(task.updated_at)}</span></Row>
-      {task.completed_at && <Row label="Completed"><span className="text-xs text-fg-2">{formatDateTime(task.completed_at)}</span></Row>}
+      <Row label="Created"><span className="block truncate text-xs text-fg-2" title={formatDateTime(task.created_at)}>{formatDateTime(task.created_at)}</span></Row>
+      <Row label="Updated"><span className="block truncate text-xs text-fg-2" title={formatDateTime(task.updated_at)}>{formatDateTime(task.updated_at)}</span></Row>
+      {task.completed_at && <Row label="Completed"><span className="block truncate text-xs text-fg-2" title={formatDateTime(task.completed_at)}>{formatDateTime(task.completed_at)}</span></Row>}
     </div>
   );
 };
