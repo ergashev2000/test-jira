@@ -74,10 +74,14 @@ export const DeadlineText = ({ task, className }: { task: Pick<Task, 'deadline' 
   const overdue = isOverdue(task);
   const diff = daysFromToday(task.deadline);
   const today = diff === 0 && task.status !== 'done' && task.status !== 'cancelled';
+  const label = today ? 'Today' : formatDate(task.deadline);
+  const text = overdue ? `${label} · ${Math.abs(diff)}d overdue` : label;
   return (
-    <span className={cn('whitespace-nowrap', overdue ? 'text-danger' : today ? 'text-warn' : 'text-fg-2', className)}>
-      {today ? 'Today' : formatDate(task.deadline)}
-      {overdue && ` · ${Math.abs(diff)}d overdue`}
+    <span
+      className={cn('inline-block max-w-full truncate whitespace-nowrap', overdue ? 'text-danger' : today ? 'text-warn' : 'text-fg-2', className)}
+      title={text}
+    >
+      {text}
     </span>
   );
 };

@@ -24,12 +24,12 @@ const nameOf = (u: Pick<UserBrief, 'full_name' | 'username'>) => u.full_name || 
 export const UserAvatar = ({ user, inactive, size = 20, showName, className, noTooltip, wrap }: Props) => {
   if (!user) {
     const empty = (
-      <Avatar size={size} icon={<HugeiconsIcon icon={UserIcon} size={16} className="hicon" strokeWidth={1.7} />} className="!border !border-dashed !border-line !bg-transparent !text-fg-3" />
+      <Avatar size={size} icon={<HugeiconsIcon icon={UserIcon} size={16} className="hicon" strokeWidth={1.7} />} className="!border !border-dashed !border-line !bg-transparent !text-fg-3 shrink-0" />
     );
     return showName ? (
-      <span className={cn('inline-flex items-center gap-2 text-fg-3', className)}>
+      <span className={cn('inline-flex max-w-full min-w-0 items-center gap-2 text-fg-3', className)}>
         {empty}
-        Unassigned
+        <span className="min-w-0 truncate">Unassigned</span>
       </span>
     ) : (
       empty
@@ -41,7 +41,7 @@ export const UserAvatar = ({ user, inactive, size = 20, showName, className, noT
     <Avatar
       size={size}
       style={{ backgroundColor: colorFromId(String(user.id)), fontSize: size * 0.42, opacity: inactive ? 0.45 : 1 }}
-      className="!font-semibold"
+      className="!font-semibold shrink-0"
     >
       {initials(name)}
     </Avatar>
@@ -51,11 +51,14 @@ export const UserAvatar = ({ user, inactive, size = 20, showName, className, noT
     return noTooltip ? avatar : <Tooltip title={`${name}${inactive ? ' (inactive)' : ''}`}>{avatar}</Tooltip>;
   }
   return (
-    <span className={cn('inline-flex min-w-0 gap-2', wrap ? 'items-start' : 'items-center', className)}>
-      <span className="flex shrink-0">{avatar}</span>
-      <span className={cn(wrap ? 'min-w-0 wrap-break-word' : 'truncate', inactive ? 'text-fg-3' : 'text-fg')}>
+    <span
+      className={cn('inline-flex max-w-full min-w-0 items-center gap-2', className)}
+      title={`${name}${inactive ? ' (inactive)' : ''}`}
+    >
+      {avatar}
+      <span className={cn('min-w-0 truncate', inactive ? 'text-fg-3' : 'text-fg')}>
         {name}
-        {inactive && <span className="ml-1 text-fg-3">(inactive)</span>}
+        {inactive && <span className="ml-1 text-fg-3 shrink-0">(inactive)</span>}
       </span>
     </span>
   );
