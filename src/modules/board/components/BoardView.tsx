@@ -7,6 +7,8 @@ import { useTableParams } from '@/shared/hooks';
 import dayjs from '@/shared/lib/dayjs';
 import type { Priority, TaskStatus, TaskWrite } from '@/shared/types';
 
+import { backgroundStyle, useBoardBackground } from '../hooks/useBoardBackground';
+import { BoardBackgroundPicker } from './BoardBackground';
 import { KanbanBoard } from './KanbanBoard';
 
 interface Props {
@@ -31,6 +33,7 @@ const deadlineParams = (f: DeadlineFilter | undefined): Pick<BoardParams, 'deadl
 export const BoardView = ({ projectId, sprintId, canCreate, extraFilters = [], keep = [], toolbar }: Props) => {
   const { get, getArray, getBool } = useTableParams();
   const [quickAdd, setQuickAdd] = useState<Partial<TaskWrite> | null>(null);
+  const [background, setBackground] = useBoardBackground(projectId);
   const query = useBoard(projectId, {
     sprint: sprintId,
     // The backend filters by one assignee for now.
@@ -50,7 +53,7 @@ export const BoardView = ({ projectId, sprintId, canCreate, extraFilters = [], k
       <div className="border-b border-line px-5 py-2">
         <FilterBar
           keep={keep}
-          extra={toolbar}
+          extra={<>{toolbar}<BoardBackgroundPicker value={background} onChange={setBackground} /></>}
           filters={[
             ...extraFilters,
             { type: 'search', key: 'search', placeholder: 'Filter…', width: 180 },
@@ -63,11 +66,12 @@ export const BoardView = ({ projectId, sprintId, canCreate, extraFilters = [], k
           ]}
         />
       </div>
-      <div className="min-h-0 flex-1">
+      <div className="min-h-0 flex-1" style={backgroundStyle(background)}>
         <QueryState query={query}>
           {() => (
             <KanbanBoard
               tasks={tasks}
+              onBackground={!!background}
               onQuickAdd={canCreate ? (s: TaskStatus) => setQuickAdd({ project: projectId, sprint: s === 'todo' ? boardSprintId : null }) : undefined}
             />
           )}

@@ -36,7 +36,7 @@ const pick = (obj: unknown, path: string): unknown =>
 /** Weighted orderings — enums are sorted by meaning, not alphabetically. */
 const WEIGHTS: Record<string, Record<string, number>> = {
   priority: { low: 1, medium: 2, high: 3, critical: 4 },
-  status: { backlog: 1, todo: 2, in_progress: 3, review: 4, done: 5, cancelled: 6, planning: 1, active: 2, on_hold: 3, completed: 4, archived: 5, planned: 1 },
+  status: { backlog: 1, todo: 2, in_progress: 3, review: 4, ready_for_testing: 5, done: 6, cancelled: 7, planning: 1, active: 2, on_hold: 3, completed: 4, archived: 5, planned: 1 },
 };
 
 const compare = (a: unknown, b: unknown, field: string) => {
