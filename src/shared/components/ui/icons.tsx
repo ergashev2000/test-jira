@@ -32,6 +32,13 @@ export const StatusIcon = ({ status, size = 14 }: { status: TaskStatus; size?: n
           <path d="M7 3.5A3.5 3.5 0 1 1 3.5 7H7z" fill={c} />
         </svg>
       );
+    case 'ready_for_testing':
+      return (
+        <svg {...common}>
+          <circle cx="7" cy="7" r="6" stroke={c} strokeWidth="1.5" />
+          <circle cx="7" cy="7" r="3.5" fill={c} />
+        </svg>
+      );
     case 'done':
       return (
         <svg {...common}>

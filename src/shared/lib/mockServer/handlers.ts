@@ -291,7 +291,7 @@ on('GET', '/projects/:id/overview/', ({ params }) => {
     id: p.id, key: p.key, name: p.name, description: p.description, status: p.status,
     start_date: p.start_date, target_date: p.end_date, lead: brief(p.manager_id),
     tasks_by_status: {
-      backlog: count('backlog'), todo: count('todo'), in_progress: count('in_progress'), review: count('review'), done: count('done'), cancelled: count('cancelled'),
+      backlog: count('backlog'), todo: count('todo'), in_progress: count('in_progress'), review: count('review'), ready_for_testing: count('ready_for_testing'), done: count('done'), cancelled: count('cancelled'),
       blocked: blocked.length, overdue: tasks.filter(isOverdue).length, total: tasks.length,
     },
     active_sprint: sprint ? {
@@ -674,7 +674,7 @@ const dailyReport = (u: DbUser, date = d(0)) => {
   const by = (f: (t: DbTask) => boolean) => entries.filter((e) => f(e.t)).map((e) => line(e.t, e.planned));
   const completed = by((t) => t.status === 'done');
   const blocked = by((t) => isOpen(t) && !!activeBlocker(t.id));
-  const inProgress = by((t) => (t.status === 'in_progress' || t.status === 'review') && !activeBlocker(t.id));
+  const inProgress = by((t) => (t.status === 'in_progress' || t.status === 'review' || t.status === 'ready_for_testing') && !activeBlocker(t.id));
   const cancelled = by((t) => t.status === 'cancelled');
   const notStarted = by((t) => (t.status === 'todo' || t.status === 'backlog') && !activeBlocker(t.id));
   const total = entries.filter((e) => e.t.status !== 'cancelled').length;
