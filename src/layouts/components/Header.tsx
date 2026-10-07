@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 
 import { logout } from '@/modules/auth';
 import { NotificationBell } from '@/modules/notifications';
-import { useAppSettings } from '@/modules/settings';
 import { useCurrentUser } from '@/shared/hooks';
 import { primaryRole, ROLES, ROUTES } from '@/shared/constants';
 
