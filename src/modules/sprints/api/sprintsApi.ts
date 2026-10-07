@@ -56,10 +56,10 @@ export const getSprintReport = async (id: number) => {
   return data;
 };
 
-// GET /tasks/?sprint=&status=backlog,todo,in_progress,review  — what "Complete sprint" will move
+// GET /tasks/?sprint=&status=backlog,todo,in_progress,review,ready_for_testing  — what "Complete sprint" will move
 export const listUnfinishedTasks = async (sprint: number) => {
   const { data } = await api.get<ApiPaginated<Task>>('/tasks/', {
-    params: { sprint, status: ['backlog', 'todo', 'in_progress', 'review'], page_size: 100, ordering: 'key' },
+    params: { sprint, status: ['backlog', 'todo', 'in_progress', 'review', 'ready_for_testing'], page_size: 100, ordering: 'key' },
   });
   return data;
 };

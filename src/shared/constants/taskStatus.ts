@@ -5,13 +5,14 @@ export const TASK_STATUS: Record<TaskStatus, { label: string; color: string; tag
   todo: { label: 'To Do', color: 'var(--c-status-todo)', tag: 'blue' },
   in_progress: { label: 'In Progress', color: '#f2c94c', tag: 'gold' },
   review: { label: 'Review', color: '#a78bfa', tag: 'purple' },
+  ready_for_testing: { label: 'Ready for testing', color: '#2dd4bf', tag: 'cyan' },
   done: { label: 'Done', color: '#4cb782', tag: 'green' },
   cancelled: { label: 'Cancelled', color: '#6b6f76', tag: 'default' },
 };
 
-export const STATUS_ORDER: TaskStatus[] = ['backlog', 'todo', 'in_progress', 'review', 'done', 'cancelled'];
-/** Kanban columns — exactly 5, no Cancelled / Blocked columns. */
-export const BOARD_COLUMNS: TaskStatus[] = ['backlog', 'todo', 'in_progress', 'review', 'done'];
+export const STATUS_ORDER: TaskStatus[] = ['backlog', 'todo', 'in_progress', 'review', 'ready_for_testing', 'done', 'cancelled'];
+/** Kanban columns — no Cancelled / Blocked columns. */
+export const BOARD_COLUMNS: TaskStatus[] = ['backlog', 'todo', 'in_progress', 'review', 'ready_for_testing', 'done'];
 export const CLOSED_STATUSES: TaskStatus[] = ['done', 'cancelled'];
 
 /** Status options selectable from a status dropdown (cancel has its own flow). */
