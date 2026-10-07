@@ -474,7 +474,7 @@ export interface AppNotification {
   title: string;
   message: string;
   entity_type: 'task' | 'sprint' | 'project' | 'report';
-  /** Task key / project key / sprint id — whatever the UI links to. */
+  /** Related entity ID. */
   entity_id: string;
   is_read: boolean;
   created_at: string;

@@ -9,7 +9,7 @@ export const ROUTES = {
   project: (id: number | string, tab = 'overview') => `/projects/${id}/${tab}`,
   SPRINTS: '/sprints',
   BOARD: '/board',
-  task: (idOrKey: number | string) => `/tasks/${idOrKey}`,
+  task: (id: number | string) => `/tasks/${id}`,
   USERS: '/users',
   ROLES: '/roles',
   TEAMS: '/teams',

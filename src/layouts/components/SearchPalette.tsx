@@ -5,7 +5,7 @@ import { Modal } from 'antd';
 import { useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { globalSearch } from '@/modules/tasks';
+import { findTaskIdByKey, globalSearch } from '@/modules/tasks';
 import { hasPermission, PROJECT_STATUS, QUERY_KEYS, ROUTES, SPRINT_STATUS } from '@/shared/constants';
 import { useDebounce } from '@/shared/hooks';
 import { useSessionStore } from '@/shared/lib/session';
@@ -170,7 +170,7 @@ export const SearchPalette = ({ open, onClose }: { open: boolean; onClose: () =>
     listRef.current?.querySelector(`[data-index="${next}"]`)?.scrollIntoView({ block: 'nearest' });
   };
 
-  const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+  const onKeyDown = async (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'ArrowDown') { e.preventDefault(); move(1); }
     if (e.key === 'ArrowUp') { e.preventDefault(); move(-1); }
     if (e.key === 'Enter') {
@@ -178,7 +178,13 @@ export const SearchPalette = ({ open, onClose }: { open: boolean; onClose: () =>
       // A typed task key opens that task (found by the search, opened by its id).
       const key = value.trim().toUpperCase();
       const exact = TASK_KEY_RE.test(key) ? items.find((i) => i.code === key) : undefined;
-      (exact ?? items[current])?.run();
+      if (exact) exact.run();
+      else if (TASK_KEY_RE.test(key)) {
+        // Not among the search results — look the key up and open it by id.
+        const taskId = await findTaskIdByKey(key);
+        if (taskId) go(ROUTES.task(taskId))();
+        else items[current]?.run();
+      } else items[current]?.run();
     }
   };
 
