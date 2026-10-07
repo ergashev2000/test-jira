@@ -14,6 +14,7 @@ export const ROUTES = {
   ROLES: '/roles',
   TEAMS: '/teams',
   BRANCHES: '/branches',
+  POSITIONS: '/positions',
   REPORTS: '/reports',
   NOTIFICATIONS: '/notifications',
   NOTIFICATION_SETTINGS: '/notifications/settings',

@@ -9,6 +9,11 @@ export interface TeamBrief {
   name: string;
 }
 
+export interface ReferenceBrief {
+  id: number;
+  name: string;
+}
+
 /** GET /users/, /users/:id/ */
 export interface User {
   id: number;
@@ -20,7 +25,8 @@ export interface User {
   username: string;
   email: string;
   phone: string;
-  position: string;
+  position: ReferenceBrief | null;
+  branch: ReferenceBrief | null;
   team: TeamBrief | null;
   status: UserStatus;
   roles: Role[];
@@ -51,7 +57,8 @@ export interface UserCreate {
   email: string;
   password: string;
   phone?: string;
-  position?: string;
+  position?: number | null;
+  branch?: number | null;
   team?: number | null;
   roles?: Role[];
 }

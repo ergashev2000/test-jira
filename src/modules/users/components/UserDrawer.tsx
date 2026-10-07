@@ -7,7 +7,7 @@ import { useCurrentUser } from '@/shared/hooks';
 import { ROLE_OPTIONS } from '@/shared/constants';
 import { errorMessage, rules } from '@/shared/utils';
 
-import { useSaveUser } from '../hooks/useUsers';
+import { useBranches, usePositions, useSaveUser } from '../hooks/useUsers';
 import type { User, UserFormValues } from '../types/user.types';
 
 const PHONE_PREFIX = '+998';
@@ -52,6 +52,8 @@ export const UserDrawer = ({ open, user, onClose }: { open: boolean; user?: User
   const [form] = Form.useForm<UserFormValues>();
   const { message } = App.useApp();
   const me = useCurrentUser();
+  const { data: branches = [], isLoading: branchesLoading } = useBranches();
+  const { data: positions = [], isLoading: positionsLoading } = usePositions();
   const save = useSaveUser();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -72,11 +74,12 @@ export const UserDrawer = ({ open, user, onClose }: { open: boolean; user?: User
           ...nameParts(user),
           username: user.username,
           email: user.email,
-          position: user.position,
+          position: user.position?.id ?? null,
+          branch: user.branch?.id ?? null,
           phone: maskPhone(user.phone ?? ''),
           roles: user.roles,
         }
-        : { roles: ['EMPLOYEE'], phone: maskPhone() },
+        : { roles: ['EMPLOYEE'], phone: maskPhone(), branch: null, position: null },
     );
   }, [open, user, form]);
 
@@ -157,7 +160,10 @@ export const UserDrawer = ({ open, user, onClose }: { open: boolean; user?: User
           <Input placeholder="+998 99 999 99 99" inputMode="tel" />
         </Form.Item>
         <Form.Item name="position" label="Position">
-          <Input />
+          <Select allowClear placeholder="No position" loading={positionsLoading} options={positions.map((p) => ({ value: p.id, label: p.name }))} />
+        </Form.Item>
+        <Form.Item name="branch" label="Branch">
+          <Select allowClear placeholder="No branch" loading={branchesLoading} options={branches.map((b) => ({ value: b.id, label: b.name }))} />
         </Form.Item>
         <Form.Item
           name="roles"
