@@ -5,7 +5,7 @@ import { useCurrentUser } from '@/shared/hooks';
 import { ROLE_OPTIONS } from '@/shared/constants';
 import { errorMessage, formatPhone, rules } from '@/shared/utils';
 
-import { useSaveUser, useTeams } from '../hooks/useUsers';
+import { useBranches, usePositions, useSaveUser, useTeams } from '../hooks/useUsers';
 import type { User, UserFormValues } from '../types/user.types';
 
 export const UserDrawer = ({ open, user, onClose }: { open: boolean; user?: User; onClose: () => void }) => {
@@ -13,6 +13,8 @@ export const UserDrawer = ({ open, user, onClose }: { open: boolean; user?: User
   const { message } = App.useApp();
   const me = useCurrentUser();
   const { data: teams = [], isLoading: teamsLoading } = useTeams();
+  const { data: branches = [], isLoading: branchesLoading } = useBranches();
+  const { data: positions = [], isLoading: positionsLoading } = usePositions();
   const save = useSaveUser();
 
   useEffect(() => {
@@ -24,12 +26,13 @@ export const UserDrawer = ({ open, user, onClose }: { open: boolean; user?: User
           full_name: user.full_name,
           username: user.username,
           email: user.email,
-          position: user.position,
+          position: user.position?.id ?? null,
+          branch: user.branch?.id ?? null,
           phone: user.phone ? formatPhone(user.phone) : '',
           team: user.team?.id ?? null,
           roles: user.roles,
         }
-        : { roles: ['EMPLOYEE'], team: null },
+        : { roles: ['EMPLOYEE'], team: null, branch: null, position: null },
     );
   }, [open, user, form]);
 
@@ -111,7 +114,10 @@ export const UserDrawer = ({ open, user, onClose }: { open: boolean; user?: User
           <Input placeholder="+998 90 123 45 67" />
         </Form.Item>
         <Form.Item name="position" label="Position">
-          <Input />
+          <Select allowClear placeholder="No position" loading={positionsLoading} options={positions.map((p) => ({ value: p.id, label: p.name }))} />
+        </Form.Item>
+        <Form.Item name="branch" label="Branch">
+          <Select allowClear placeholder="No branch" loading={branchesLoading} options={branches.map((b) => ({ value: b.id, label: b.name }))} />
         </Form.Item>
         <Form.Item name="team" label="Team">
           <Select

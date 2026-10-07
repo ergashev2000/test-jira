@@ -8,7 +8,7 @@ import { ROLES } from '@/shared/constants';
 import type { Role } from '@/shared/types';
 import { formatDate, formatPhone, fromNow } from '@/shared/utils';
 
-import type { TeamBrief, User } from '../types/user.types';
+import type { ReferenceBrief, TeamBrief, User } from '../types/user.types';
 
 interface Options {
   meId: number;
@@ -23,7 +23,8 @@ export const getUserColumns = ({ meId, isLocked, onEdit, onToggleStatus, pending
   { title: 'Username', dataIndex: 'username', width: 120, render: (v: string) => <span className="text-fg-2">@{v}</span> },
   { title: 'Email', dataIndex: 'email', width: 200 },
   { title: 'Phone', dataIndex: 'phone', width: 160, render: (v: string) => (v ? formatPhone(v) : <EmptyCell />) },
-  { title: 'Position', dataIndex: 'position', width: 170, render: (v: string) => v || <EmptyCell /> },
+  { title: 'Position', dataIndex: 'position', width: 170, render: (v: ReferenceBrief | null) => v?.name ?? <EmptyCell /> },
+  { title: 'Branch', dataIndex: 'branch', width: 150, render: (v: ReferenceBrief | null) => v?.name ?? <EmptyCell /> },
   { title: 'Team', dataIndex: 'team', key: 'team__name', width: 120, render: (t: TeamBrief | null) => t?.name ?? <EmptyCell /> },
   {
     title: 'Roles', dataIndex: 'roles', width: 200, render: (roles: Role[]) => (roles.length

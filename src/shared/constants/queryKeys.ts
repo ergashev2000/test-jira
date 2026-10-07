@@ -49,6 +49,11 @@ export const QUERY_KEYS = {
     list: (params: object) => ['branches', 'list', params] as const,
     detail: (id: number) => ['branches', 'detail', id] as const,
   },
+  positions: {
+    all: ['positions'] as const,
+    list: (params: object) => ['positions', 'list', params] as const,
+    detail: (id: number) => ['positions', 'detail', id] as const,
+  },
   reports: {
     all: ['reports'] as const,
     daily: (userId: string, date: string) => ['reports', 'daily', userId, date] as const,

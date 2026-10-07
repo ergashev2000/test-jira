@@ -120,7 +120,7 @@ export const SearchPalette = ({ open, onClose }: { open: boolean; onClose: () =>
       list.push({
         id: `user:${u.id}`, group: 'People',
         icon: <span className="flex size-7 items-center justify-center"><UserAvatar user={u} size={22} noTooltip /></span>,
-        title: u.full_name, meta: `@${u.username}${u.position ? ` · ${u.position}` : ''}`,
+        title: u.full_name, meta: `@${u.username}${u.position?.name ? ` · ${u.position.name}` : ''}`,
         run: go(can('user.manage') ? `${ROUTES.USERS}?search=${encodeURIComponent(u.username)}` : `${ROUTES.REPORTS}?type=daily&user=${u.id}`),
       });
     }
