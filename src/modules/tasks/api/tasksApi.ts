@@ -1,4 +1,5 @@
 import { api } from '@/shared/lib/axios';
+import { ApiError } from '@/shared/lib/apiError';
 import type { ApiPaginated, Board, DailyPlan, MyTasksSummary, Task, TaskStatus, TaskWrite } from '@/shared/types';
 
 import type { BoardParams, MyTasksParams, TaskListParams } from '../types/task.types';
@@ -48,8 +49,8 @@ export const getMyTasksSummary = async () => {
   return data;
 };
 
-// GET /tasks/:id/
-export const getTask = async (id: string) => {
+// GET /tasks/{id}/
+export const getTask = async (id: number | string) => {
   const { data } = await api.get<Task>(`/tasks/${id}/`);
   return data;
 };
@@ -83,10 +84,21 @@ export const moveTask = async (id: number, sprint: number | null) => {
   return data;
 };
 
-// POST /tasks/:id/transition/  { to }  — the backend may route "done" through review
-export const transitionTask = async (id: number, to: TaskStatus) => {
+const postTransition = async (id: number, to: TaskStatus) => {
   const { data } = await api.post<Task>(`/tasks/${id}/transition/`, { to });
   return data;
+};
+
+// POST /tasks/:id/transition/  { to }
+// In a `require_review` project the backend rejects in_progress → done with 400 (it doesn't reroute
+// to review itself yet), so "Done" falls back to sending `review` — what the workflow expects.
+export const transitionTask = async (id: number, to: TaskStatus, from?: TaskStatus) => {
+  try {
+    return await postTransition(id, to);
+  } catch (e) {
+    if (to !== 'done' || from === 'review' || !(e instanceof ApiError) || e.status !== 400) throw e;
+    return postTransition(id, 'review');
+  }
 };
 
 // GET /me/daily-plan/?date=  — built on first request of the day

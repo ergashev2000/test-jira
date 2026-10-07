@@ -12,7 +12,6 @@ import { errorMessage, rules, suggestProjectKey } from '@/shared/utils';
 import { useProject, useProjectMembers, useSaveProject } from '../hooks/useProjects';
 import type { Project } from '../types/project.types';
 
-/** ProjectWrite with Dayjs dates + the member picker. */
 type Shape = Omit<ProjectWrite, 'start_date' | 'end_date'> & { start_date: Dayjs; end_date: Dayjs | null; member_ids: number[] };
 
 interface Props {
@@ -29,13 +28,11 @@ const StatusDot = ({ s }: { s: ProjectStatus }) => (
   </span>
 );
 
-/** Linear "New project" dialog: icon tile, big name, summary key, property chips, brief. */
 export const ProjectFormModal = ({ open, onClose, project: listItem, onSaved }: Props) => {
   const [form] = Form.useForm<Shape>();
   const { message } = App.useApp();
   const save = useSaveProject();
-  // Edit works on a fresh copy: GET /projects/:id/ + /projects/:id/members/.
-  const detail = useProject(open ? String(listItem?.id) : undefined);
+  const detail = useProject(open ? listItem?.id : undefined);
   const project = detail.data ?? listItem;
   const members = useProjectMembers(open ? listItem?.id : undefined);
   const memberList = members.data ?? [];
@@ -120,8 +117,10 @@ export const ProjectFormModal = ({ open, onClose, project: listItem, onSaved }: 
             <DatePicker size="small" variant="filled" className="chip-picker" format="DD.MM.YYYY" placeholder="Start" allowClear={false} />
           </Form.Item>
           <Form.Item name="end_date" noStyle dependencies={['start_date']}
-            rules={[({ getFieldValue }) => ({ validator: (_, v: Dayjs | null) =>
-              !v || !v.isBefore(getFieldValue('start_date'), 'day') ? Promise.resolve() : Promise.reject(new Error('Target must be after start')) })]}>
+            rules={[({ getFieldValue }) => ({
+              validator: (_, v: Dayjs | null) =>
+                !v || !v.isBefore(getFieldValue('start_date'), 'day') ? Promise.resolve() : Promise.reject(new Error('Target must be after start'))
+            })]}>
             <DatePicker size="small" variant="filled" className="chip-picker" format="DD.MM.YYYY" placeholder="Target"
               disabledDate={(d) => !!startDate && d.isBefore(startDate, 'day')} />
           </Form.Item>

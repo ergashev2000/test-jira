@@ -1,16 +1,15 @@
 import { api } from '@/shared/lib/axios';
-import type { ApiPaginated, Project, ProjectMember, ProjectReport, ProjectWrite, Task } from '@/shared/types';
+import type { ApiPaginated, Project, ProjectMember, ProjectOverview, ProjectWrite } from '@/shared/types';
 
 import type { ProjectListParams } from '../types/project.types';
 
-// GET /projects/?search=&status=&manager=&member=&ordering=
 export const listProjects = async (params: ProjectListParams = {}) => {
   const { data } = await api.get<ApiPaginated<Project>>('/projects/', { params });
   return data;
 };
 
-// GET /projects/:id/  — routes use the project id
-export const getProject = async (id: string) => {
+// GET /projects/{id}/
+export const getProject = async (id: number | string) => {
   const { data } = await api.get<Project>(`/projects/${id}/`);
   return data;
 };
@@ -30,17 +29,9 @@ export const updateProject = async (id: number, body: Partial<ProjectWrite>) => 
 // PATCH /projects/:id/  { status: 'archived' }
 export const archiveProject = (id: number) => updateProject(id, { status: 'archived' });
 
-// GET /reports/projects/:id/  — status counts, blocked / overdue for the overview tab
-export const getProjectReport = async (id: number) => {
-  const { data } = await api.get<ProjectReport>(`/reports/projects/${id}/`);
-  return data;
-};
-
-// GET /tasks/?project=&is_blocked=true&ordering=updated_at  — oldest blockers first
-export const listTopBlockers = async (project: number) => {
-  const { data } = await api.get<ApiPaginated<Task>>('/tasks/', {
-    params: { project, is_blocked: true, ordering: 'updated_at', page_size: 5 },
-  });
+// GET /projects/{id}/overview/  — the Overview tab in one request (about, tasks by status, active sprint, top blockers)
+export const getProjectOverview = async (id: number) => {
+  const { data } = await api.get<ProjectOverview>(`/projects/${id}/overview/`);
   return data;
 };
 

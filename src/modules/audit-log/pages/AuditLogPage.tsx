@@ -79,15 +79,15 @@ export const AuditLogPage = () => {
             }}
             columns={[
               { title: 'Timestamp', dataIndex: 'created_at', width: 150, sorter: true, render: (v: string) => <Tooltip title={fromNow(v)}><span className="text-fg-2">{formatDateTime(v)}</span></Tooltip> },
-              { title: 'Actor', dataIndex: 'actor', key: 'actor__full_name', width: 190, sorter: true, render: (u: UserBrief | null) => <UserAvatar user={u} showName size={18} /> },
-              { title: 'Action', dataIndex: 'action', width: 210, sorter: true, render: (a: string) => <span className="font-mono text-xs">{a}</span> },
-              { title: 'Entity', dataIndex: 'entity_type', width: 90, sorter: true, render: (e: string) => <Tag className="!m-0">{e}</Tag> },
+              { title: 'Actor', dataIndex: 'actor', key: 'actor__full_name', width: 190, render: (u: UserBrief | null) => <UserAvatar user={u} showName size={18} /> },
+              { title: 'Action', dataIndex: 'action', width: 210, render: (a: string) => <span className="font-mono text-xs">{a}</span> },
+              { title: 'Entity', dataIndex: 'entity_type', width: 90, render: (e: string) => <Tag className="!m-0">{e}</Tag> },
               { title: 'Entity ID', dataIndex: 'entity_label', width: 150, render: (l: string, r) =>
                 r.entity_type === 'task' ? <Link to={ROUTES.task(r.entity_id)} className="font-mono text-xs">{l}</Link>
                   : r.entity_type === 'project' ? <Link to={ROUTES.project(r.entity_id)} className="font-mono text-xs">{l}</Link>
                     : <span className="text-xs text-fg-2">{l}</span> },
               { title: 'Old → New', key: 'diff', render: (_, r) => <Diff row={r} /> },
-              { title: 'Source', dataIndex: 'source', width: 110, sorter: true, render: (s: Source) => <Tag color={SOURCE_COLORS[s]} className="!m-0"><SourceBadge source={s} /></Tag> },
+              { title: 'Source', dataIndex: 'source', width: 110, render: (s: Source) => <Tag color={SOURCE_COLORS[s]} className="!m-0"><SourceBadge source={s} /></Tag> },
               { title: 'IP address', dataIndex: 'ip_address', width: 130, render: (ip: string) => <span className="font-mono text-xs text-fg-2">{ip}</span> },
             ]} />
     </>

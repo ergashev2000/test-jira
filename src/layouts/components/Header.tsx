@@ -10,7 +10,7 @@ import { useCurrentUser } from '@/shared/hooks';
 import { primaryRole, ROLES, ROUTES } from '@/shared/constants';
 
 import { UserAvatar } from '@/shared/components/ui/UserAvatar';
-import { useDemoMode } from '@/shared/lib/demoMode';
+import { MOCK_ENABLED, useDemoMode } from '@/shared/lib/demoMode';
 import { queryClient } from '@/shared/lib/react-query';
 import { useSessionStore } from '@/shared/lib/session';
 import { useThemeStore } from '@/shared/lib/theme';
@@ -60,7 +60,7 @@ export const Header = ({ collapsed, onToggleSidebar }: Props) => {
         <Button type="text" size="small" icon={<HugeiconsIcon icon={SidebarLeftIcon} size={16} className="hicon" strokeWidth={1.7} />} onClick={onToggleSidebar} />
       </Tooltip>
       <div className="flex flex-1 justify-center"><GlobalSearch /></div>
-      <Tooltip title={demo
+      {MOCK_ENABLED && <Tooltip title={demo
         ? 'Demo data: ON — every page uses mock data, no API requests'
         : fallback
           ? 'Demo data: OFF — some data is mock (backend unreachable or endpoint missing). Click to use mock everywhere'
@@ -75,7 +75,7 @@ export const Header = ({ collapsed, onToggleSidebar }: Props) => {
             onClick={onToggleDemo}
           />
         </Badge>
-      </Tooltip>
+      </Tooltip>}
       <Tooltip title={themeMode === 'dark' ? 'Light mode' : 'Dark mode'}>
         <Button
           type="text"

@@ -61,7 +61,7 @@ export const NotificationsPage = () => {
   );
 };
 
-type Row = Pick<NotificationSetting, 'event' | 'telegram' | 'web'>;
+type Row = Pick<NotificationSetting, 'event' | 'label' | 'telegram' | 'web'>;
 
 export const NotificationSettingsPage = () => {
   const { message } = App.useApp();
@@ -69,7 +69,7 @@ export const NotificationSettingsPage = () => {
   const save = useSaveNotificationSettings();
   const [rows, setRows] = useState<Row[]>([]);
   useEffect(() => {
-    if (query.data) setRows(query.data.items.map(({ event, telegram, web }) => ({ event, telegram, web })));
+    if (query.data) setRows(query.data.items.map(({ event, label, telegram, web }) => ({ event, label, telegram, web })));
   }, [query.data]);
   const linked = query.data?.telegram_linked ?? false;
   const toggle = (event: NotificationType, key: 'telegram' | 'web', v: boolean) =>
@@ -88,8 +88,10 @@ export const NotificationSettingsPage = () => {
           {() => (
             <Table<Row> className="app-table" size="middle" rowKey="event" dataSource={rows} pagination={false}
               columns={[
-                { title: 'Event', dataIndex: 'event', render: (e: NotificationType) => (
-                  <span className="flex items-center gap-2"><HugeiconsIcon icon={NOTIFICATION_META[e].icon} size={15} color={NOTIFICATION_META[e].color} className="hicon" strokeWidth={1.7} />{NOTIFICATION_META[e].label}</span>) },
+                { title: 'Event', dataIndex: 'event', render: (e: NotificationType, r) => {
+                  const meta = NOTIFICATION_META[e] ?? NOTIFICATION_META.task_assigned;
+                  return <span className="flex items-center gap-2"><HugeiconsIcon icon={meta.icon} size={15} color={meta.color} className="hicon" strokeWidth={1.7} />{NOTIFICATION_META[e]?.label ?? r.label ?? e}</span>;
+                } },
                 { title: <span className="flex items-center gap-1"><HugeiconsIcon icon={TelegramIcon} size={14} className="hicon" strokeWidth={1.7} />Telegram</span>, dataIndex: 'telegram', width: 120,
                   render: (v: boolean, r) => <Switch size="small" checked={linked && v} disabled={!linked} onChange={(x) => toggle(r.event, 'telegram', x)} /> },
                 { title: <span className="flex items-center gap-1"><HugeiconsIcon icon={GlobeIcon} size={14} className="hicon" strokeWidth={1.7} />Web</span>, dataIndex: 'web', width: 100,

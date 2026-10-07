@@ -1,16 +1,17 @@
 import { api } from '@/shared/lib/axios';
+import { normalizeDailyReport } from '@/shared/lib/normalize';
 import type { DailyReport, ProjectReport, SprintReport, TeamDailyReport } from '@/shared/types';
 
 // GET /me/daily-report/?date=  — own report
 export const getMyDailyReport = async (date: string) => {
   const { data } = await api.get<DailyReport>('/me/daily-report/', { params: { date } });
-  return data;
+  return normalizeDailyReport(data);
 };
 
 // GET /reports/users/:id/daily/?date=  — a member's report (team lead / admin)
 export const getUserDailyReport = async (userId: number, date: string) => {
   const { data } = await api.get<DailyReport>(`/reports/users/${userId}/daily/`, { params: { date } });
-  return data;
+  return normalizeDailyReport(data);
 };
 
 // GET /reports/teams/:id/daily/?date=

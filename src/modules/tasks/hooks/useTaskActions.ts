@@ -5,6 +5,7 @@ import { QUERY_KEYS } from '@/shared/constants';
 import {
   addComment,
   blockTask,
+  downloadAttachment,
   editComment,
   listAttachments,
   listBlockers,
@@ -56,6 +57,15 @@ export const useEditComment = () =>
 
 export const useAttachments = (taskId: number) =>
   useQuery({ queryKey: QUERY_KEYS.tasks.attachments(String(taskId)), queryFn: () => listAttachments(taskId) });
+/** File body via GET /tasks/{id}/attachments/{aid}/download/ — cached, a file never changes. */
+export const useAttachmentFile = (taskId: number, attachmentId: number, enabled = true) =>
+  useQuery({
+    queryKey: [...QUERY_KEYS.tasks.attachments(String(taskId)), 'file', attachmentId],
+    queryFn: () => downloadAttachment(taskId, attachmentId),
+    enabled,
+    staleTime: Infinity,
+    gcTime: 10 * 60_000,
+  });
 export const useUploadAttachment = () =>
   useTaskMutation(({ taskId, file }: { taskId: number; file: File }) => uploadAttachment(taskId, file));
 
