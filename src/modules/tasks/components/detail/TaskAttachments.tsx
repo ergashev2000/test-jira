@@ -95,11 +95,11 @@ export const TaskAttachments = ({ taskId, disabled }: { taskId: number; disabled
           </div>
         </Upload.Dragger>
       )}
-      <QueryState query={query} skeletonRows={1} isEmpty={(d) => !d.results.length} empty={<span className="text-xs text-fg-3">No attachments</span>}>
+      <QueryState query={query} skeletonRows={1} isEmpty={(d) => !d.length} empty={<span className="text-xs text-fg-3">No attachments</span>}>
         {(d) => (
           <Image.PreviewGroup>
             <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
-              {d.results.map((a) => (
+              {d.map((a) => (
                 <li key={a.id} className="flex items-center gap-3 rounded-md border border-line bg-surface px-2.5 py-1.5">
                   {isImage(a) ? <ImageThumb taskId={taskId} a={a} /> : <GenericIcon a={a} />}
                   <div className="min-w-0 flex-1">

@@ -22,7 +22,7 @@ export const ProjectMembersTab = () => {
   const [selected, setSelected] = useState<number[]>([]);
   if (!project) return null;
 
-  const existing = new Set((query.data?.results ?? []).map((m) => m.id));
+  const existing = new Set((query.data ?? []).map((m) => m.id));
   const columns = getMemberColumns({
     managerId: project.manager.id,
     canManageMembers,
@@ -32,7 +32,7 @@ export const ProjectMembersTab = () => {
   return (
     <div className="p-5">
       <div className="mb-3 flex items-center">
-        <span className="text-fg-2">{query.data?.count ?? project.members_count} people</span>
+        <span className="text-fg-2">{query.data?.length ?? project.members_count} people</span>
         {canManageMembers && (
           <Button className="!ml-auto" size="small" type="primary" icon={<HugeiconsIcon icon={Add01Icon} size={14} className="hicon" strokeWidth={1.7} />} onClick={() => { setSelected([]); setOpen(true); }}>
             Add members
@@ -41,7 +41,7 @@ export const ProjectMembersTab = () => {
       </div>
       <QueryState query={query}>
         {(data) => (
-          <Table<ProjectMember> className="app-table" size="middle" rowKey="id" dataSource={data.results} pagination={false} scroll={{ x: 800 }}
+          <Table<ProjectMember> className="app-table" size="middle" rowKey="id" dataSource={data} pagination={false} scroll={{ x: 800 }}
             columns={columns} />
         )}
       </QueryState>

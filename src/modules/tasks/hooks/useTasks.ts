@@ -12,6 +12,8 @@ import {
   getMyTasksSummary,
   getTask,
   listMyTasks,
+  listAllTasks,
+  listProjectBacklog,
   listTasks,
   moveTask,
   transitionTask,
@@ -35,6 +37,23 @@ export const useTaskList = (params: TaskListParams, options: { live?: boolean; e
     placeholderData: (prev) => prev,
   });
 
+/** Loads all pages for a screen that displays a complete task section. */
+export const useAllTaskList = (params: TaskListParams, enabled = true) =>
+  useQuery({
+    queryKey: ['tasks', 'all-pages', params],
+    queryFn: () => listAllTasks(params),
+    enabled,
+    placeholderData: (prev) => prev,
+  });
+
+export const useProjectBacklog = (projectId: number | undefined) =>
+  useQuery({
+    queryKey: ['projects', projectId, 'backlog'],
+    queryFn: () => listProjectBacklog(projectId!),
+    enabled: !!projectId,
+    placeholderData: (prev) => prev,
+  });
+
 export const useBoard = (projectId: number, params: BoardParams) =>
   useQuery({
     queryKey: ['board', projectId, params],
@@ -54,11 +73,11 @@ export const useMyTasks = (params: MyTasksParams) =>
 export const useMyTasksSummary = () =>
   useQuery({ queryKey: [...QUERY_KEYS.tasks.all, 'summary'], queryFn: getMyTasksSummary, refetchInterval: REFETCH_INTERVAL });
 
-export const useTaskDetail = (key: string | null | undefined) =>
+export const useTaskDetail = (id: string | null | undefined) =>
   useQuery({
-    queryKey: QUERY_KEYS.tasks.detail(key ?? ''),
-    queryFn: () => getTask(key!),
-    enabled: !!key,
+    queryKey: QUERY_KEYS.tasks.detail(id ?? ''),
+    queryFn: () => getTask(id!),
+    enabled: !!id,
     refetchInterval: REFETCH_INTERVAL,
   });
 

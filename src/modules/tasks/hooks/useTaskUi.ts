@@ -30,7 +30,7 @@ export const useTaskDrawer = () => {
       }),
     [setSp],
   );
-  return { taskKey: sp.get('task'), openTask, closeTask };
+  return { taskId: sp.get('task'), openTask, closeTask };
 };
 
 /**

@@ -18,9 +18,8 @@ export type {
  */
 export interface TaskListParams extends ListParams {
   project?: number;
+  /** Sprint ID. */
   sprint?: number;
-  /** Tasks without a sprint. */
-  backlog?: boolean;
   status?: TaskStatus[];
   /** One value — the backend doesn't accept several yet. */
   assignee?: number;

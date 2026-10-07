@@ -1,10 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { QUERY_KEYS } from '@/shared/constants';
-import { ApiError } from '@/shared/lib/apiError';
 import { api } from '@/shared/lib/axios';
 import { asList } from '@/shared/lib/normalize';
-import type { ApiPaginated, Project, Role, SprintStatus, Team, TeamBrief, UserBrief } from '@/shared/types';
+import type { ApiPaginated, Project, Role, SprintStatus, Team, TeamBrief, UserBrief, UserStatus } from '@/shared/types';
 
 import { fetchSprints } from './sprints';
 
@@ -18,24 +17,22 @@ export interface UserOptionsParams {
   search?: string;
 }
 
-export type UserOptionRow = UserBrief & { team?: TeamBrief | null; roles?: Role[] };
+export type UserOptionRow = UserBrief & { status?: UserStatus; team?: TeamBrief | null; roles?: Role[] };
 
 export const fetchUserOptions = async ({ projectId, teamId, roles, onlyActive, search }: UserOptionsParams): Promise<UserOptionRow[]> => {
   const url = projectId ? `/projects/${projectId}/members/` : teamId ? `/teams/${teamId}/members/` : '/users/';
+  if (projectId || teamId) {
+    const { data } = await api.get<UserOptionRow[]>(url);
+    const term = search?.trim().toLowerCase();
+    return data.filter((user) =>
+      (!onlyActive || user.status === 'active') &&
+      (!term || user.full_name.toLowerCase().includes(term) || user.username.toLowerCase().includes(term)));
+  }
   const base = { search: search || undefined, page_size: 50, status: onlyActive ? 'active' : undefined };
   const get = async (role?: Role) => {
     const { data } = await api.get<UserOptionRow[] | ApiPaginated<UserOptionRow>>(url, { params: { ...base, role } });
     return asList(data);
   };
-  if (projectId || teamId) {
-    try {
-      return await get();
-    } catch (e) {
-      // Members list not reachable for this user (404 / 403) — offer everyone instead.
-      if (!(e instanceof ApiError) || ![403, 404].includes(e.status)) throw e;
-      return fetchUserOptions({ roles, onlyActive, search });
-    }
-  }
   if (!roles?.length) return get();
   const lists = await Promise.all(roles.map(get));
   return [...new Map(lists.flat().map((u) => [u.id, u])).values()];
