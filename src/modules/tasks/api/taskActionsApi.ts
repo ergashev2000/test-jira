@@ -1,4 +1,5 @@
 import { api } from '@/shared/lib/axios';
+import { asPage } from '@/shared/lib/normalize';
 import type { Activity, ApiPaginated, Attachment, CancelRequest, CancelRequestStatus, Comment, ListParams, Task, TaskBlocker } from '@/shared/types';
 
 // POST /tasks/:id/block/  { reason }
@@ -55,6 +56,12 @@ export const listAttachments = async (taskId: number) => {
   return data;
 };
 
+// GET /tasks/{id}/attachments/{aid}/download/  — needs the JWT, so it's fetched as a blob (a plain href can't send it)
+export const downloadAttachment = async (taskId: number, attachmentId: number) => {
+  const { data } = await api.get<Blob>(`/tasks/${taskId}/attachments/${attachmentId}/download/`, { responseType: 'blob' });
+  return data;
+};
+
 // POST /tasks/:id/attachments/  (multipart: file)
 export const uploadAttachment = async (taskId: number, file: File) => {
   const form = new FormData();
@@ -85,8 +92,8 @@ export interface ProjectActivityParams extends ListParams {
 
 // GET /projects/:id/activity/?actor=&action=&date_from=&date_to=  — NOT IN api.json
 export const listProjectActivity = async ({ projectId, ...params }: ProjectActivityParams) => {
-  const { data } = await api.get<ApiPaginated<Activity>>(`/projects/${projectId}/activity/`, {
+  const { data } = await api.get<Activity[] | ApiPaginated<Activity>>(`/projects/${projectId}/activity/`, {
     params: { ordering: '-created_at', ...params },
   });
-  return data;
+  return asPage(data);
 };

@@ -12,18 +12,23 @@ export type {
   TaskWrite,
 } from '@/shared/types';
 
-/** GET /tasks/ query params — all filtering happens on the backend. */
+/**
+ * GET /tasks/ query params — all filtering happens on the backend. Names follow the backend as it is
+ * today (`blocked`, `overdue`, `backlog`, `ordering=priority_order`); it keeps them after adding aliases.
+ */
 export interface TaskListParams extends ListParams {
   project?: number;
   /** Sprint ID. */
   sprint?: number;
   status?: TaskStatus[];
-  assignee?: number[];
+  /** One value — the backend doesn't accept several yet. */
+  assignee?: number;
   priority?: Priority[];
   type?: TaskType;
-  is_blocked?: boolean;
-  /** Deadline bucket: today | week | overdue. */
-  deadline?: DeadlineFilter;
+  blocked?: boolean;
+  overdue?: boolean;
+  deadline_from?: string;
+  deadline_to?: string;
 }
 
 export type DeadlineFilter = 'today' | 'week' | 'overdue';

@@ -7,7 +7,7 @@ import { fetchMe, logout, useAuthStore } from '@/modules/auth';
 import { PageLoader } from '@/shared/components/ui/Loader';
 import { hasPermission, QUERY_KEYS, ROUTES, type Permission } from '@/shared/constants';
 import { ApiError } from '@/shared/lib/apiError';
-import { isSignedIn, roleOf } from '@/shared/lib/session';
+import { isSignedIn } from '@/shared/lib/session';
 
 export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   const { user, setUser } = useAuthStore();
@@ -50,18 +50,18 @@ export const NotFound = () => {
 };
 
 export const RoleGuard = ({ permission, children }: { permission: Permission; children: ReactNode }) => {
-  const role = useAuthStore((s) => roleOf(s.user));
-  return hasPermission(role, permission) ? <>{children}</> : <Forbidden />;
+  const user = useAuthStore((s) => s.user);
+  return hasPermission(user, permission) ? <>{children}</> : <Forbidden />;
 };
 
 export const HomeRedirect = () => {
-  const role = useAuthStore((s) => roleOf(s.user));
-  return <Navigate to={hasPermission(role, 'dashboard.view') ? ROUTES.DASHBOARD : ROUTES.MY_TASKS} replace />;
+  const user = useAuthStore((s) => s.user);
+  return <Navigate to={hasPermission(user, 'dashboard.view') ? ROUTES.DASHBOARD : ROUTES.MY_TASKS} replace />;
 };
 
 export const DashboardGuard = ({ children }: { children: ReactNode }) => {
-  const role = useAuthStore((s) => roleOf(s.user));
-  return hasPermission(role, 'dashboard.view') ? <>{children}</> : <Navigate to={ROUTES.MY_TASKS} replace />;
+  const user = useAuthStore((s) => s.user);
+  return hasPermission(user, 'dashboard.view') ? <>{children}</> : <Navigate to={ROUTES.MY_TASKS} replace />;
 };
 
 const CHUNK_ERROR = /Failed to fetch dynamically imported module|error loading dynamically imported module|Importing a module script failed/i;

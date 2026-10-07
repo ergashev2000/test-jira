@@ -2,7 +2,10 @@ import { useQuery } from '@tanstack/react-query';
 
 import { QUERY_KEYS } from '@/shared/constants';
 import { api } from '@/shared/lib/axios';
-import type { ApiPaginated, Project, Role, Sprint, SprintStatus, Team, TeamBrief, UserBrief, UserStatus } from '@/shared/types';
+import { asList } from '@/shared/lib/normalize';
+import type { ApiPaginated, Project, Role, SprintStatus, Team, TeamBrief, UserBrief, UserStatus } from '@/shared/types';
+
+import { fetchSprints } from './sprints';
 
 export const LOOKUP_PAGE_SIZE = 100;
 
@@ -16,7 +19,7 @@ export interface UserOptionsParams {
 
 export type UserOptionRow = UserBrief & { status?: UserStatus; team?: TeamBrief | null; roles?: Role[] };
 
-export const fetchUserOptions = async ({ projectId, teamId, roles, onlyActive, search }: UserOptionsParams) => {
+export const fetchUserOptions = async ({ projectId, teamId, roles, onlyActive, search }: UserOptionsParams): Promise<UserOptionRow[]> => {
   const url = projectId ? `/projects/${projectId}/members/` : teamId ? `/teams/${teamId}/members/` : '/users/';
   if (projectId || teamId) {
     const { data } = await api.get<UserOptionRow[]>(url);
@@ -27,8 +30,8 @@ export const fetchUserOptions = async ({ projectId, teamId, roles, onlyActive, s
   }
   const base = { search: search || undefined, page_size: 50, status: onlyActive ? 'active' : undefined };
   const get = async (role?: Role) => {
-    const { data } = await api.get<ApiPaginated<UserOptionRow>>(url, { params: { ...base, role } });
-    return data.results;
+    const { data } = await api.get<UserOptionRow[] | ApiPaginated<UserOptionRow>>(url, { params: { ...base, role } });
+    return asList(data);
   };
   if (!roles?.length) return get();
   const lists = await Promise.all(roles.map(get));
@@ -49,9 +52,7 @@ export const fetchProjectLookups = async () => {
 };
 
 export const fetchSprintLookups = async (params: { project?: number; status?: SprintStatus[] }) => {
-  const { data } = await api.get<ApiPaginated<Sprint>>('/sprints/', {
-    params: { ...params, page_size: LOOKUP_PAGE_SIZE, ordering: '-start_date' },
-  });
+  const data = await fetchSprints({ ...params, page_size: LOOKUP_PAGE_SIZE, ordering: '-start_date' });
   return data.results;
 };
 

@@ -1,11 +1,12 @@
 import { HugeiconsIcon } from '@hugeicons/react';
-import { Add01Icon, Cancel01Icon } from '@hugeicons/core-free-icons';
-import { App, Button, Modal, Popconfirm, Table, Tag } from 'antd';
+import { Add01Icon } from '@hugeicons/core-free-icons';
+import { App, Button, Modal, Table } from 'antd';
 import { useState } from 'react';
 
-import { QueryState, UserAvatar, UserSelect } from '@/shared/components/ui';
-import { errorMessage, formatDate } from '@/shared/utils';
+import { QueryState, UserSelect } from '@/shared/components/ui';
+import { errorMessage } from '@/shared/utils';
 
+import { getMemberColumns } from '../components/memberColumns';
 import { useAddMembers, useProjectAccess, useProjectMembers, useRemoveMember } from '../hooks/useProjects';
 import type { ProjectMember } from '../types/project.types';
 import { useCurrentProject } from './ProjectLayout';
@@ -22,7 +23,11 @@ export const ProjectMembersTab = () => {
   if (!project) return null;
 
   const existing = new Set((query.data ?? []).map((m) => m.id));
-  const isManager = (m: ProjectMember) => m.id === project.manager.id;
+  const columns = getMemberColumns({
+    managerId: project.manager.id,
+    canManageMembers,
+    onRemove: (m) => remove.mutateAsync({ id: project.id, userId: m.id }).then(() => message.success('Member removed')).catch((e) => message.error(errorMessage(e))),
+  });
 
   return (
     <div className="p-5">
@@ -37,31 +42,7 @@ export const ProjectMembersTab = () => {
       <QueryState query={query}>
         {(data) => (
           <Table<ProjectMember> className="app-table" size="middle" rowKey="id" dataSource={data} pagination={false} scroll={{ x: 800 }}
-            columns={[
-              { title: 'User', dataIndex: 'full_name', render: (_, m) => <UserAvatar user={m} inactive={m.status === 'inactive'} showName /> },
-              { title: 'Position', render: () => <span className="text-fg-2">###</span> },
-              {
-                title: 'Role', render: (_, m) => (
-                  <>
-                    {isManager(m) && <Tag color="purple">Lead</Tag>}
-                    {m.role_in_project ? <Tag>{m.role_in_project}</Tag> : <span className="text-fg-2">###</span>}
-                  </>
-                ),
-              },
-              { title: 'Team', render: () => <span className="text-fg-2">###</span> },
-              { title: 'Active tasks', width: 110, render: () => <span className="text-fg-2">###</span> },
-              { title: 'Added', dataIndex: 'added_at', width: 110, render: (d: string) => formatDate(d) },
-              {
-                title: '', key: 'x', width: 60, render: (_, m) => canManageMembers && !isManager(m) && (
-                  <Popconfirm
-                    title={`Remove ${m.full_name}?`}
-                    description="They will lose access to this project."
-                    okButtonProps={{ danger: true }} okText="Remove"
-                    onConfirm={() => remove.mutateAsync({ id: project.id, userId: m.id }).then(() => message.success('Member removed')).catch((e) => message.error(errorMessage(e)))}>
-                    <Button size="small" type="text" danger icon={<HugeiconsIcon icon={Cancel01Icon} size={14} className="hicon" strokeWidth={1.7} />} />
-                  </Popconfirm>)
-              },
-            ]} />
+            columns={columns} />
         )}
       </QueryState>
       <Modal title="Add members" open={open} onCancel={() => setOpen(false)} okText="Add" okButtonProps={{ disabled: !selected.length, loading: add.isPending }}

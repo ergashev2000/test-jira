@@ -1,6 +1,6 @@
 import { HugeiconsIcon } from '@hugeicons/react';
 import { ArrowExpand01Icon, Edit02Icon, Link01Icon, MoreHorizontalIcon, StopCircleIcon } from '@hugeicons/core-free-icons';
-import { App, Button, Dropdown, Tag, Tooltip, Typography } from 'antd';
+import { App, Button, Dropdown, Tag, Tooltip } from 'antd';
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -14,6 +14,7 @@ import { useBlockTask, useCancelTask, usePendingCancelRequest, useRequestCancel 
 import { useUpdateTask } from '../../hooks/useTasks';
 import type { Task } from '../../types/task.types';
 import { TaskFormModal } from '../TaskFormModal';
+import { InlineEdit } from './InlineEdit';
 
 export const TaskHeader = ({ task, inDrawer }: { task: Task; inDrawer?: boolean }) => {
   const user = useCurrentUser();
@@ -74,17 +75,10 @@ export const TaskHeader = ({ task, inDrawer }: { task: Task; inDrawer?: boolean 
         </div>
       </div>
 
-      <Typography.Title
-        level={4}
-        className={`!m-0 !text-xl !font-semibold ${closed ? 'line-through opacity-60' : ''}`}
-        editable={editable ? {
-          triggerType: ['text'],
-          onChange: (title) => title.trim() && title !== task.title &&
-            update.mutate({ task, patch: { title } }, { onError: (e) => message.error(errorMessage(e)) }),
-        } : false}
-      >
-        {task.title}
-      </Typography.Title>
+      <InlineEdit value={task.title} editable={editable} required placeholder="Task title"
+        className={`text-xl leading-8 font-semibold text-fg ${closed ? 'line-through opacity-60' : ''}`}
+        inputClassName="!text-xl !font-semibold"
+        onSave={(title) => update.mutate({ task, patch: { title } }, { onSuccess: () => message.success('Title saved'), onError: (e) => message.error(errorMessage(e)) })} />
 
       <ReasonModal
         open={modal === 'block' || modal === 'cancel' || modal === 'request'}

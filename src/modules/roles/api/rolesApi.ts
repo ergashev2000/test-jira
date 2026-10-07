@@ -1,5 +1,6 @@
 import { api } from '@/shared/lib/axios';
-import type { Role } from '@/shared/types';
+import { asList } from '@/shared/lib/normalize';
+import type { ApiPaginated, Role } from '@/shared/types';
 
 export interface RoleDef {
   id: number;
@@ -19,8 +20,8 @@ export interface PermissionDef {
 
 // GET /roles/?ordering=level  — role → permission matrix (read-only, defined on the server)
 export const listRoles = async () => {
-  const { data } = await api.get<RoleDef[]>('/roles/', { params: { ordering: 'level' } });
-  return data;
+  const { data } = await api.get<RoleDef[] | ApiPaginated<RoleDef>>('/roles/', { params: { ordering: 'level' } });
+  return asList(data);
 };
 
 // GET /roles/:id/
@@ -31,8 +32,8 @@ export const getRole = async (id: number) => {
 
 // GET /permissions/?search=&ordering=code
 export const listPermissions = async (search?: string) => {
-  const { data } = await api.get<PermissionDef[]>('/permissions/', { params: { search: search || undefined, ordering: 'code' } });
-  return data;
+  const { data } = await api.get<PermissionDef[] | ApiPaginated<PermissionDef>>('/permissions/', { params: { search: search || undefined, ordering: 'code' } });
+  return asList(data);
 };
 
 // GET /permissions/:id/
