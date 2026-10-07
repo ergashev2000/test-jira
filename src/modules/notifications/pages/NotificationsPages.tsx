@@ -31,7 +31,9 @@ export const NotificationsPage = () => {
     <>
       <PageHeader title="Notifications" extra={
         <>
-          <Button size="small" loading={markAll.isPending} onClick={() => markAll.mutate()}>Mark all as read</Button>
+          {query.data?.results.some((notification) => !notification.is_read) && (
+            <Button size="small" loading={markAll.isPending} onClick={() => markAll.mutate()}>Mark all as read</Button>
+          )}
           <Button size="small" type="text" icon={<HugeiconsIcon icon={Settings02Icon} size={15} className="hicon" strokeWidth={1.7} />} onClick={() => navigate(ROUTES.NOTIFICATION_SETTINGS)}>Settings</Button>
         </>
       }>
