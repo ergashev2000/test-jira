@@ -1,1 +1,3 @@
 npx lint-staged
+# Whole-project type check — fails on unused imports/locals/params (noUnusedLocals / noUnusedParameters).
+npx tsc -b

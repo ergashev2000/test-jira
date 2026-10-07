@@ -27,9 +27,8 @@ const Column = ({ status, tasks, onAdd, onOpen, onBackground }: {
 }) => {
   const { setNodeRef, isOver } = useDroppable({ id: status });
   return (
-    // On a custom background the column gets its own panel (Trello-like) so it stays readable.
     <div className={cn('flex w-[300px] shrink-0 flex-col', onBackground && 'max-h-full self-start rounded-xl bg-panel/90 p-1.5 shadow-lg backdrop-blur-sm')}>
-      <div className="flex h-10 items-center gap-2 px-2 text-[13px]">
+      <div className="flex h-10 shrink-0 items-center gap-2 px-2 text-[13px]">
         <StatusIcon status={status} />
         <span className="font-medium text-fg">{TASK_STATUS[status].label}</span>
         <span className="text-fg-3">{tasks.length}</span>
@@ -40,7 +39,7 @@ const Column = ({ status, tasks, onAdd, onOpen, onBackground }: {
       <div
         ref={setNodeRef}
         className={cn(
-          'flex min-h-40 flex-1 flex-col gap-2 rounded-xl p-1.5 transition-colors',
+          'flex min-h-40 flex-1 flex-col gap-2 overflow-y-auto rounded-xl p-1.5 transition-colors [&>*]:shrink-0',
           isOver ? 'bg-primary/10 ring-1 ring-primary/40' : !onBackground && 'bg-bg/40',
         )}
       >
