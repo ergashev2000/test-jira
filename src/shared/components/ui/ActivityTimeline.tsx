@@ -71,7 +71,7 @@ const describe = (a: Activity): ReactNode => {
 export const ActivityTimeline = ({ items, showTask }: { items: Activity[]; showTask?: boolean }) => {
   const location = useLocation();
   return (
-    <ol className="relative m-0 list-none space-y-0 p-0">
+    <ol className="relative m-0 list-none space-y-0 p-0 pt-4">
       {items.map((a) => (
         <li key={a.id} className="relative flex gap-3 pb-4 before:absolute before:left-[9px] before:top-6 before:h-[calc(100%-20px)] before:w-px before:bg-line last:before:hidden">
           <UserAvatar user={a.actor} size={20} />

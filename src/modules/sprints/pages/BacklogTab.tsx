@@ -53,13 +53,17 @@ const InlineCreate = ({ projectId, disabled }: { projectId: number; disabled: bo
 const useSectionTasks = (project: number, sprint: number) =>
   useAllTaskList({ project, sprint, ordering: 'priority_order' });
 
-const TaskRows = ({ tasks, actions }: { tasks: Task[]; actions: (t: Task) => React.ReactNode }) =>
-  tasks.length ? <>{tasks.map((t) => <TaskListRow key={t.id} task={t} actions={actions(t)} />)}</>
-    : <div className="px-5 py-4 text-xs text-fg-3">No tasks — move some here from the backlog.</div>;
+const TaskRows = ({ tasks, total, actions }: { tasks: Task[]; total: number; actions: (t: Task) => React.ReactNode }) =>
+  tasks.length ? (
+    <>
+      {tasks.map((t) => <TaskListRow key={t.id} task={t} actions={actions(t)} />)}
+      {total > tasks.length && <div className="px-5 py-2 text-xs text-fg-3">Showing {tasks.length} of {total} — use the board filters to narrow down.</div>}
+    </>
+  ) : <div className="px-5 py-4 text-xs text-fg-3">No tasks — move some here from the backlog.</div>;
 
 const SprintTasks = ({ project, sprint, actions }: { project: number; sprint: number; actions: (t: Task) => React.ReactNode }) => {
   const query = useSectionTasks(project, sprint);
-  return <QueryState query={query} skeletonRows={2}>{(d) => <TaskRows tasks={d.results} actions={actions} />}</QueryState>;
+  return <QueryState query={query} skeletonRows={2}>{(d) => <TaskRows tasks={d.results} total={d.count} actions={actions} />}</QueryState>;
 };
 
 export const BacklogTab = () => {
@@ -117,7 +121,7 @@ export const BacklogTab = () => {
                 <span className="font-medium">Backlog</span>
                 <span className="text-xs text-fg-3">{backlogCount}</span>
               </header>
-              {backlogCount ? <TaskRows tasks={backlog.data?.results ?? []} actions={actions} /> : <EmptyState description="Backlog is empty" />}
+              {backlogCount ? <TaskRows tasks={backlog.data?.results ?? []} total={backlogCount} actions={actions} /> : <EmptyState description="Backlog is empty" />}
               {canCreate && <InlineCreate projectId={project.id} disabled={archived} />}
             </section>
           </>

@@ -11,7 +11,6 @@ import { useStatusChanger } from '../hooks/useTaskUi';
 
 type TaskLike = Pick<Task, 'id' | 'key' | 'status' | 'assignee' | 'reviewer'>;
 
-/** Clickable status chip → menu of statuses. Read-only chip if user can't change it. */
 export const StatusDropdown = ({ task, children, disabled }: { task: TaskLike; children?: ReactNode; disabled?: boolean }) => {
   const user = useSessionStore((s) => s.user);
   const { change } = useStatusChanger();
@@ -25,7 +24,10 @@ export const StatusDropdown = ({ task, children, disabled }: { task: TaskLike; c
       menu={{
         selectable: true,
         selectedKeys: [task.status],
-        items: STATUS_OPTIONS.map((o) => ({ key: o.value, label: o.label, icon: <StatusIcon status={o.value} /> })),
+        items: STATUS_OPTIONS.map((o) => ({
+          key: o.value,
+          label: <span className="flex items-center gap-2"><StatusIcon status={o.value} />{o.label}</span>,
+        })),
         onClick: ({ key, domEvent }) => {
           domEvent.stopPropagation();
           change(task, key as Task['status']);

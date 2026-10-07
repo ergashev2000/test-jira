@@ -27,7 +27,7 @@ export const updateTeam = async (id: number, body: Partial<TeamWrite>) => {
   return data;
 };
 
-// GET /teams/:id/members/
+// GET /teams/:id/members/  — a plain array today
 export const listTeamMembers = async (id: number) => {
   const { data } = await api.get<TeamMember[]>(`/teams/${id}/members/`);
   return data;

@@ -5,7 +5,8 @@ import { Button, Empty, Result, Skeleton } from 'antd';
 import type { ReactNode } from 'react';
 
 import { hasPermission, type Permission } from '@/shared/constants';
-import { roleOf, useSessionStore } from '@/shared/lib/session';
+import { isNotImplemented } from '@/shared/lib/apiError';
+import { useSessionStore } from '@/shared/lib/session';
 import { errorMessage } from '@/shared/utils';
 
 export const EmptyState = ({ description = 'No data', children }: { description?: ReactNode; children?: ReactNode }) => (
@@ -16,7 +17,9 @@ export const EmptyState = ({ description = 'No data', children }: { description?
   </div>
 );
 
-export const ErrorState = ({ error, onRetry }: { error: unknown; onRetry?: () => void }) => (
+export const ErrorState = ({ error, onRetry }: { error: unknown; onRetry?: () => void }) => isNotImplemented(error) ? (
+  <Result status="info" title="Not available yet" subTitle="This feature isn't available on the backend yet." />
+) : (
   <Result
     status="error"
     title="Failed to load"
@@ -44,6 +47,6 @@ export function QueryState<T>({ query, isEmpty, empty, skeletonRows = 4, childre
 
 /** Renders children only when current role has the permission. */
 export const Can = ({ permission, children, fallback = null }: { permission: Permission; children: ReactNode; fallback?: ReactNode }) => {
-  const role = useSessionStore((s) => roleOf(s.user));
-  return <>{hasPermission(role, permission) ? children : fallback}</>;
+  const user = useSessionStore((s) => s.user);
+  return <>{hasPermission(user, permission) ? children : fallback}</>;
 };

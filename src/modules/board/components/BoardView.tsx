@@ -33,7 +33,8 @@ export const BoardView = ({ projectId, sprintId, canCreate, extraFilters = [], k
   const [quickAdd, setQuickAdd] = useState<Partial<TaskWrite> | null>(null);
   const query = useBoard(projectId, {
     sprint: sprintId,
-    assignee: getArray('assignee').map(Number),
+    // The backend filters by one assignee for now.
+    assignee: get('assignee') ? [Number(get('assignee'))] : undefined,
     priority: getArray('priority') as Priority[],
     label: get('label'),
     blocked: getBool('blocked') || undefined,
@@ -53,7 +54,7 @@ export const BoardView = ({ projectId, sprintId, canCreate, extraFilters = [], k
           filters={[
             ...extraFilters,
             { type: 'search', key: 'search', placeholder: 'Filter…', width: 180 },
-            { type: 'user', key: 'assignee', placeholder: 'Assignee', multiple: true, projectId },
+            { type: 'user', key: 'assignee', placeholder: 'Assignee', projectId },
             { type: 'select', key: 'priority', placeholder: 'Priority', multiple: true, options: PRIORITY_OPTIONS, width: 130 },
             { type: 'select', key: 'label', placeholder: 'Label', options: labels.map((l) => ({ value: l, label: l })), width: 110 },
             { type: 'select', key: 'deadline', placeholder: 'Deadline', width: 120, options: [
