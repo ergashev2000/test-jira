@@ -5,7 +5,7 @@ import type { ColumnsType } from 'antd/es/table';
 
 import { UserAvatar } from '@/shared/components/ui';
 import { ROLES } from '@/shared/constants';
-import type { Role, TeamBrief } from '@/shared/types';
+import type { ReferenceBrief, Role, TeamBrief } from '@/shared/types';
 import { formatDate } from '@/shared/utils';
 
 import type { ProjectMember } from '../types/project.types';
@@ -20,7 +20,7 @@ interface Options {
 /** Project → Members table columns (GET /projects/{id}/members/). */
 export const getMemberColumns = ({ managerId, canManageMembers, onRemove }: Options): ColumnsType<ProjectMember> => [
   { title: 'User', dataIndex: 'full_name', render: (_, m) => <UserAvatar user={m} inactive={m.status === 'inactive'} showName /> },
-  { title: 'Position', dataIndex: 'position', render: (v?: string) => <span className="text-fg-2">{v}</span> },
+  { title: 'Position', dataIndex: 'position', render: (v?: ReferenceBrief | null) => <span className="text-fg-2">{v?.name ?? '—'}</span> },
   {
     title: 'Role', dataIndex: 'roles', render: (roles: Role[] | undefined, m) => (
       <>

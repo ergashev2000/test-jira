@@ -19,8 +19,14 @@ export const teamBrief = (id: number | null) => {
   return t ? { id: t.id, name: t.name } : null;
 };
 
+const referenceBrief = (rows: { id: number; name: string }[], id: number | null) => {
+  const reference = rows.find((x) => x.id === id);
+  return reference ? { id: reference.id, name: reference.name } : null;
+};
+
 export const userOut = (u: DbUser) => ({
-  id: u.id, full_name: u.full_name, username: u.username, email: u.email, phone: u.phone, position: u.position,
+  id: u.id, full_name: u.full_name, username: u.username, email: u.email, phone: u.phone,
+  position: referenceBrief(db.positions, u.position_id), branch: referenceBrief(db.branches, u.branch_id),
   team: teamBrief(u.team_id), status: u.status, roles: u.roles,
   is_superuser: u.roles.includes('SUPER_ADMIN'), is_staff: u.roles.includes('SUPER_ADMIN') || u.roles.includes('ADMIN'),
   last_login: u.last_login, created_at: u.created_at,
@@ -66,7 +72,7 @@ export const memberOut = (p: DbProject, userId: number) => {
   const u = userById(userId)!;
   return {
     id: u.id, full_name: u.full_name, username: u.username, status: u.status, role_in_project: m.role_in_project, added_at: m.added_at,
-    position: u.position, roles: u.roles, team: teamBrief(u.team_id),
+    position: referenceBrief(db.positions, u.position_id), branch: referenceBrief(db.branches, u.branch_id), roles: u.roles, team: teamBrief(u.team_id),
     active_tasks: db.tasks.filter((t) => t.project_id === p.id && t.assignee_id === u.id && t.status !== 'done' && t.status !== 'cancelled').length,
   };
 };

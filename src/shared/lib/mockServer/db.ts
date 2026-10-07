@@ -37,10 +37,11 @@ export const dt = (offset = 0, time = '10:00') => {
 export const now = () => new Date().toISOString();
 
 export interface DbUser {
-  id: number; full_name: string; username: string; email: string; phone: string; position: string;
+  id: number; full_name: string; username: string; email: string; phone: string; position_id: number | null; branch_id: number | null;
   team_id: number | null; status: UserStatus; roles: Role[]; last_login: string | null; created_at: string;
   telegram: { tg_username: string; linked_at: string } | null;
 }
+export interface DbReference { id: number; name: string; created_at: string; updated_at: string }
 export interface DbTeam { id: number; name: string; description: string; lead_id: number | null; created_at: string; updated_at: string }
 export interface DbMember { user_id: number; role_in_project: string; added_at: string }
 export interface DbProject {
@@ -84,15 +85,22 @@ export const NOTIFICATION_TYPES: NotificationType[] = [
 // ───────────── seed ─────────────
 
 const users: DbUser[] = [
-  { id: 1, full_name: 'Sardor Karimov', username: 'superadmin', email: 'sardor@company.uz', phone: '+998901112233', position: 'CTO', team_id: null, status: 'active', roles: ['SUPER_ADMIN'], last_login: dt(0, '08:40'), created_at: dt(-120), telegram: { tg_username: 'sardor_k', linked_at: dt(-60) } },
-  { id: 2, full_name: 'Dilnoza Rahimova', username: 'admin', email: 'dilnoza@company.uz', phone: '+998901112234', position: 'Office Manager', team_id: null, status: 'active', roles: ['ADMIN'], last_login: dt(-1, '17:20'), created_at: dt(-118), telegram: null },
-  { id: 3, full_name: 'Bekzod Tursunov', username: 'bekzod', email: 'bekzod@company.uz', phone: '+998901112235', position: 'Project Manager', team_id: null, status: 'active', roles: ['PROJECT_MANAGER'], last_login: dt(0, '09:02'), created_at: dt(-110), telegram: { tg_username: 'bekzod_pm', linked_at: dt(-50) } },
-  { id: 4, full_name: 'Akmal Yusupov', username: 'akmal', email: 'akmal@company.uz', phone: '+998901112236', position: 'Team Lead', team_id: 1, status: 'active', roles: ['TEAM_LEAD'], last_login: dt(0, '09:10'), created_at: dt(-100), telegram: { tg_username: 'akmal_lead', linked_at: dt(-45) } },
-  { id: 5, full_name: 'Shohrux Aliyev', username: 'shohrux', email: 'shohrux@company.uz', phone: '+998901112237', position: 'Frontend Developer', team_id: 1, status: 'active', roles: ['EMPLOYEE'], last_login: dt(0, '09:05'), created_at: dt(-90), telegram: { tg_username: 'shohrux_dev', linked_at: dt(-40) } },
-  { id: 6, full_name: 'Javohir Nazarov', username: 'javohir', email: 'javohir@company.uz', phone: '+998901112238', position: 'Backend Developer', team_id: 1, status: 'active', roles: ['EMPLOYEE'], last_login: dt(0, '09:15'), created_at: dt(-90), telegram: { tg_username: 'javohir_be', linked_at: dt(-38) } },
-  { id: 7, full_name: 'Malika Qodirova', username: 'malika', email: 'malika@company.uz', phone: '+998901112239', position: 'QA Engineer', team_id: 1, status: 'active', roles: ['EMPLOYEE'], last_login: dt(-1, '18:05'), created_at: dt(-80), telegram: null },
-  { id: 8, full_name: 'Rustam Ergashev', username: 'rustam', email: 'rustam@company.uz', phone: '+998901112240', position: 'Mobile Team Lead', team_id: 2, status: 'active', roles: ['TEAM_LEAD'], last_login: dt(-2, '11:00'), created_at: dt(-70), telegram: { tg_username: 'rustam_m', linked_at: dt(-30) } },
-  { id: 9, full_name: 'Otabek Ismoilov', username: 'otabek', email: 'otabek@company.uz', phone: '+998901112241', position: 'Mobile Developer', team_id: 2, status: 'inactive', roles: ['EMPLOYEE'], last_login: dt(-20, '10:00'), created_at: dt(-70), telegram: null },
+  { id: 1, full_name: 'Sardor Karimov', username: 'superadmin', email: 'sardor@company.uz', phone: '+998901112233', position_id: 1, branch_id: 1, team_id: null, status: 'active', roles: ['SUPER_ADMIN'], last_login: dt(0, '08:40'), created_at: dt(-120), telegram: { tg_username: 'sardor_k', linked_at: dt(-60) } },
+  { id: 2, full_name: 'Dilnoza Rahimova', username: 'admin', email: 'dilnoza@company.uz', phone: '+998901112234', position_id: 2, branch_id: 1, team_id: null, status: 'active', roles: ['ADMIN'], last_login: dt(-1, '17:20'), created_at: dt(-118), telegram: null },
+  { id: 3, full_name: 'Bekzod Tursunov', username: 'bekzod', email: 'bekzod@company.uz', phone: '+998901112235', position_id: 3, branch_id: 1, team_id: null, status: 'active', roles: ['PROJECT_MANAGER'], last_login: dt(0, '09:02'), created_at: dt(-110), telegram: { tg_username: 'bekzod_pm', linked_at: dt(-50) } },
+  { id: 4, full_name: 'Akmal Yusupov', username: 'akmal', email: 'akmal@company.uz', phone: '+998901112236', position_id: 4, branch_id: 1, team_id: 1, status: 'active', roles: ['TEAM_LEAD'], last_login: dt(0, '09:10'), created_at: dt(-100), telegram: { tg_username: 'akmal_lead', linked_at: dt(-45) } },
+  { id: 5, full_name: 'Shohrux Aliyev', username: 'shohrux', email: 'shohrux@company.uz', phone: '+998901112237', position_id: 5, branch_id: 1, team_id: 1, status: 'active', roles: ['EMPLOYEE'], last_login: dt(0, '09:05'), created_at: dt(-90), telegram: { tg_username: 'shohrux_dev', linked_at: dt(-40) } },
+  { id: 6, full_name: 'Javohir Nazarov', username: 'javohir', email: 'javohir@company.uz', phone: '+998901112238', position_id: 6, branch_id: 1, team_id: 1, status: 'active', roles: ['EMPLOYEE'], last_login: dt(0, '09:15'), created_at: dt(-90), telegram: { tg_username: 'javohir_be', linked_at: dt(-38) } },
+  { id: 7, full_name: 'Malika Qodirova', username: 'malika', email: 'malika@company.uz', phone: '+998901112239', position_id: 7, branch_id: 1, team_id: 1, status: 'active', roles: ['EMPLOYEE'], last_login: dt(-1, '18:05'), created_at: dt(-80), telegram: null },
+  { id: 8, full_name: 'Rustam Ergashev', username: 'rustam', email: 'rustam@company.uz', phone: '+998901112240', position_id: 8, branch_id: 2, team_id: 2, status: 'active', roles: ['TEAM_LEAD'], last_login: dt(-2, '11:00'), created_at: dt(-70), telegram: { tg_username: 'rustam_m', linked_at: dt(-30) } },
+  { id: 9, full_name: 'Otabek Ismoilov', username: 'otabek', email: 'otabek@company.uz', phone: '+998901112241', position_id: 9, branch_id: 2, team_id: 2, status: 'inactive', roles: ['EMPLOYEE'], last_login: dt(-20, '10:00'), created_at: dt(-70), telegram: null },
+];
+
+const positions: DbReference[] = ['CTO', 'Office Manager', 'Project Manager', 'Team Lead', 'Frontend Developer', 'Backend Developer', 'QA Engineer', 'Mobile Team Lead', 'Mobile Developer']
+  .map((name, index) => ({ id: index + 1, name, created_at: dt(-120 + index), updated_at: dt(-10) }));
+const branches: DbReference[] = [
+  { id: 1, name: 'Toshkent', created_at: dt(-120), updated_at: dt(-10) },
+  { id: 2, name: 'Samarqand', created_at: dt(-70), updated_at: dt(-10) },
 ];
 
 const teams: DbTeam[] = [
@@ -266,6 +274,8 @@ const roleLevel: Record<Role, number> = { SUPER_ADMIN: 100, ADMIN: 80, PROJECT_M
 
 const createDb = () => ({
   users: structuredClone(users),
+  positions: structuredClone(positions),
+  branches: structuredClone(branches),
   teams: structuredClone(teams),
   projects: structuredClone(projects),
   sprints: structuredClone(sprints),
