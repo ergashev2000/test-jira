@@ -6,16 +6,12 @@ import type { UserBrief } from '@/shared/types';
 import { cn, colorFromId, initials } from '@/shared/utils';
 
 interface Props {
-  /** User object as embedded in backend responses (assignee, author, manager…). */
   user: Pick<UserBrief, 'id' | 'full_name' | 'username'> | null | undefined;
-  /** Dims the avatar — pass when the response carries `status: 'inactive'`. */
   inactive?: boolean;
   size?: number;
   showName?: boolean;
   className?: string;
-  /** Hide tooltip (e.g. when name is shown next to it). */
   noTooltip?: boolean;
-  /** Long names wrap onto the next line instead of being cut with "…". */
   wrap?: boolean;
 }
 

@@ -92,9 +92,9 @@ const ALWAYS = () => true;
 const FROM_BACKEND: Record<Permission, (codes: Set<string>) => boolean> = {
   'dashboard.view': (c) => c.has('dashboard.view'),
   'project.view': ALWAYS,
-  'project.create': (c) => c.has('projects.manage'),
-  'project.edit': (c) => c.has('projects.manage'),
-  'project.archive': (c) => c.has('projects.manage'),
+  'project.create': (c) => c.has('projects.create'),
+  'project.edit': (c) => c.has('projects.edit'),
+  'project.archive': (c) => c.has('projects.archive'),
   'project.members.manage': (c) => c.has('projects.manage'),
   'sprint.view': ALWAYS,
   'sprint.manage': (c) => c.has('sprints.manage'),

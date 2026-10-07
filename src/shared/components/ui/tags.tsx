@@ -7,7 +7,6 @@ import { cn, daysFromToday, formatDate, isOverdue } from '@/shared/utils';
 
 import { PriorityIcon, StatusIcon } from './icons';
 
-/** Linear-style pill: subtle border, icon + label. */
 export const Chip = ({
   icon,
   children,

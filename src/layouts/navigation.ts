@@ -25,13 +25,17 @@ export const WORKSPACE: NavItem[] = [
   { to: ROUTES.REPORTS, label: 'Reports', icon: Analytics01Icon, permission: 'report.view' },
 ];
 
+/**
+ * Setup flow first — each step only needs what's above it: branches & positions (picked in the user form)
+ * → users → teams (lead + members are users) → audit log. Then system-wide config: roles, settings.
+ */
 export const ADMIN: NavItem[] = [
-  { to: ROUTES.USERS, label: 'Users', icon: UserMultipleIcon, permission: 'user.manage' },
-  { to: ROUTES.ROLES, label: 'Roles', icon: UserShield01Icon, permission: 'user.manage' },
-  { to: ROUTES.TEAMS, label: 'Teams', icon: UserGroupIcon, permission: 'team.manage' },
   { to: ROUTES.BRANCHES, label: 'Branches', icon: Building02Icon, permission: 'branches.view' },
   { to: ROUTES.POSITIONS, label: 'Positions', icon: UserSquareIcon, permission: 'positions.view' },
+  { to: ROUTES.USERS, label: 'Users', icon: UserMultipleIcon, permission: 'user.manage' },
+  { to: ROUTES.TEAMS, label: 'Teams', icon: UserGroupIcon, permission: 'team.manage' },
   { to: ROUTES.AUDIT_LOG, label: 'Audit log', icon: Shield01Icon, permission: 'auditLog.view' },
+  { to: ROUTES.ROLES, label: 'Roles', icon: UserShield01Icon, permission: 'user.manage' },
   { to: ROUTES.SETTINGS, label: 'Settings', icon: Settings02Icon, permission: 'settings.manage' },
 ];
 
