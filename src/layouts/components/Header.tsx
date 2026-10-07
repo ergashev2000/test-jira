@@ -28,7 +28,6 @@ export const Header = ({ collapsed, onToggleSidebar }: Props) => {
   const user = useCurrentUser();
   const role = primaryRole(user.roles);
   const navigate = useNavigate();
-  const { data: settings } = useAppSettings();
   const themeMode = useThemeStore((s) => s.mode);
   const toggleTheme = useThemeStore((s) => s.toggle);
   const { message } = App.useApp();

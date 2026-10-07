@@ -13,13 +13,11 @@ interface SessionState {
   refreshToken: string | null;
   user: Me | null;
   setSession: (token: string, refreshToken: string, user: Me) => void;
-  /** Swaps tokens after a refresh (the backend may rotate the refresh token too). */
   setTokens: (token: string, refreshToken?: string | null) => void;
   setUser: (user: Me) => void;
   clear: () => void;
 }
 
-/** JWT `exp` (seconds) → Date, so a cookie never outlives its token. */
 const jwtExpiry = (token: string): Date | undefined => {
   try {
     const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))) as { exp?: number };
@@ -41,7 +39,6 @@ const readUser = (): Me | null => {
   try {
     const raw = localStorage.getItem(USER_KEY);
     const user = raw ? (JSON.parse(raw) as Me) : null;
-    // Ignore a profile saved in an older shape — GET /auth/me/ refills it.
     return user && Array.isArray(user.roles) ? user : null;
   } catch {
     return null;
@@ -57,10 +54,6 @@ const writeUser = (user: Me | null) => {
   }
 };
 
-/**
- * The access cookie expires with the access token (~30 min); the session lives as long as the
- * refresh token, and the axios interceptor issues a new access token on the next 401.
- */
 const initial = {
   token: Cookies.get(ACCESS_COOKIE) ?? null,
   refreshToken: Cookies.get(REFRESH_COOKIE) ?? null,
@@ -69,14 +62,11 @@ const initial = {
 const signedIn = !!(initial.token || initial.refreshToken);
 if (!signedIn) writeUser(null);
 
-/** Highest of the user's backend roles — drives menus and permission checks. */
 export const roleOf = (user: Pick<Me, 'roles'> | null | undefined): Role | undefined =>
   user ? primaryRole(user.roles) : undefined;
 
-/** Signed in while either token is alive — an expired access token is renewed with the refresh token. */
 export const isSignedIn = (s: Pick<SessionState, 'token' | 'refreshToken'>) => !!(s.token || s.refreshToken);
 
-/** Session store: JWT tokens in cookies (js-cookie), the user (GET /auth/me/ as-is) in localStorage. */
 export const useSessionStore = create<SessionState>((set) => ({
   token: signedIn ? initial.token : null,
   refreshToken: initial.refreshToken,
@@ -104,7 +94,6 @@ export const useSessionStore = create<SessionState>((set) => ({
   },
 }));
 
-/** Non-null current user — only use inside protected routes. */
 export const useCurrentUser = () => {
   const user = useSessionStore((s) => s.user);
   if (!user) throw new Error('useCurrentUser used outside of an authenticated route');
