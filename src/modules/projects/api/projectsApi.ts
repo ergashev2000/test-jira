@@ -1,13 +1,5 @@
 import { api } from '@/shared/lib/axios';
-import { asPage } from '@/shared/lib/normalize';
-import type {
-  ApiPaginated,
-  ListParams,
-  Project,
-  ProjectMember,
-  ProjectOverview,
-  ProjectWrite,
-} from '@/shared/types';
+import type { ApiPaginated, Project, ProjectMember, ProjectOverview, ProjectWrite } from '@/shared/types';
 
 import type { ProjectListParams } from '../types/project.types';
 
@@ -43,12 +35,10 @@ export const getProjectOverview = async (id: number) => {
   return data;
 };
 
-// GET /projects/:id/members/  — a plain array today, paginated later
-export const listMembers = async (id: number, params: ListParams = {}) => {
-  const { data } = await api.get<ProjectMember[] | ApiPaginated<ProjectMember>>(`/projects/${id}/members/`, {
-    params: { page_size: 100, ...params },
-  });
-  return asPage(data);
+// GET /projects/:id/members/
+export const listMembers = async (id: number) => {
+  const { data } = await api.get<ProjectMember[]>(`/projects/${id}/members/`);
+  return data;
 };
 
 // POST /projects/:id/members/  { user_id, role_in_project }  — idempotent

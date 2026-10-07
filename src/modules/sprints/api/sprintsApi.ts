@@ -45,12 +45,6 @@ export const completeSprint = async (id: number, moveTo: 'backlog' | number) => 
   return data;
 };
 
-// GET /projects/{id}/backlog/  — tasks with no sprint (not done / cancelled), critical first, then earlier deadlines
-export const listProjectBacklog = async (projectId: number, params: { page_size?: number } = {}) => {
-  const { data } = await api.get<ApiPaginated<Task>>(`/projects/${projectId}/backlog/`, { params });
-  return data;
-};
-
 // POST /tasks/:id/move-sprint/  { sprint }
 export const moveTaskToSprint = async (taskId: number, sprint: number) => {
   await api.post(`/tasks/${taskId}/move-sprint/`, { sprint });

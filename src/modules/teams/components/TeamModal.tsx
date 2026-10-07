@@ -12,7 +12,7 @@ export const TeamModal = ({ open, team, onClose }: { open: boolean; team?: Team;
   const { message } = App.useApp();
   const save = useSaveTeam();
   const { data: members } = useTeamMembers(open ? team?.id : undefined);
-  const memberList = members?.results ?? [];
+  const memberList = members ?? [];
 
   useEffect(() => {
     if (!open) return;
@@ -21,10 +21,10 @@ export const TeamModal = ({ open, team, onClose }: { open: boolean; team?: Team;
       form.setFieldsValue({
         name: team.name,
         lead: team.lead?.id ?? null,
-        member_ids: (members?.results ?? []).map((m) => m.id).filter((id) => id !== team.lead?.id),
+        member_ids: (members ?? []).map((m) => m.id).filter((id) => id !== team.lead?.id),
       });
     }
-  }, [open, team, form, members?.results]);
+  }, [open, team, form, members]);
 
   return (
     <Modal open={open} title={team ? `Edit ${team.name}` : 'New team'} onCancel={onClose} onOk={() => form.submit()}

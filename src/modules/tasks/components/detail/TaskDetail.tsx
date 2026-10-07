@@ -15,12 +15,12 @@ import { TaskMeta } from './TaskMeta';
 
 const Activity = ({ taskId }: { taskId: number }) => {
   const query = useTaskActivity(taskId);
-  return <QueryState query={query}>{(d) => <ActivityTimeline items={d.results} />}</QueryState>;
+  return <QueryState query={query}>{(d) => <ActivityTimeline items={d} />}</QueryState>;
 };
 
-/** Shared by the Drawer (?task=KEY) and the full page (/tasks/:key). */
-export const TaskDetailView = ({ taskKey, inDrawer }: { taskKey: string; inDrawer?: boolean }) => {
-  const { data: task, isLoading, isError, error, refetch } = useTaskDetail(taskKey);
+/** Shared by the Drawer (?task=ID) and the full page (/tasks/:id). */
+export const TaskDetailView = ({ taskId, inDrawer }: { taskId: string; inDrawer?: boolean }) => {
+  const { data: task, isLoading, isError, error, refetch } = useTaskDetail(taskId);
 
   if (isLoading) return <Skeleton active paragraph={{ rows: 10 }} />;
   if (isError) {
@@ -28,7 +28,7 @@ export const TaskDetailView = ({ taskKey, inDrawer }: { taskKey: string; inDrawe
       return <Result status="403" title="403" subTitle="You don't have access to this task." />;
     }
     if (error instanceof ApiError && error.status === 404) {
-      return <Result status="404" title="Task not found" subTitle={`${taskKey} doesn't exist.`} />;
+      return <Result status="404" title="Task not found" subTitle={`Task ${taskId} doesn't exist.`} />;
     }
     return <ErrorState error={error} onRetry={refetch} />;
   }
