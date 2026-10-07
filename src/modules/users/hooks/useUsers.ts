@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { QUERY_KEYS } from '@/shared/constants';
+import { listReferenceBranches, listReferencePositions } from '@/shared/api/references';
 
 import { createUser, getUser, listTeams, listUsers, setUserActive, setUserRoles, updateUser } from '../api/usersApi';
 import type { User, UserFormValues, UserListParams } from '../types/user.types';
@@ -21,6 +22,12 @@ export const useUser = (id: number | undefined) =>
 
 export const useTeams = () =>
   useQuery({ queryKey: QUERY_KEYS.users.teamOptions, queryFn: listTeams, staleTime: 5 * 60_000, select: (d) => d.results });
+
+export const useBranches = () =>
+  useQuery({ queryKey: QUERY_KEYS.branches.list({ page_size: 100 }), queryFn: listReferenceBranches, staleTime: 5 * 60_000 });
+
+export const usePositions = () =>
+  useQuery({ queryKey: QUERY_KEYS.positions.list({ page_size: 100 }), queryFn: listReferencePositions, staleTime: 5 * 60_000 });
 
 export const useSaveUser = () => {
   const inv = useInvalidate();

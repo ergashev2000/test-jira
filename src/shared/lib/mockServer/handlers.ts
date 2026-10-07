@@ -3,7 +3,7 @@ import dayjs from '@/shared/lib/dayjs';
 import { ATTACHMENT_RULES, toAppSettings, type BackendSettings } from '@/shared/lib/settingsShape';
 import type { ActivityAction, AuditEntityType, DailyPlanStatus, NotificationType, Role, TaskStatus } from '@/shared/types';
 
-import { d, db, MOCK_PASSWORD, nextId, now, NOTIFICATION_TYPES, type DbProject, type DbSprint, type DbTask, type DbUser } from './db';
+import { d, db, MOCK_PASSWORD, nextId, now, NOTIFICATION_TYPES, type DbProject, type DbReference, type DbSprint, type DbTask, type DbUser } from './db';
 import {
   activeBlocker, activeSprintOf, activityOut, attachmentOut, blockerOut, brief, cancelRequestOut, commentOut, isOpen, isOverdue,
   memberOut, meOut, projectOut, sprintOut, taskOut, teamMembers, teamOut, userById, userOut,
@@ -94,7 +94,7 @@ on('POST', '/users/', ({ body, me }) => {
   if (db.users.some((u) => u.username === body.username)) throw badRequest({ username: ['A user with that username already exists.'] });
   const u: DbUser = {
     id: nextId(db.users), full_name: str(body.full_name), username: str(body.username), email: str(body.email), phone: str(body.phone),
-    position: str(body.position), team_id: (body.team as number) ?? null, status: 'active', roles: (body.roles as Role[]) ?? ['EMPLOYEE'],
+    position_id: (body.position as number) ?? null, branch_id: (body.branch as number) ?? null, team_id: (body.team as number) ?? null, status: 'active', roles: (body.roles as Role[]) ?? ['EMPLOYEE'],
     last_login: null, created_at: now(), telegram: null,
   };
   db.users.push(u);
@@ -104,7 +104,9 @@ on('POST', '/users/', ({ body, me }) => {
 });
 on('PATCH', '/users/:id/', ({ params, body }) => {
   const u = findUser(params[0]);
-  for (const k of ['full_name', 'username', 'email', 'phone', 'position'] as const) if (body[k] !== undefined) u[k] = str(body[k]);
+  for (const k of ['full_name', 'username', 'email', 'phone'] as const) if (body[k] !== undefined) u[k] = str(body[k]);
+  if (body.position !== undefined) u.position_id = (body.position as number) ?? null;
+  if (body.branch !== undefined) u.branch_id = (body.branch as number) ?? null;
   if (body.team !== undefined) u.team_id = (body.team as number) ?? null;
   if (body.password) passwords[u.id] = str(body.password);
   return userOut(u);
@@ -121,6 +123,46 @@ on('POST', '/users/:id/deactivate/', ({ params, me }) => {
   if (u.id === me.id) throw badRequest("You can't deactivate yourself");
   u.status = 'inactive';
   return userOut(u);
+});
+
+// ───────────── references ─────────────
+
+const findReference = (rows: DbReference[], id: string, label: string) =>
+  rows.find((reference) => reference.id === Number(id)) ?? (() => { throw notFound(`${label} not found`); })();
+const saveReference = (rows: DbReference[], body: Body) => {
+  const name = str(body.name).trim();
+  if (!name) throw badRequest({ name: ['This field may not be blank.'] });
+  if (rows.some((reference) => reference.name.toLowerCase() === name.toLowerCase())) throw badRequest({ name: ['A reference with this name already exists.'] });
+  const reference = { id: nextId(rows), name, created_at: now(), updated_at: now() };
+  rows.push(reference);
+  return reference;
+};
+const updateReference = (reference: DbReference, body: Body, rows: DbReference[]) => {
+  if (body.name !== undefined) {
+    const name = str(body.name).trim();
+    if (!name) throw badRequest({ name: ['This field may not be blank.'] });
+    if (rows.some((row) => row.id !== reference.id && row.name.toLowerCase() === name.toLowerCase())) throw badRequest({ name: ['A reference with this name already exists.'] });
+    reference.name = name;
+    reference.updated_at = now();
+  }
+  return reference;
+};
+
+on('GET', '/references/branches/', ({ query }) => list(db.branches, query, { search: ['name'], ordering: 'name' }));
+on('GET', '/references/branches/:id/', ({ params }) => findReference(db.branches, params[0], 'Branch'));
+on('POST', '/references/branches/', ({ body }) => ({ status: 201, data: saveReference(db.branches, body) }));
+on('PATCH', '/references/branches/:id/', ({ params, body }) => updateReference(findReference(db.branches, params[0], 'Branch'), body, db.branches));
+
+on('GET', '/references/positions/', ({ query }) => list(db.positions, query, { search: ['name'], ordering: 'name' }));
+on('GET', '/references/positions/:id/', ({ params }) => findReference(db.positions, params[0], 'Position'));
+on('POST', '/references/positions/', ({ body }) => ({ status: 201, data: saveReference(db.positions, body) }));
+on('PATCH', '/references/positions/:id/', ({ params, body }) => updateReference(findReference(db.positions, params[0], 'Position'), body, db.positions));
+on('DELETE', '/references/positions/:id/', ({ params }) => {
+  const position = findReference(db.positions, params[0], 'Position');
+  const users = db.users.filter((user) => user.position_id === position.id).length;
+  if (users) throw new HttpError(409, `This position is assigned to ${users} user${users === 1 ? '' : 's'}.`);
+  db.positions.splice(db.positions.indexOf(position), 1);
+  return NO_CONTENT;
 });
 
 // ───────────── teams ─────────────

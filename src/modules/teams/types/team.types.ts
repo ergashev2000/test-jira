@@ -1,4 +1,4 @@
-import type { Role } from '@/shared/types';
+import type { ReferenceBrief, Role } from '@/shared/types';
 
 // Shapes follow api/api.json (components.schemas) as-is.
 
@@ -40,7 +40,7 @@ export interface TeamMember {
   full_name: string;
   username: string;
   email: string;
-  position: string;
+  position: ReferenceBrief | null;
   status: 'active' | 'inactive';
   roles: Role[];
 }

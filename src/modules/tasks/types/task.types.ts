@@ -1,4 +1,4 @@
-import type { Comment, ListParams, Priority, Project, Sprint, Task, TaskStatus, TaskType, Team, UserBrief } from '@/shared/types';
+import type { Comment, ListParams, Priority, Project, ReferenceBrief, Sprint, Task, TaskStatus, TaskType, Team, UserBrief } from '@/shared/types';
 
 export type {
   Activity,
@@ -68,7 +68,7 @@ export interface SearchResults {
   tasks: Task[];
   projects: Project[];
   sprints: Sprint[];
-  users: (UserBrief & { email?: string; position?: string })[];
+  users: (UserBrief & { email?: string; position?: ReferenceBrief | null })[];
   teams: Team[];
   /** NOT IN api.json — comment search (GET /search/?q=). */
   comments?: (Comment & { task: { id: number; key: string; title: string } })[];

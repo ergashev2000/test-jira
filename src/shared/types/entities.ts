@@ -41,6 +41,11 @@ export interface TeamBrief {
   name: string;
 }
 
+export interface ReferenceBrief {
+  id: number;
+  name: string;
+}
+
 export interface ProjectBrief {
   id: number;
   key: string;
@@ -61,7 +66,8 @@ export interface Me {
   username: string;
   email: string;
   phone: string;
-  position: string;
+  position: ReferenceBrief | null;
+  branch: ReferenceBrief | null;
   team: TeamBrief | null;
   status: UserStatus;
   roles: Role[];
@@ -76,7 +82,8 @@ export interface Me {
 export interface UserOption extends UserBrief {
   email: string;
   phone: string;
-  position: string;
+  position: ReferenceBrief | null;
+  branch: ReferenceBrief | null;
   team: TeamBrief | null;
   status: UserStatus;
   roles: Role[];
@@ -165,7 +172,7 @@ export interface ProjectMember {
   role_in_project: string;
   added_at: string;
   /** NOT IN api.json — shown in the members table. */
-  position?: string;
+  position?: ReferenceBrief | null;
   roles?: Role[];
   team?: TeamBrief | null;
   active_tasks?: number;
@@ -489,7 +496,7 @@ export interface NotificationSetting {
   web: boolean;
 }
 
-export type AuditEntityType = 'task' | 'project' | 'sprint' | 'user' | 'team' | 'settings';
+export type AuditEntityType = 'task' | 'project' | 'sprint' | 'user' | 'team' | 'settings' | 'references.branch' | 'references.position';
 
 /** GET /audit-logs/ */
 export interface AuditLog {
