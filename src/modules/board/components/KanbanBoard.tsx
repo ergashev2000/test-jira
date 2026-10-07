@@ -22,12 +22,13 @@ import { cn } from '@/shared/utils';
 
 import { TaskCard, TaskCardView } from './TaskCard';
 
-const Column = ({ status, tasks, onAdd, onOpen }: {
-  status: TaskStatus; tasks: Task[]; onAdd?: () => void; onOpen: (id: number) => void;
+const Column = ({ status, tasks, onAdd, onOpen, onBackground }: {
+  status: TaskStatus; tasks: Task[]; onAdd?: () => void; onOpen: (id: number) => void; onBackground?: boolean;
 }) => {
   const { setNodeRef, isOver } = useDroppable({ id: status });
   return (
-    <div className="flex w-[300px] shrink-0 flex-col">
+    // On a custom background the column gets its own panel (Trello-like) so it stays readable.
+    <div className={cn('flex w-[300px] shrink-0 flex-col', onBackground && 'max-h-full self-start rounded-xl bg-panel/90 p-1.5 shadow-lg backdrop-blur-sm')}>
       <div className="flex h-10 items-center gap-2 px-2 text-[13px]">
         <StatusIcon status={status} />
         <span className="font-medium text-fg">{TASK_STATUS[status].label}</span>
@@ -40,7 +41,7 @@ const Column = ({ status, tasks, onAdd, onOpen }: {
         ref={setNodeRef}
         className={cn(
           'flex min-h-40 flex-1 flex-col gap-2 rounded-xl p-1.5 transition-colors',
-          isOver ? 'bg-primary/10 ring-1 ring-primary/40' : 'bg-bg/40',
+          isOver ? 'bg-primary/10 ring-1 ring-primary/40' : !onBackground && 'bg-bg/40',
         )}
       >
         {tasks.map((t) => <TaskCard key={t.id} task={t} onOpen={onOpen} />)}
@@ -53,13 +54,15 @@ const Column = ({ status, tasks, onAdd, onOpen }: {
 interface Props {
   tasks: Task[];
   onQuickAdd?: (status: TaskStatus) => void;
+  /** A board background image / color is set. */
+  onBackground?: boolean;
 }
 
 /** Board columns — no Backlog: backlog tasks live outside the board. */
 const COLUMNS = BOARD_COLUMNS.filter((s) => s !== 'backlog');
 
 /** Fixed columns. Backlog and cancelled tasks never appear; blocked tasks stay in their column. */
-export const KanbanBoard = ({ tasks, onQuickAdd }: Props) => {
+export const KanbanBoard = ({ tasks, onQuickAdd, onBackground }: Props) => {
   const { openTask } = useTaskDrawer();
   const { change } = useStatusChanger();
   const [active, setActive] = useState<Task | null>(null);
@@ -88,6 +91,7 @@ export const KanbanBoard = ({ tasks, onQuickAdd }: Props) => {
             status={s}
             tasks={visible.filter((t) => t.status === s)}
             onOpen={openTask}
+            onBackground={onBackground}
             onAdd={onQuickAdd && s === 'todo' ? () => onQuickAdd(s) : undefined}
           />
         ))}
