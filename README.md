@@ -185,3 +185,22 @@ commit; warnings do not.
 - Dashboard, notifications, audit log, settings, comment editing, blocker history and project activity are not in `api.json` yet — they run on the mock server until the backend adds them (see `docs/BACKEND_REQUIREMENTS.md`).
 - No automated tests yet.
 - UI copy is English only (antd locale `en_US`).
+
+## CI/CD (GitHub Actions)
+
+`.github/workflows/deploy.yml`:
+
+- **Pull request** (`main`, `dev`) va har push: `npm ci` → `npm run lint` → `npm run build`.
+- **Push to `main`**: build artefakti serverga `rsync` qilinadi (`https://u-management.ziyodev.uz`), so'ng smoke check (`GET /` → 200).
+
+Repo **Settings → Secrets and variables → Actions** da kerak:
+
+| Secret | Qiymat |
+|---|---|
+| `DEPLOY_HOST` | server IP yoki domen |
+| `DEPLOY_USER` | SSH foydalanuvchi (masalan `ubuntu`) |
+| `DEPLOY_PATH` | nginx root, masalan `/var/www/u-management-frontend` |
+| `DEPLOY_SSH_KEY` | faqat deploy uchun ajratilgan private key (ed25519), pub qismi serverdagi `~/.ssh/authorized_keys` da |
+| `DEPLOY_KNOWN_HOSTS` | `ssh-keyscan -t ed25519 <host>` natijasi |
+
+Ixtiyoriy variable: `VITE_API_URL` (default `https://u-management-api.ziyodev.uz/api/v1`).
