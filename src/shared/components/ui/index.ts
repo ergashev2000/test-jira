@@ -14,3 +14,4 @@ export * from './KpiCard';
 export * from './ActivityTimeline';
 export * from './ProjectIcon';
 export * from './Loader';
+export * from './RichText';

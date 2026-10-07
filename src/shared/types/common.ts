@@ -13,7 +13,6 @@ export interface ListParams {
   page?: number;
   page_size?: number;
   search?: string;
-  /** DRF ordering: `field` or `-field`. */
   ordering?: string;
 }
 

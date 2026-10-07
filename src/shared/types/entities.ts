@@ -1,6 +1,3 @@
-// Shapes follow api/api.json (components.schemas) as-is: snake_case, numeric ids, lowercase enums.
-// Types marked "NOT IN api.json" describe endpoints the UI needs but the backend doesn't have yet —
-// see docs/BACKEND_REQUIREMENTS.md.
 
 export type Role = 'SUPER_ADMIN' | 'ADMIN' | 'PROJECT_MANAGER' | 'TEAM_LEAD' | 'EMPLOYEE';
 export type UserStatus = 'active' | 'inactive';
@@ -270,7 +267,9 @@ export interface Attachment {
   file_name: string;
   file_size: number;
   mime_type: string;
+  is_image?: boolean;
   url: string;
+  preview_url?: string | null;
   uploaded_by: UserBrief | null;
   created_at: string;
 }
@@ -283,7 +282,6 @@ export interface Activity {
   new_value: string;
   source: Source;
   created_at: string;
-  /** NOT IN api.json — needed by project/dashboard activity feeds. */
   task?: { id: number; key: string; title: string };
 }
 
@@ -344,7 +342,6 @@ export interface DailyPlan {
   date: string;
   is_confirmed: boolean;
   confirmed_at: string | null;
-  /** NOT IN api.json — where the plan was confirmed. */
   confirmed_via?: Source | null;
   note: string;
   items: DailyPlanItem[];
@@ -376,7 +373,6 @@ export interface DailyReport {
   completed_tasks: ReportTaskLine[];
   blocked_tasks: ReportTaskLine[];
   not_completed_tasks: ReportTaskLine[];
-  /** NOT IN api.json — whose report it is, plan confirmation, finer task groups. */
   user?: UserBrief;
   plan_confirmed_at?: string | null;
   confirmed_via?: Source | null;
@@ -404,7 +400,6 @@ export interface TeamDailyReport {
   members: TeamDailyMemberRow[];
   team_progress_percent: number;
   blockers: number;
-  /** NOT IN api.json — the blocked tasks behind `blockers`. */
   blocker_tasks?: (ReportTaskLine & { assignee: UserBrief | null })[];
 }
 
@@ -421,7 +416,6 @@ export interface SprintReport {
   completion_percent: number;
   moved_to_backlog: number;
   generated_at: string | null;
-  /** NOT IN api.json — which tasks were moved and where. */
   moved_tasks?: ReportTaskLine[];
   moved_to?: SprintBrief | null;
 }
@@ -437,7 +431,6 @@ export interface ProjectReport {
   active_sprint: ActiveSprintInfo | null;
   sprints_completed: number;
   members_count: number;
-  /** NOT IN api.json — open tasks per priority / active tasks per member. */
   by_priority?: Partial<Record<Priority, number>>;
   workload?: { user: UserBrief; active: number }[];
 }
@@ -481,7 +474,6 @@ export interface AppNotification {
   title: string;
   message: string;
   entity_type: 'task' | 'sprint' | 'project' | 'report';
-  /** Related entity ID. */
   entity_id: string;
   is_read: boolean;
   created_at: string;
@@ -490,7 +482,6 @@ export interface AppNotification {
 /** GET /notification-settings/ item (UI shape). */
 export interface NotificationSetting {
   event: NotificationType;
-  /** Backend's human-readable event name. */
   label?: string;
   telegram: boolean;
   web: boolean;
