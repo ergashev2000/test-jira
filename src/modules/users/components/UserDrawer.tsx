@@ -1,21 +1,69 @@
 import { App, Button, Drawer, Form, Input, Select } from 'antd';
-import { useEffect } from 'react';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { MagicWand01Icon } from '@hugeicons/core-free-icons';
+import { useEffect, useState } from 'react';
 
 import { useCurrentUser } from '@/shared/hooks';
 import { ROLE_OPTIONS } from '@/shared/constants';
-import { errorMessage, formatPhone, rules } from '@/shared/utils';
+import { errorMessage, rules } from '@/shared/utils';
 
-import { useBranches, usePositions, useSaveUser, useTeams } from '../hooks/useUsers';
+import { useBranches, usePositions, useSaveUser } from '../hooks/useUsers';
 import type { User, UserFormValues } from '../types/user.types';
+
+const PHONE_PREFIX = '+998';
+
+/** `+998 XX XXX XX XX` — the +998 prefix is fixed; accepts typed or pasted numbers with or without it. */
+const maskPhone = (v = '') => {
+  let d = v.replace(/\D/g, '');
+  if (d.startsWith('998')) d = d.slice(3);
+  d = d.slice(0, 9);
+  const parts = [d.slice(0, 2), d.slice(2, 5), d.slice(5, 7), d.slice(7, 9)].filter(Boolean);
+  return parts.length ? [PHONE_PREFIX, ...parts].join(' ') : `${PHONE_PREFIX} `;
+};
+
+/** Masked value → API value (`+998901234567`), or '' when only the prefix is there. */
+const phoneValue = (v = '') => {
+  const d = v.replace(/\D/g, '').replace(/^998/, '');
+  return d ? `${PHONE_PREFIX}${d}` : '';
+};
+
+const CHARSETS = ['ABCDEFGHJKLMNPQRSTUVWXYZ', 'abcdefghijkmnpqrstuvwxyz', '23456789', '!@#$%^&*-_=+?'];
+
+/** 16 chars from crypto.getRandomValues — at least one upper, lower, digit and symbol; look-alikes (0/O, 1/l/I) left out. */
+const generatePassword = (length = 16) => {
+  const all = CHARSETS.join('');
+  const rand = (n: number) => crypto.getRandomValues(new Uint32Array(1))[0] % n;
+  const chars = [...CHARSETS.map((set) => set[rand(set.length)]), ...Array.from({ length: length - CHARSETS.length }, () => all[rand(all.length)])];
+  for (let i = chars.length - 1; i > 0; i--) {
+    const j = rand(i + 1);
+    [chars[i], chars[j]] = [chars[j], chars[i]];
+  }
+  return chars.join('');
+};
+
+/** Until the backend returns the name parts, split `full_name` ("First Last Middle"). */
+const nameParts = (u: User) => {
+  if (u.first_name || u.last_name) return { first_name: u.first_name ?? '', last_name: u.last_name ?? '', middle_name: u.middle_name ?? '' };
+  const [first_name = '', last_name = '', ...rest] = u.full_name.trim().split(/\s+/);
+  return { first_name, last_name, middle_name: rest.join(' ') };
+};
 
 export const UserDrawer = ({ open, user, onClose }: { open: boolean; user?: User; onClose: () => void }) => {
   const [form] = Form.useForm<UserFormValues>();
   const { message } = App.useApp();
   const me = useCurrentUser();
-  const { data: teams = [], isLoading: teamsLoading } = useTeams();
   const { data: branches = [], isLoading: branchesLoading } = useBranches();
   const { data: positions = [], isLoading: positionsLoading } = usePositions();
   const save = useSaveUser();
+  const [showPassword, setShowPassword] = useState(false);
+
+  const onGenerate = () => {
+    const password = generatePassword();
+    form.setFieldValue('password', password);
+    void form.validateFields(['password']);
+    setShowPassword(true);
+    navigator.clipboard?.writeText(password).then(() => message.success('Password generated and copied'), () => message.success('Password generated'));
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -23,16 +71,15 @@ export const UserDrawer = ({ open, user, onClose }: { open: boolean; user?: User
     form.setFieldsValue(
       user
         ? {
-          full_name: user.full_name,
+          ...nameParts(user),
           username: user.username,
           email: user.email,
           position: user.position?.id ?? null,
           branch: user.branch?.id ?? null,
-          phone: user.phone ? formatPhone(user.phone) : '',
-          team: user.team?.id ?? null,
+          phone: maskPhone(user.phone ?? ''),
           roles: user.roles,
         }
-        : { roles: ['EMPLOYEE'], team: null, branch: null, position: null },
+        : { roles: ['EMPLOYEE'], phone: maskPhone(), branch: null, position: null },
     );
   }, [open, user, form]);
 
@@ -45,6 +92,7 @@ export const UserDrawer = ({ open, user, onClose }: { open: boolean; user?: User
       width={480}
       title={user ? `Edit ${user.full_name || user.username}` : 'New user'}
       destroyOnHidden
+      afterOpenChange={(o) => !o && setShowPassword(false)}
       footer={
         <div className="flex justify-end gap-2">
           <Button onClick={onClose} disabled={save.isPending}>
@@ -64,7 +112,7 @@ export const UserDrawer = ({ open, user, onClose }: { open: boolean; user?: User
           save.mutate(
             {
               user,
-              values: { ...values, team: values.team ?? null, phone: values.phone?.replace(/\s/g, '') ?? '' },
+              values: { ...values, middle_name: values.middle_name?.trim() ?? '', phone: phoneValue(values.phone) },
             },
             {
               onSuccess: () => {
@@ -76,7 +124,15 @@ export const UserDrawer = ({ open, user, onClose }: { open: boolean; user?: User
           )
         }
       >
-        <Form.Item name="full_name" label="Full name" rules={[rules.required('Full name')]}>
+        <div className="grid grid-cols-2 gap-3">
+          <Form.Item name="first_name" label="First name" rules={[rules.required('First name')]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="last_name" label="Last name" rules={[rules.required('Last name')]}>
+            <Input />
+          </Form.Item>
+        </div>
+        <Form.Item name="middle_name" label="Middle name">
           <Input />
         </Form.Item>
         <div className="grid grid-cols-2 gap-3">
@@ -98,34 +154,16 @@ export const UserDrawer = ({ open, user, onClose }: { open: boolean; user?: User
         <Form.Item
           name="phone"
           label="Phone"
-          rules={[rules.phone]}
-          normalize={(v: string) => {
-            const d = v.replace(/\D/g, '').slice(0, 12);
-            const parts = [
-              d.slice(0, 3),
-              d.slice(3, 5),
-              d.slice(5, 8),
-              d.slice(8, 10),
-              d.slice(10, 12),
-            ].filter(Boolean);
-            return parts.length ? `+${parts.join(' ')}` : '';
-          }}
+          rules={[{ validator: (r, v: string | undefined) => (phoneValue(v) ? (rules.phone.validator(r, phoneValue(v))) : Promise.resolve()) }]}
+          normalize={(v: string) => maskPhone(v)}
         >
-          <Input placeholder="+998 90 123 45 67" />
+          <Input placeholder="+998 99 999 99 99" inputMode="tel" />
         </Form.Item>
         <Form.Item name="position" label="Position">
           <Select allowClear placeholder="No position" loading={positionsLoading} options={positions.map((p) => ({ value: p.id, label: p.name }))} />
         </Form.Item>
         <Form.Item name="branch" label="Branch">
           <Select allowClear placeholder="No branch" loading={branchesLoading} options={branches.map((b) => ({ value: b.id, label: b.name }))} />
-        </Form.Item>
-        <Form.Item name="team" label="Team">
-          <Select
-            allowClear
-            placeholder="No team"
-            loading={teamsLoading}
-            options={teams.map((t) => ({ value: t.id, label: t.name }))}
-          />
         </Form.Item>
         <Form.Item
           name="roles"
@@ -144,7 +182,16 @@ export const UserDrawer = ({ open, user, onClose }: { open: boolean; user?: User
           extra={user ? 'Leave empty to keep the current password.' : undefined}
           rules={user ? [rules.min(8)] : [rules.required('Password'), rules.min(8)]}
         >
-          <Input.Password autoComplete="new-password" />
+          <Input.Password
+            autoComplete="new-password"
+            visibilityToggle={{ visible: showPassword, onVisibleChange: setShowPassword }}
+            addonAfter={
+              <Button type="text" size="small" className="!h-auto !px-1" onClick={onGenerate}
+                icon={<HugeiconsIcon icon={MagicWand01Icon} size={14} className="hicon" strokeWidth={1.7} />}>
+                Generate
+              </Button>
+            }
+          />
         </Form.Item>
       </Form>
     </Drawer>

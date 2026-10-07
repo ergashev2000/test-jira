@@ -18,6 +18,10 @@ export interface ReferenceBrief {
 export interface User {
   id: number;
   full_name: string;
+  /** Being added on the backend — may be missing until then (fall back to `full_name`). */
+  first_name?: string;
+  last_name?: string;
+  middle_name?: string;
   username: string;
   email: string;
   phone: string;
@@ -46,6 +50,9 @@ export interface UserListParams {
 /** POST /users/ */
 export interface UserCreate {
   full_name: string;
+  first_name: string;
+  last_name: string;
+  middle_name?: string;
   username: string;
   email: string;
   password: string;
@@ -65,7 +72,7 @@ export interface UserRoles {
 }
 
 /** Drawer form: create + update fields in API naming. */
-export type UserFormValues = Omit<UserCreate, 'password' | 'roles'> & {
+export type UserFormValues = Omit<UserCreate, 'password' | 'roles' | 'full_name' | 'team'> & {
   roles: Role[];
   password?: string;
 };

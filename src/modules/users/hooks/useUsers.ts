@@ -33,7 +33,9 @@ export const useSaveUser = () => {
   const inv = useInvalidate();
   return useMutation({
     mutationFn: async ({ user, values }: { user?: User; values: UserFormValues }) => {
-      const { roles, password, ...fields } = values;
+      const { roles, password, ...rest } = values;
+      // full_name is still required by the backend — sent alongside the new name parts.
+      const fields = { ...rest, full_name: [rest.first_name, rest.last_name, rest.middle_name].filter(Boolean).join(' ') };
       if (!user) return createUser({ ...fields, roles, password: password! });
       const updated = await updateUser(user.id, password ? { ...fields, password } : fields);
       if (!sameRoles(roles, user.roles)) await setUserRoles(user.id, roles);
