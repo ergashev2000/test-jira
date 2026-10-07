@@ -55,7 +55,10 @@ interface Props {
   onQuickAdd?: (status: TaskStatus) => void;
 }
 
-/** 5 fixed columns. Cancelled tasks never appear; blocked tasks stay in their column. */
+/** Board columns — no Backlog: backlog tasks live outside the board. */
+const COLUMNS = BOARD_COLUMNS.filter((s) => s !== 'backlog');
+
+/** Fixed columns. Backlog and cancelled tasks never appear; blocked tasks stay in their column. */
 export const KanbanBoard = ({ tasks, onQuickAdd }: Props) => {
   const { openTask } = useTaskDrawer();
   const { change } = useStatusChanger();
@@ -79,13 +82,13 @@ export const KanbanBoard = ({ tasks, onQuickAdd }: Props) => {
   return (
     <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={() => setActive(null)}>
       <div className="flex h-full gap-3 overflow-x-auto p-4">
-        {BOARD_COLUMNS.map((s) => (
+        {COLUMNS.map((s) => (
           <Column
             key={s}
             status={s}
             tasks={visible.filter((t) => t.status === s)}
             onOpen={openTask}
-            onAdd={onQuickAdd && (s === 'backlog' || s === 'todo') ? () => onQuickAdd(s) : undefined}
+            onAdd={onQuickAdd && s === 'todo' ? () => onQuickAdd(s) : undefined}
           />
         ))}
       </div>
