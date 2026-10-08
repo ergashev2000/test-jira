@@ -17,7 +17,7 @@ interface Props {
 
 const nameOf = (u: Pick<UserBrief, 'full_name' | 'username'>) => u.full_name || u.username;
 
-export const UserAvatar = ({ user, inactive, size = 20, showName, className, noTooltip }: Props) => {
+export const UserAvatar = ({ user, inactive, size = 20, showName, className, noTooltip, wrap }: Props) => {
   if (!user) {
     const empty = (
       <Avatar size={size} icon={<HugeiconsIcon icon={UserIcon} size={16} className="hicon" strokeWidth={1.7} />} className="!border !border-dashed !border-line !bg-transparent !text-fg-3 shrink-0" />
