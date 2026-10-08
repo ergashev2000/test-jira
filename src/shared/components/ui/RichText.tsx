@@ -21,7 +21,7 @@ import { EditorContent, useEditor, useEditorState, type Editor } from '@tiptap/r
 import StarterKit from '@tiptap/starter-kit';
 import { Button, Tooltip } from 'antd';
 import DOMPurify from 'dompurify';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import { cn } from '@/shared/utils';
 
@@ -132,18 +132,20 @@ interface EditorProps {
   onCancel: () => void;
 }
 
+const extensions = (placeholder: string) => [
+  StarterKit.configure({
+    heading: { levels: [2, 3] },
+    link: { openOnClick: false, autolink: true, HTMLAttributes: { target: '_blank', rel: 'noopener noreferrer' } },
+  }),
+  TaskList,
+  TaskItem.configure({ nested: true }),
+  Placeholder.configure({ placeholder }),
+];
+
 /** Rich text editor with a toolbar and Save / Cancel. Ctrl+Enter saves, Esc cancels. */
 export const RichTextEditor = ({ value, placeholder = 'Write something…', saving, onSave, onCancel }: EditorProps) => {
   const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
-        heading: { levels: [2, 3] },
-        link: { openOnClick: false, autolink: true, HTMLAttributes: { target: '_blank', rel: 'noopener noreferrer' } },
-      }),
-      TaskList,
-      TaskItem.configure({ nested: true }),
-      Placeholder.configure({ placeholder }),
-    ],
+    extensions: extensions(placeholder),
     content: toSafeHtml(value),
     autofocus: 'end',
     editorProps: {
@@ -170,6 +172,31 @@ export const RichTextEditor = ({ value, placeholder = 'Write something…', savi
         <Button size="small" onClick={onCancel} disabled={saving}>Cancel</Button>
         <Button size="small" type="primary" loading={saving} onClick={save}>Save</Button>
       </div>
+    </div>
+  );
+};
+
+/** Form-controlled rich text field (antd Form.Item `value` / `onChange`) — toolbar, no Save / Cancel. */
+export const RichTextInput = ({ value, onChange, placeholder = 'Write something…', className }: {
+  value?: string; onChange?: (html: string) => void; placeholder?: string; className?: string;
+}) => {
+  const editor = useEditor({
+    extensions: extensions(placeholder),
+    content: toSafeHtml(value),
+    editorProps: { attributes: { class: cn('rich-text min-h-28 max-h-[40vh] overflow-y-auto px-3 py-2 outline-none', className) } },
+    onUpdate: ({ editor: e }) => onChange?.(fromEditor(e)),
+  });
+
+  // Value set from outside (form reset, "Create more") — load it unless it's what the editor already holds.
+  useEffect(() => {
+    if (editor && (value ?? '') !== fromEditor(editor)) editor.commands.setContent(toSafeHtml(value), { emitUpdate: false });
+  }, [editor, value]);
+
+  if (!editor) return null;
+  return (
+    <div className="overflow-hidden rounded-lg border border-line bg-surface focus-within:border-primary">
+      <Toolbar editor={editor} />
+      <EditorContent editor={editor} />
     </div>
   );
 };

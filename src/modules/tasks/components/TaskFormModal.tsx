@@ -1,16 +1,18 @@
 import { HugeiconsIcon } from '@hugeicons/react';
-import { ArrowRight01Icon, Calendar03Icon, Clock01Icon, Rocket01Icon, Tag01Icon, UserIcon } from '@hugeicons/core-free-icons';
-import { App, Button, DatePicker, Form, Input, InputNumber, Modal, Select, Switch } from 'antd';
+import { ArrowRight01Icon, Attachment01Icon, Calendar03Icon, Clock01Icon, Rocket01Icon, Tag01Icon, UserIcon } from '@hugeicons/core-free-icons';
+import { App, Button, DatePicker, Form, Input, InputNumber, Modal, Select, Switch, Upload, type UploadFile } from 'antd';
 
 import { useEffect, useState } from 'react';
 
 import { useOpenSprints, useProjectLookups } from '@/shared/api/lookups';
-import { PriorityIcon, ProjectIcon, TaskTypeIcon, UserSelect } from '@/shared/components/ui';
+import { useAppSettings } from '@/modules/settings';
+import { PriorityIcon, ProjectIcon, RichTextInput, TaskTypeIcon, UserSelect } from '@/shared/components/ui';
 import { PRIORITY_OPTIONS } from '@/shared/constants';
 import dayjs, { type Dayjs } from '@/shared/lib/dayjs';
 import type { Task, TaskWrite } from '@/shared/types';
-import { errorMessage, rules } from '@/shared/utils';
+import { errorMessage, formatFileSize, rules } from '@/shared/utils';
 
+import { useUploadAttachment } from '../hooks/useTaskActions';
 import { useCreateTask, useUpdateTask } from '../hooks/useTasks';
 /** TaskWrite with antd-friendly values: Dayjs deadline, numeric estimate, sentinel for "no sprint". */
 type FormShape = Omit<TaskWrite, 'deadline' | 'sprint' | 'estimate'> & { deadline: Dayjs | null; sprint: number | typeof BACKLOG; estimate: number | null };
@@ -37,10 +39,17 @@ export const TaskFormModal = ({ open, onClose, task, defaults, onCreated }: Prop
   const { data: sprints = [] } = useOpenSprints(projectId);
   const create = useCreateTask();
   const update = useUpdateTask();
+  const upload = useUploadAttachment();
+  const [files, setFiles] = useState<UploadFile[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const { data: settings } = useAppSettings();
+  const maxMb = settings?.tasks?.max_attachment_mb ?? 10;
+  const types = settings?.tasks?.allowed_file_types ?? [];
   const writableProjects = projects.filter((p) => p.status !== 'archived');
 
   useEffect(() => {
     if (!open) return;
+    setFiles([]);
     form.setFieldsValue(task ? {
       project: task.project.id,
       type: task.type,
@@ -89,10 +98,24 @@ export const TaskFormModal = ({ open, onClose, task, defaults, onCreated }: Prop
       return;
     }
     create.mutate(values, {
-      onSuccess: (t) => {
+      onSuccess: async (t) => {
+        // Files go to POST /tasks/{id}/attachments/ once the task exists — one by one, failures reported.
+        if (files.length) {
+          setUploading(true);
+          const failed: string[] = [];
+          for (const f of files) {
+            try {
+              await upload.mutateAsync({ taskId: t.id, file: f.originFileObj as File });
+            } catch {
+              failed.push(f.name);
+            }
+          }
+          setUploading(false);
+          if (failed.length) message.warning(`${t.key} created, but ${failed.length} file(s) failed to upload: ${failed.join(', ')}`);
+        }
         message.success(`${t.key} created`);
         onCreated?.(t);
-        if (createMore) form.setFieldsValue({ title: '', description: '' });
+        if (createMore) { form.setFieldsValue({ title: '', description: '' }); setFiles([]); }
         else onClose();
       },
       onError: (e) => message.error(errorMessage(e)),
@@ -125,12 +148,36 @@ export const TaskFormModal = ({ open, onClose, task, defaults, onCreated }: Prop
           <span className="text-fg">{task ? `Edit ${task.key}` : 'New task'}</span>
         </div>
 
-        <Form.Item name="title" rules={[rules.required('Title'), rules.max(200)]} className="!mb-1">
-          <Input className="ghost-input !text-[22px] !font-medium" placeholder={project ? `${project.key} task title` : 'Task title'} autoFocus />
+        {/* Long titles wrap to a second line; Enter / pasted line breaks don't add new lines. */}
+        <Form.Item name="title" rules={[rules.required('Title'), rules.max(200)]} className="!mb-2"
+          normalize={(v: string) => v.replace(/\s*\n\s*/g, ' ')}>
+          <Input.TextArea className="ghost-input !resize-none !text-[22px] !font-medium !leading-snug" autoSize={{ minRows: 1, maxRows: 2 }}
+            placeholder={project ? `${project.key} task title` : 'Task title'} autoFocus onPressEnter={(e) => e.preventDefault()} />
         </Form.Item>
         <Form.Item name="description" className="!mb-3">
-          <Input.TextArea className="ghost-input !text-[14px] !text-fg-2" rows={6} placeholder="Add description…" />
+          <RichTextInput placeholder="Add description…" />
         </Form.Item>
+        {!task && (
+          <Upload
+            multiple
+            fileList={files}
+            accept={types.map((t) => `.${t}`).join(',') || undefined}
+            beforeUpload={(file) => {
+              const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+              if (types.length && !types.includes(ext)) message.error(`.${ext} files are not allowed`);
+              else if (file.size > maxMb * 1024 * 1024) message.error(`${file.name} is larger than ${maxMb} MB`);
+              else setFiles((prev) => [...prev, { uid: file.uid, name: file.name, size: file.size, type: file.type, originFileObj: file, status: 'done' }]);
+              return false;
+            }}
+            onRemove={(f) => setFiles((prev) => prev.filter((x) => x.uid !== f.uid))}
+            itemRender={(node, f) => <div title={f.size ? formatFileSize(f.size) : undefined}>{node}</div>}
+            className="mb-3 block"
+          >
+            <Button size="small" type="dashed" icon={<HugeiconsIcon icon={Attachment01Icon} size={14} className="hicon" strokeWidth={1.7} />}>
+              Attach files <span className="text-fg-3">· max {maxMb} MB</span>
+            </Button>
+          </Upload>
+        )}
 
         <div className="flex flex-wrap items-center gap-1.5">
           <Form.Item name="type" noStyle>
@@ -180,7 +227,7 @@ export const TaskFormModal = ({ open, onClose, task, defaults, onCreated }: Prop
           )}
           <div className="ml-auto flex gap-2">
             <Button onClick={onClose}>Cancel</Button>
-            <Button type="primary" htmlType="submit" loading={create.isPending || update.isPending}>
+            <Button type="primary" htmlType="submit" loading={create.isPending || update.isPending || uploading}>
               {task ? 'Save changes' : 'Create task'}
             </Button>
           </div>
