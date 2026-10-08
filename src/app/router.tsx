@@ -10,6 +10,7 @@ import type { Permission } from '@/shared/constants';
 import { DashboardGuard, Forbidden, HomeRedirect, NotFound, ProtectedRoute, RoleGuard, RouteError } from './guards';
 import { lazyPage as page } from './lazyPage';
 
+
 const guard = (permission: Permission, element: React.ReactNode) => <RoleGuard permission={permission}>{element}</RoleGuard>;
 
 const boardPages = () => import('@/modules/board/pages/BoardPages');
