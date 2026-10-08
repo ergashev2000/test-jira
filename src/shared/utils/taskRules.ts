@@ -14,6 +14,12 @@ export const isManager = (a: Actor) => MANAGER_ROLES.includes(role(a));
 
 export const canEditTask = (a: Actor) => hasPermission(a, 'task.edit');
 
+/** Pick any assignee (POST /tasks/{id}/assign/). */
+export const canAssignTask = (a: Actor) => hasPermission(a, 'task.assign') || hasPermission(a, 'task.edit');
+
+/** Anyone may take an unassigned task for themselves. */
+export const canTakeTask = (_a: Actor, t: TaskLike) => !t.assignee;
+
 export const canChangeStatus = (a: Actor, t: TaskLike) =>
   hasPermission(a, 'task.changeStatus') || t.assignee?.id === a.id || t.reviewer?.id === a.id;
 

@@ -35,7 +35,7 @@ export const ADMIN: NavItem[] = [
   { to: ROUTES.USERS, label: 'Users', icon: UserMultipleIcon, permission: 'user.manage' },
   { to: ROUTES.TEAMS, label: 'Teams', icon: UserGroupIcon, permission: 'team.manage' },
   { to: ROUTES.AUDIT_LOG, label: 'Audit log', icon: Shield01Icon, permission: 'auditLog.view' },
-  { to: ROUTES.ROLES, label: 'Roles', icon: UserShield01Icon, permission: 'user.manage' },
+  { to: ROUTES.ROLES, label: 'Roles', icon: UserShield01Icon, permission: 'role.manage' },
   { to: ROUTES.SETTINGS, label: 'Settings', icon: Settings02Icon, permission: 'settings.manage' },
 ];
 
