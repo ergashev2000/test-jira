@@ -52,7 +52,7 @@ export const UserAvatar = ({ user, inactive, size = 20, showName, className, noT
       title={`${name}${inactive ? ' (inactive)' : ''}`}
     >
       {avatar}
-      <span className={cn('min-w-0 truncate', inactive ? 'text-fg-3' : 'text-fg')}>
+      <span className={cn('min-w-0', wrap ? 'whitespace-normal' : 'truncate', inactive ? 'text-fg-3' : 'text-fg')}>
         {name}
         {inactive && <span className="ml-1 text-fg-3 shrink-0">(inactive)</span>}
       </span>
