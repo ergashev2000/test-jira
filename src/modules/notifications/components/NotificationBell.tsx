@@ -16,7 +16,7 @@ export const NotificationBell = () => {
   const markAll = useMarkAllRead();
   const openNotification = useOpenNotification();
   const navigate = useNavigate();
-  const hasNotifications = Boolean(data?.items.length);
+  const unread = data?.unread ?? 0;
 
   const content = (
     <div className="w-[360px]">
@@ -42,15 +42,13 @@ export const NotificationBell = () => {
   return (
     <Popover open={open} onOpenChange={setOpen} trigger="click" placement="bottomRight" content={content} arrow={false}
       styles={{ body: { padding: 0 } }}>
-      <Badge count={data?.unread ?? 0} size="small" offset={[-4, 4]}>
-        <Button type="text" className="header-action relative" icon={<HugeiconsIcon icon={Notification03Icon} size={17} className="hicon" strokeWidth={1.7} />} aria-label="Notifications">
-          {hasNotifications && (
-            <span className="absolute right-1 top-1 flex h-2 w-2" aria-hidden="true">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
-            </span>
-          )}
-        </Button>
+      <Badge count={unread} size="small" overflowCount={99} offset={[-2, 2]}>
+        <Button
+          type="text"
+          className="header-action"
+          icon={<HugeiconsIcon icon={Notification03Icon} size={17} className="hicon" strokeWidth={1.7} />}
+          aria-label={unread ? `Notifications, ${unread} unread` : 'Notifications'}
+        />
       </Badge>
     </Popover>
   );

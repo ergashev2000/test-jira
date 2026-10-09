@@ -46,6 +46,7 @@ export const router = createBrowserRouter([
         ],
       },
       { path: 'sprints', element: guard('sprint.view', page(sprintsPages, 'SprintsPage')) },
+      { path: 'sprints/:sprintId', element: guard('sprint.view', page(sprintsPages, 'SprintDetailPage')) },
       { path: 'board', element: guard('board.view', page(boardPages, 'GlobalBoardPage')) },
       { path: 'tasks/:taskId', element: page(() => import('@/modules/tasks/pages/TaskPage'), 'TaskPage') },
       { path: 'users', element: guard('user.manage', page(() => import('@/modules/users/pages/UsersPage'), 'UsersPage')) },

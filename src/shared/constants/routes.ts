@@ -8,6 +8,7 @@ export const ROUTES = {
   PROJECTS: '/projects',
   project: (id: number | string, tab = 'overview') => `/projects/${id}/${tab}`,
   SPRINTS: '/sprints',
+  sprint: (id: number | string) => `/sprints/${id}`,
   BOARD: '/board',
   task: (id: number | string) => `/tasks/${id}`,
   USERS: '/users',

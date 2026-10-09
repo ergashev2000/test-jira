@@ -1,7 +1,7 @@
 import { Progress, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { DataTable, ProjectIcon } from '@/shared/components/ui';
 import { ROUTES, SPRINT_STATUS } from '@/shared/constants';
@@ -21,8 +21,9 @@ interface PagedQuery {
   refetch: () => unknown;
 }
 
-/** Server-paginated, server-sorted sprint list (page / ordering live in the URL). */
+/** Server-paginated, server-sorted sprint list (page / ordering live in the URL). The global list (`showProject`) opens a sprint on row click. */
 export const SprintsTable = ({ query, showProject }: { query: PagedQuery; showProject?: boolean }) => {
+  const navigate = useNavigate();
   const [editing, setEditing] = useState<Sprint | null>(null);
   const [completing, setCompleting] = useState<Sprint | null>(null);
   const items = query.data?.results ?? [];
@@ -30,7 +31,7 @@ export const SprintsTable = ({ query, showProject }: { query: PagedQuery; showPr
 
   const columns: ColumnsType<Sprint> = [
     ...(showProject ? [{ title: 'Project', key: 'project__key', width: 110, render: (_: unknown, s: Sprint) => (
-      <Link to={ROUTES.project(s.project.id, 'sprints')} className="flex items-center gap-1.5 !text-fg"><ProjectIcon projectKey={s.project.key} size={14} />{s.project.key}</Link>) }] : []),
+      <span className="flex items-center gap-1.5 text-fg"><ProjectIcon projectKey={s.project.key} size={14} />{s.project.key}</span>) }] : []),
     { title: 'Name', dataIndex: 'name', width: 120, render: (n: string) => <span className="font-medium">{n}</span> },
     { title: 'Goal', dataIndex: 'goal', ellipsis: true, render: (g: string) => <span className="text-fg-2">{g || '—'}</span> },
     { title: 'Dates', key: 'start_date', width: 200, sorter: true, render: (_, s) => <span className="text-fg-2">{formatDate(s.start_date)} — {formatDate(s.end_date)}</span> },
@@ -44,7 +45,8 @@ export const SprintsTable = ({ query, showProject }: { query: PagedQuery; showPr
 
   return (
     <>
-      <DataTable<Sprint> query={query} columns={columns} rowNumbers={false} scroll={{ x: 1000 }} emptyText="No sprints" />
+      <DataTable<Sprint> query={query} columns={columns} rowNumbers={false} scroll={{ x: 1000 }} emptyText="No sprints"
+        onRowClick={showProject ? (s) => navigate(ROUTES.sprint(s.id)) : undefined} />
       <SprintFormModal open={!!editing} projectId={editing?.project.id ?? 0} sprint={editing ?? undefined} onClose={() => setEditing(null)} />
       <CompleteSprintModal sprint={completing} onClose={() => setCompleting(null)} />
     </>

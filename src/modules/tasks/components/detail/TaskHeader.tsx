@@ -1,9 +1,8 @@
 import { HugeiconsIcon } from '@hugeicons/react';
-import { ArrowExpand01Icon, Edit02Icon, Link01Icon, MoreHorizontalIcon, StopCircleIcon } from '@hugeicons/core-free-icons';
+import { Edit02Icon, Link01Icon, MoreHorizontalIcon, StopCircleIcon } from '@hugeicons/core-free-icons';
 import { App, Button, Dropdown, Tag, Tooltip } from 'antd';
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import { useCurrentUser } from '@/shared/hooks';
 import { ReasonModal, TaskTypeIcon, type ReasonValues } from '@/shared/components/ui';
@@ -16,10 +15,9 @@ import type { Task } from '../../types/task.types';
 import { TaskFormModal } from '../TaskFormModal';
 import { InlineEdit } from './InlineEdit';
 
-export const TaskHeader = ({ task, inDrawer }: { task: Task; inDrawer?: boolean }) => {
+export const TaskHeader = ({ task }: { task: Task }) => {
   const user = useCurrentUser();
   const { message } = App.useApp();
-  const navigate = useNavigate();
   const [modal, setModal] = useState<'block' | 'cancel' | 'request' | 'edit' | null>(null);
   const block = useBlockTask();
   const cancel = useCancelTask();
@@ -62,11 +60,6 @@ export const TaskHeader = ({ task, inDrawer }: { task: Task; inDrawer?: boolean 
             <Button size="small" onClick={() => setModal('block')}>🚧 Block</Button>
           )}
           {editable && <Button size="small" icon={<HugeiconsIcon icon={Edit02Icon} size={16} className="hicon" strokeWidth={1.7} />} onClick={() => setModal('edit')}>Edit</Button>}
-          {inDrawer && (
-            <Tooltip title="Open in full page">
-              <Button size="small" type="text" icon={<HugeiconsIcon icon={ArrowExpand01Icon} size={16} className="hicon" strokeWidth={1.7} />} onClick={() => navigate(ROUTES.task(task.id))} />
-            </Tooltip>
-          )}
           {menu.length > 0 && (
             <Dropdown trigger={['click']} menu={{ items: menu, onClick: ({ key }) => setModal(key as 'cancel' | 'request') }}>
               <Button size="small" type="text" icon={<HugeiconsIcon icon={MoreHorizontalIcon} size={16} className="hicon" strokeWidth={1.7} />} />

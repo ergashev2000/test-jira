@@ -22,16 +22,19 @@ import { cn } from '@/shared/utils';
 
 import { TaskCard, TaskCardView } from './TaskCard';
 
-const Column = ({ status, tasks, onAdd, onOpen, onBackground }: {
-  status: TaskStatus; tasks: Task[]; onAdd?: () => void; onOpen: (id: number) => void; onBackground?: boolean;
+const Column = ({ status, tasks, onAdd, onOpen, onBackground, selectedId }: {
+  status: TaskStatus; tasks: Task[]; onAdd?: () => void; onOpen: (id: number) => void; onBackground?: boolean; selectedId?: string | null;
 }) => {
   const { setNodeRef, isOver } = useDroppable({ id: status });
   return (
-    <div className={cn('flex w-[300px] shrink-0 flex-col', onBackground && 'max-h-full self-start rounded-xl bg-panel/90 p-1.5 shadow-lg backdrop-blur-sm')}>
+    <div className={cn(
+      'flex min-w-[272px] flex-1 basis-0 flex-col',
+      onBackground && 'max-h-full self-start rounded-2xl border border-white/15 bg-panel/40 p-1.5 shadow-xl shadow-black/20 backdrop-blur-xl backdrop-saturate-150',
+    )}>
       <div className="flex h-10 shrink-0 items-center gap-2 px-2 text-[13px]">
         <StatusIcon status={status} />
         <span className="font-medium text-fg">{TASK_STATUS[status].label}</span>
-        <span className="text-fg-3">{tasks.length}</span>
+        <span className="rounded-full bg-fg/10 px-1.5 text-[11px] leading-5 tabular-nums text-fg-2">{tasks.length}</span>
         {onAdd && (
           <Button size="small" type="text" className="!ml-auto" icon={<HugeiconsIcon icon={Add01Icon} size={14} className="hicon" strokeWidth={1.7} />} onClick={onAdd} aria-label={`Add to ${TASK_STATUS[status].label}`} />
         )}
@@ -39,12 +42,14 @@ const Column = ({ status, tasks, onAdd, onOpen, onBackground }: {
       <div
         ref={setNodeRef}
         className={cn(
-          'flex min-h-40 flex-1 flex-col gap-2 overflow-y-auto rounded-xl p-1.5 transition-colors [&>*]:shrink-0',
-          isOver ? 'bg-primary/10 ring-1 ring-primary/40' : !onBackground && 'bg-bg/40',
+          'flex min-h-40 flex-1 flex-col gap-2 overflow-y-auto rounded-xl p-1.5 transition-colors [scrollbar-width:thin] [&>*]:shrink-0',
+          isOver ? 'bg-primary/15 ring-1 ring-primary/50' : !onBackground && 'bg-bg/40',
         )}
       >
-        {tasks.map((t) => <TaskCard key={t.id} task={t} onOpen={onOpen} />)}
-        {!tasks.length && <div className="py-6 text-center text-xs text-fg-3">No tasks</div>}
+        {tasks.map((t) => <TaskCard key={t.id} task={t} onOpen={onOpen} glass={onBackground} selected={String(t.id) === selectedId} />)}
+        {!tasks.length && (
+          <div className={cn('rounded-lg border border-dashed py-6 text-center text-xs text-fg-3', onBackground ? 'border-white/20' : 'border-line')}>No tasks</div>
+        )}
       </div>
     </div>
   );
@@ -62,7 +67,7 @@ const COLUMNS = BOARD_COLUMNS.filter((s) => s !== 'backlog');
 
 /** Fixed columns. Backlog and cancelled tasks never appear; blocked tasks stay in their column. */
 export const KanbanBoard = ({ tasks, onQuickAdd, onBackground }: Props) => {
-  const { openTask } = useTaskDrawer();
+  const { taskId, openTask } = useTaskDrawer();
   const { change } = useStatusChanger();
   const [active, setActive] = useState<Task | null>(null);
   const sensors = useSensors(
@@ -91,6 +96,7 @@ export const KanbanBoard = ({ tasks, onQuickAdd, onBackground }: Props) => {
             tasks={visible.filter((t) => t.status === s)}
             onOpen={openTask}
             onBackground={onBackground}
+            selectedId={taskId}
             onAdd={onQuickAdd && s === 'todo' ? () => onQuickAdd(s) : undefined}
           />
         ))}

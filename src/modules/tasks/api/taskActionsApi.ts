@@ -44,7 +44,7 @@ export const addComment = async (taskId: number, text: string) => {
   return data;
 };
 
-// PATCH /tasks/:id/comments/:commentId/  { text }  — NOT IN api.json
+// PATCH /tasks/:id/comments/:cid/  { text }  — author only
 export const editComment = async (taskId: number, commentId: number, text: string) => {
   const { data } = await api.patch<Comment>(`/tasks/${taskId}/comments/${commentId}/`, { text });
   return data;
@@ -60,6 +60,11 @@ export const listAttachments = async (taskId: number) => {
 export const downloadAttachment = async (taskId: number, attachmentId: number) => {
   const { data } = await api.get<Blob>(`/tasks/${taskId}/attachments/${attachmentId}/download/`, { responseType: 'blob' });
   return data;
+};
+
+// DELETE /tasks/:id/attachments/:aid/  — the uploader or anyone who can edit the task
+export const deleteAttachment = async (taskId: number, attachmentId: number) => {
+  await api.delete(`/tasks/${taskId}/attachments/${attachmentId}/`);
 };
 
 // POST /tasks/:id/attachments/  (multipart: file)
