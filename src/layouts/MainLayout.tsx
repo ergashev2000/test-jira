@@ -2,7 +2,7 @@ import { Grid } from 'antd';
 import { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 
-import { TaskDrawer } from '@/modules/tasks';
+import { TaskDrawer, TaskSidePanel, useTaskViewMode } from '@/modules/tasks';
 import { cn } from '@/shared/utils';
 
 import { Header } from './components/Header';
@@ -11,6 +11,10 @@ import { Sidebar } from './components/Sidebar';
 export const MainLayout = () => {
   const screens = Grid.useBreakpoint();
   const [collapsed, setCollapsed] = useState(false);
+  const taskView = useTaskViewMode((s) => s.mode);
+  // The docked panel needs room; small screens always get the overlay drawer.
+  const canDock = screens.lg ?? window.matchMedia('(min-width: 992px)').matches;
+  const docked = canDock && taskView === 'panel';
 
   useEffect(() => {
     if (screens.xl === false) setCollapsed(true);
@@ -27,8 +31,9 @@ export const MainLayout = () => {
         <main className="mr-2 mb-2 min-w-0 flex-1 overflow-auto rounded-xl border border-line bg-panel">
           <Outlet />
         </main>
+        {docked && <TaskSidePanel />}
       </div>
-      <TaskDrawer />
+      {!docked && <TaskDrawer canDock={canDock} />}
     </div>
   );
 };

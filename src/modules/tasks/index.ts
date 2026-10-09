@@ -1,6 +1,7 @@
 export * from './types/task.types';
 export { MyTasksPage } from './pages/MyTasksPage';
-export { TaskDrawer } from './components/TaskDrawer';
+export { TaskDrawer, TaskSidePanel } from './components/TaskDrawer';
+export { useTaskViewMode } from './hooks/useTaskViewMode';
 export { TaskFormModal } from './components/TaskFormModal';
 export { TaskTable } from './components/TaskTable';
 export { TaskListRow } from './components/TaskListRow';

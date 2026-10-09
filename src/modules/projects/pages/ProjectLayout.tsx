@@ -1,12 +1,14 @@
 import { HugeiconsIcon } from '@hugeicons/react';
 import { Edit02Icon } from '@hugeicons/core-free-icons';
 import { Alert, Button, Result, Skeleton, Tabs, Tag } from 'antd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { ErrorState, PageHeader, ProjectIcon, UserAvatar, UserAvatarGroup } from '@/shared/components/ui';
 import { PROJECT_STATUS, ROUTES } from '@/shared/constants';
 import { ApiError } from '@/shared/lib/apiError';
+import { useRecentProjectsStore } from '@/shared/lib/recentProjects';
+import { useSessionStore } from '@/shared/lib/session';
 
 import { ProjectFormModal } from '../components/ProjectFormModal';
 import { useProject, useProjectAccess } from '../hooks/useProjects';
@@ -26,6 +28,13 @@ export const ProjectLayout = () => {
   const { data: project, isLoading, isError, error, refetch } = useProject(projectId);
   const { canEdit } = useProjectAccess(project);
   const tab = TABS.find((t) => pathname.endsWith(`/${t}`)) ?? 'overview';
+  const userId = useSessionStore((s) => s.user?.id);
+  const visit = useRecentProjectsStore((s) => s.visit);
+
+  // Feeds the sidebar's "Recent" list once the project actually opened.
+  useEffect(() => {
+    if (project && userId) visit(userId, project.id);
+  }, [project, userId, visit]);
 
   if (isLoading) return <div className="p-6"><Skeleton active /></div>;
   if (isError || !project) {

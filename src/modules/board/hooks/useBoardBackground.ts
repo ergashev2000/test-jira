@@ -31,12 +31,18 @@ export type Background = { kind: 'photo' | 'color' | 'custom'; value: string };
 
 const storageKey = (projectId: number) => `board-bg:${projectId}`;
 
+/** Boards start on the first photo until the user picks another one or resets to the theme. */
+export const DEFAULT_BACKGROUND: Background = { kind: 'photo', value: PHOTOS[0] };
+/** Stored when the user resets — keeps the default photo from coming back. */
+const NONE = 'none';
+
 const readBackground = (projectId: number): Background | null => {
   try {
     const raw = localStorage.getItem(storageKey(projectId));
-    return raw ? (JSON.parse(raw) as Background) : null;
+    if (!raw) return DEFAULT_BACKGROUND;
+    return raw === NONE ? null : (JSON.parse(raw) as Background);
   } catch {
-    return null;
+    return DEFAULT_BACKGROUND;
   }
 };
 
@@ -50,8 +56,7 @@ export const useBoardBackground = (projectId: number) => {
   }
   const save = (next: Background | null) => {
     try {
-      if (next) localStorage.setItem(storageKey(projectId), JSON.stringify(next));
-      else localStorage.removeItem(storageKey(projectId));
+      localStorage.setItem(storageKey(projectId), next ? JSON.stringify(next) : NONE);
     } catch {
       return false;
     }
@@ -65,6 +70,7 @@ export const backgroundStyle = (bg: Background | null): CSSProperties | undefine
   if (!bg) return undefined;
   if (bg.kind === 'color') return { background: bg.value };
   const url = bg.kind === 'photo' ? photo(bg.value, 1920) : bg.value;
-  return { backgroundImage: `url("${url}")`, backgroundSize: 'cover', backgroundPosition: 'center' };
+  // Soft dark scrim keeps column headers readable on bright photos.
+  return { backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0.12)), url("${url}")`, backgroundSize: 'cover', backgroundPosition: 'center' };
 };
 

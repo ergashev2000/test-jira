@@ -645,6 +645,14 @@ on('POST', '/tasks/:id/attachments/', ({ params, body, me }) => {
   logActivity(t, me, 'attachment_added', '', file.name);
   return { status: 201, data: attachmentOut(a) };
 });
+on('DELETE', '/tasks/:id/attachments/:aid/', ({ params }) => {
+  const t = findTask(params[0]);
+  const i = db.attachments.findIndex((a) => a.task_id === t.id && a.id === Number(params[1]));
+  if (i < 0) throw notFound('Attachment not found');
+  URL.revokeObjectURL(db.attachments[i].url);
+  db.attachments.splice(i, 1);
+  return NO_CONTENT;
+});
 on('GET', '/tasks/:id/activity/', ({ params, query }) =>
   list(db.activity.filter((a) => a.task_id === findTask(params[0]).id).map(activityOut), query, { ordering: '-created_at', paginate: false }));
 on('GET', '/tasks/:id/blockers/', ({ params, query }) =>
