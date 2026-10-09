@@ -18,8 +18,8 @@ const Activity = ({ taskId }: { taskId: number }) => {
   return <QueryState query={query}>{(d) => <ActivityTimeline items={d} />}</QueryState>;
 };
 
-/** Shared by the Drawer (?task=ID) and the full page (/tasks/:id). */
-export const TaskDetailView = ({ taskId, inDrawer }: { taskId: string; inDrawer?: boolean }) => {
+/** Shared by the side panel / drawer (?task=ID) and the full page (/tasks/:id). Layout follows its container width. */
+export const TaskDetailView = ({ taskId }: { taskId: string }) => {
   const { data: task, isLoading, isError, error, refetch } = useTaskDetail(taskId);
 
   if (isLoading) return <Skeleton active paragraph={{ rows: 10 }} />;
@@ -35,10 +35,10 @@ export const TaskDetailView = ({ taskId, inDrawer }: { taskId: string; inDrawer?
   if (!task) return null;
 
   return (
-    <div className="flex flex-col gap-4">
-      <TaskHeader task={task} inDrawer={inDrawer} />
+    <div className="@container flex flex-col gap-4">
+      <TaskHeader task={task} />
       <TaskAlerts task={task} />
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_300px]">
+      <div className="grid grid-cols-1 gap-6 @3xl:grid-cols-[1fr_300px]">
         <div className="flex min-w-0 flex-col gap-6">
           <TaskDescription task={task} />
           <section>
@@ -54,7 +54,8 @@ export const TaskDetailView = ({ taskId, inDrawer }: { taskId: string; inDrawer?
             ]}
           />
         </div>
-        <aside className="h-fit rounded-xl border border-line bg-surface px-3 py-2 lg:sticky lg:top-0">
+        {/* Narrow (side panel): details come first, right under the title. */}
+        <aside className="order-first h-fit rounded-xl border border-line bg-surface px-3 py-2 @3xl:sticky @3xl:top-0 @3xl:order-none">
           <TaskMeta task={task} />
         </aside>
       </div>

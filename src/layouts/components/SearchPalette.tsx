@@ -113,7 +113,7 @@ export const SearchPalette = ({ open, onClose }: { open: boolean; onClose: () =>
       list.push({
         id: `sprint:${s.id}`, group: 'Sprints', icon: <NavIcon icon={Rocket01Icon} />,
         title: s.name, meta: `${s.project.name} · ${SPRINT_STATUS[s.status].label}`, hint: s.goal || undefined,
-        run: go(ROUTES.project(s.project.id, 'sprints')),
+        run: go(ROUTES.sprint(s.id)),
       });
     }
     for (const u of data?.users ?? []) {

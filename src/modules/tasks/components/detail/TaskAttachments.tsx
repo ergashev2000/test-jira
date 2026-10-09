@@ -1,17 +1,18 @@
 import { HugeiconsIcon } from '@hugeicons/react';
-import { CloudUploadIcon, Download01Icon, File01Icon, Pdf01Icon, Zip01Icon } from '@hugeicons/core-free-icons';
+import { CloudUploadIcon, Delete02Icon, Download01Icon, File01Icon, Pdf01Icon, Zip01Icon } from '@hugeicons/core-free-icons';
 import { useQueryClient } from '@tanstack/react-query';
-import { App, Button, Image, Skeleton, Upload } from 'antd';
+import { App, Button, Image, Popconfirm, Skeleton, Tooltip, Upload } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 
 import { useAppSettings } from '@/modules/settings';
 import { QueryState } from '@/shared/components/ui';
 import { QUERY_KEYS } from '@/shared/constants';
+import { useCurrentUser, usePermission } from '@/shared/hooks';
 import type { Attachment } from '@/shared/types';
 import { errorMessage, formatFileSize, fromNow } from '@/shared/utils';
 
 import { downloadAttachment } from '../../api/taskActionsApi';
-import { useAttachmentFile, useAttachments, useUploadAttachment } from '../../hooks/useTaskActions';
+import { useAttachmentFile, useAttachments, useDeleteAttachment, useUploadAttachment } from '../../hooks/useTaskActions';
 
 const isImage = (a: Attachment) => a.is_image ?? a.mime_type.startsWith('image/');
 
@@ -35,7 +36,7 @@ const GenericIcon = ({ a }: { a: Attachment }) => {
   return <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded bg-surface-2 text-base text-fg-2"><HugeiconsIcon icon={icon} size={16} className="hicon" strokeWidth={1.7} /></span>;
 };
 
-const ImageTile = ({ taskId, a }: { taskId: number; a: Attachment }) => {
+const ImageTile = ({ taskId, a, canDelete }: { taskId: number; a: Attachment; canDelete: boolean }) => {
   const file = useAttachmentFile(taskId, a.id);
   const src = useObjectUrl(file.data);
   return (
@@ -51,6 +52,7 @@ const ImageTile = ({ taskId, a }: { taskId: number; a: Attachment }) => {
       <figcaption className="flex items-center gap-1 border-t border-line px-2 py-1">
         <span className="min-w-0 flex-1 truncate text-[11px] text-fg-2" title={a.file_name}>{a.file_name}</span>
         <DownloadButton taskId={taskId} a={a} />
+        {canDelete && <DeleteButton taskId={taskId} a={a} />}
       </figcaption>
     </figure>
   );
@@ -78,8 +80,28 @@ const DownloadButton = ({ taskId, a }: { taskId: number; a: Attachment }) => {
   return <Button type="text" size="small" loading={loading} icon={<HugeiconsIcon icon={Download01Icon} size={16} className="hicon" strokeWidth={1.7} />} onClick={download} />;
 };
 
+const DeleteButton = ({ taskId, a }: { taskId: number; a: Attachment }) => {
+  const { message } = App.useApp();
+  const remove = useDeleteAttachment();
+  return (
+    <Popconfirm title="Delete file?" description={a.file_name} okText="Delete" okButtonProps={{ danger: true }}
+      onConfirm={() => remove.mutateAsync({ taskId, id: a.id })
+        .then(() => message.success(`${a.file_name} deleted`))
+        .catch((e) => message.error(errorMessage(e)))}>
+      <Tooltip title="Delete">
+        <Button type="text" size="small" danger loading={remove.isPending} aria-label={`Delete ${a.file_name}`}
+          icon={<HugeiconsIcon icon={Delete02Icon} size={16} className="hicon" strokeWidth={1.7} />} />
+      </Tooltip>
+    </Popconfirm>
+  );
+};
+
 export const TaskAttachments = ({ taskId, disabled }: { taskId: number; disabled?: boolean }) => {
   const { message } = App.useApp();
+  const me = useCurrentUser();
+  const canEdit = usePermission('task.edit');
+  /** The uploader or anyone who can edit the task (backend rule). */
+  const canDelete = (a: Attachment) => !disabled && (canEdit || a.uploaded_by?.id === me.id);
   const query = useAttachments(taskId);
   const upload = useUploadAttachment();
   const { data: settings } = useAppSettings();
@@ -114,7 +136,7 @@ export const TaskAttachments = ({ taskId, disabled }: { taskId: number; disabled
             {d.some(isImage) && (
               <Image.PreviewGroup>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                  {d.filter(isImage).map((a) => <ImageTile key={a.id} taskId={taskId} a={a} />)}
+                  {d.filter(isImage).map((a) => <ImageTile key={a.id} taskId={taskId} a={a} canDelete={canDelete(a)} />)}
                 </div>
               </Image.PreviewGroup>
             )}
@@ -129,6 +151,7 @@ export const TaskAttachments = ({ taskId, disabled }: { taskId: number; disabled
                     </div>
                   </div>
                   <DownloadButton taskId={taskId} a={a} />
+                  {canDelete(a) && <DeleteButton taskId={taskId} a={a} />}
                 </li>
               ))}
             </ul>

@@ -5,6 +5,7 @@ import { QUERY_KEYS } from '@/shared/constants';
 import {
   addComment,
   blockTask,
+  deleteAttachment,
   downloadAttachment,
   editComment,
   listAttachments,
@@ -68,6 +69,8 @@ export const useAttachmentFile = (taskId: number, attachmentId: number, enabled 
   });
 export const useUploadAttachment = () =>
   useTaskMutation(({ taskId, file }: { taskId: number; file: File }) => uploadAttachment(taskId, file));
+export const useDeleteAttachment = () =>
+  useTaskMutation(({ taskId, id }: { taskId: number; id: number }) => deleteAttachment(taskId, id));
 
 export const useTaskActivity = (taskId: number) =>
   useQuery({ queryKey: QUERY_KEYS.tasks.activity(String(taskId)), queryFn: () => listTaskActivity(taskId) });

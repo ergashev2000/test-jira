@@ -53,7 +53,7 @@ export const TaskMeta = ({ task }: { task: Task }) => {
             <UserSelect size="small" variant="borderless" className={inline} value={task.assignee?.id} popupMatchSelectWidth={USER_POPUP_WIDTH}
               projectId={task.project.id} initial={task.assignee ? [task.assignee] : []} placeholder="Unassigned"
               onChange={(v) => patch({ assignee: (v as number | undefined) ?? null })} />
-            {!task.assignee && open && (
+            {task.assignee?.id !== user.id && open && (
               <Button size="small" type="link" className="!h-5 !px-2 !text-xs" loading={update.isPending} onClick={() => patch({ assignee: user.id })}>Assign to me</Button>
             )}
           </span>
