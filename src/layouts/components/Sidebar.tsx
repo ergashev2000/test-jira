@@ -150,19 +150,6 @@ const RecentNav = ({ collapsed }: { collapsed: boolean }) => {
   );
 };
 
-const ProjectsNav = ({ collapsed }: { collapsed: boolean }) => {
-  const { data: projects = [] } = useProjectLookups();
-  const list = projects.filter((p) => p.status !== 'archived');
-  if (!list.length) return null;
-  return (
-    <Section title="Your projects" collapsed={collapsed}>
-      {list.map((p) => (
-        <ProjectLink key={p.id} project={p} collapsed={collapsed} />
-      ))}
-    </Section>
-  );
-};
-
 /** Role-filtered navigation — items without permission are not rendered at all. */
 export const Sidebar = ({ collapsed }: { collapsed: boolean }) => {
   const user = useSessionStore((s) => s.user);
@@ -182,7 +169,6 @@ export const Sidebar = ({ collapsed }: { collapsed: boolean }) => {
         ))}
       </Section>
       <RecentNav collapsed={collapsed} />
-      <ProjectsNav collapsed={collapsed} />
       {admin.length > 0 && (
         <Section title="Administration" collapsed={collapsed}>
           {admin.map((i) => (
