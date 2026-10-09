@@ -1,4 +1,3 @@
-import { HugeiconsIcon } from '@hugeicons/react';
 import { Alert02Icon, CheckmarkCircle02Icon, Clock01Icon, Folder01Icon, Rocket01Icon, Task01Icon } from '@hugeicons/core-free-icons';
 import { useQuery } from '@tanstack/react-query';
 import { Select } from 'antd';
@@ -35,12 +34,12 @@ export const DashboardPage = () => {
   return <><PageHeader title="Dashboard" extra={<><span className="text-xs text-fg-3">{scope}</span><Select size="small" className="min-w-52" value={projectId ?? 'all'} onChange={(value: number | 'all') => set({ project: value === 'all' ? undefined : value })} options={[{ value: 'all', label: 'All projects' }, ...projects.map((project) => ({ value: project.id, label: project.name }))]} /></>} />
     <div className="flex flex-col gap-4 p-5">
       {kpi.isError ? <Panel><ErrorState error={kpi.error} onRetry={() => void kpi.refetch()} /></Panel> : <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-        <KpiCard loading={kpi.isLoading} icon={<HugeiconsIcon icon={Folder01Icon} size={14} className="hicon" strokeWidth={1.7} />} title="Active projects" color="var(--c-fg)" value={data?.active_projects ?? 0} onClick={go.projects} />
-        <KpiCard loading={kpi.isLoading} icon={<HugeiconsIcon icon={Rocket01Icon} size={14} className="hicon" strokeWidth={1.7} />} title="Active sprints" color="var(--c-fg)" value={data?.active_sprints ?? 0} onClick={go.sprints} />
-        <KpiCard loading={kpi.isLoading} icon={<HugeiconsIcon icon={Task01Icon} size={14} className="hicon" strokeWidth={1.7} />} title="Total tasks" color="var(--c-fg)" value={data?.total_tasks ?? 0} onClick={go.tasks} />
-        <KpiCard loading={kpi.isLoading} icon={<HugeiconsIcon icon={CheckmarkCircle02Icon} size={14} className="hicon" strokeWidth={1.7} />} title="Completed today" value={data?.completed_today ?? 0} color="var(--c-success)" onClick={go.completed} />
-        <KpiCard loading={kpi.isLoading} icon={<HugeiconsIcon icon={Clock01Icon} size={14} className="hicon" strokeWidth={1.7} />} title="Overdue tasks" value={data?.overdue_tasks ?? 0} color="var(--c-danger)" onClick={go.overdue} />
-        <KpiCard loading={kpi.isLoading} icon={<HugeiconsIcon icon={Alert02Icon} size={14} className="hicon" strokeWidth={1.7} />} title="Blocked tasks" value={data?.blocked_tasks ?? 0} color="var(--c-warn)" onClick={go.blocked} />
+        <KpiCard loading={kpi.isLoading} icon={Folder01Icon} title="Active projects" color="var(--c-primary)" value={data?.active_projects ?? 0} onClick={go.projects} />
+        <KpiCard loading={kpi.isLoading} icon={Rocket01Icon} title="Active sprints" color="#8b5cf6" value={data?.active_sprints ?? 0} onClick={go.sprints} />
+        <KpiCard loading={kpi.isLoading} icon={Task01Icon} title="Total tasks" color="var(--c-telegram)" value={data?.total_tasks ?? 0} onClick={go.tasks} />
+        <KpiCard loading={kpi.isLoading} icon={CheckmarkCircle02Icon} title="Completed today" value={data?.completed_today ?? 0} color="var(--c-success)" onClick={go.completed} />
+        <KpiCard loading={kpi.isLoading} icon={Clock01Icon} title="Overdue tasks" value={data?.overdue_tasks ?? 0} color="var(--c-danger)" onClick={go.overdue} />
+        <KpiCard loading={kpi.isLoading} icon={Alert02Icon} title="Blocked tasks" value={data?.blocked_tasks ?? 0} color="var(--c-warn)" onClick={go.blocked} />
       </div>}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3"><Panel title="Sprint progress" className="lg:col-span-2"><QueryState query={sprints} isEmpty={(items) => !items.length}>{(items) => <SprintProgressCards items={items} />}</QueryState></Panel><Panel title="My tasks today" extra={<Link to={ROUTES.MY_TASKS}>View all</Link>}><QueryState query={myTasks} isEmpty={(items) => !items.length}>{(items) => <MyTasksWidget items={items} />}</QueryState></Panel></div>
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[3fr_2fr]"><Panel title="Team performance"><QueryState query={team} isEmpty={(rows) => !rows.length}>{(rows) => <TeamTable rows={rows} />}</QueryState></Panel><Panel title="Workload · active tasks"><QueryState query={workload} isEmpty={(rows) => !rows.length}>{(rows) => <WorkloadChart rows={rows} />}</QueryState></Panel></div>
