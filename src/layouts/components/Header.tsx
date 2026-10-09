@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { logout } from '@/modules/auth';
 import { NotificationBell } from '@/modules/notifications';
+import { TelegramHeaderButton } from '@/modules/profile';
 import { useCurrentUser } from '@/shared/hooks';
 import { primaryRole, ROLES, ROUTES } from '@/shared/constants';
 
@@ -57,7 +58,9 @@ export const Header = ({ collapsed, onToggleSidebar }: Props) => {
       <Tooltip title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
         <Button type="text" size="small" icon={<HugeiconsIcon icon={SidebarLeftIcon} size={16} className="hicon" strokeWidth={1.7} />} onClick={onToggleSidebar} />
       </Tooltip>
+
       <div className="flex flex-1 justify-center"><GlobalSearch /></div>
+      <TelegramHeaderButton />
       {MOCK_ENABLED && <Tooltip title={demo
         ? 'Demo data: ON — every page uses mock data, no API requests'
         : fallback

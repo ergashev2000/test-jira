@@ -7,6 +7,7 @@ import { NavLink } from 'react-router-dom';
 
 import { useProjectLookups } from '@/shared/api/lookups';
 import { hasPermission, ROUTES } from '@/shared/constants';
+import { useRecentProjectsStore } from '@/shared/lib/recentProjects';
 import { useSessionStore } from '@/shared/lib/session';
 import { cn } from '@/shared/utils';
 
@@ -133,6 +134,22 @@ const Section = ({
   );
 };
 
+/** Last opened projects (this browser, per user) — only ones the user can still see. */
+const RecentNav = ({ collapsed }: { collapsed: boolean }) => {
+  const userId = useSessionStore((s) => s.user?.id);
+  const ids = useRecentProjectsStore((s) => (userId ? s.byUser[userId] : undefined));
+  const { data: projects = [] } = useProjectLookups();
+  const list = (ids ?? []).map((id) => projects.find((p) => p.id === id)).filter((p): p is NonNullable<typeof p> => !!p && p.status !== 'archived');
+  if (!list.length) return null;
+  return (
+    <Section title="Recent" collapsed={collapsed}>
+      {list.map((p) => (
+        <ProjectLink key={p.id} project={p} collapsed={collapsed} />
+      ))}
+    </Section>
+  );
+};
+
 const ProjectsNav = ({ collapsed }: { collapsed: boolean }) => {
   const { data: projects = [] } = useProjectLookups();
   const list = projects.filter((p) => p.status !== 'archived');
@@ -164,6 +181,7 @@ export const Sidebar = ({ collapsed }: { collapsed: boolean }) => {
           <Item key={i.to} item={i} collapsed={collapsed} />
         ))}
       </Section>
+      <RecentNav collapsed={collapsed} />
       <ProjectsNav collapsed={collapsed} />
       {admin.length > 0 && (
         <Section title="Administration" collapsed={collapsed}>

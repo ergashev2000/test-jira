@@ -1,4 +1,4 @@
-import { App, DatePicker, InputNumber, Select } from 'antd';
+import { App, Button, DatePicker, InputNumber, Select } from 'antd';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -8,7 +8,7 @@ import { DeadlineText, PriorityIcon, PriorityTag, ProjectIcon, UserAvatar, UserS
 import { PRIORITY_OPTIONS, ROUTES } from '@/shared/constants';
 import dayjs from '@/shared/lib/dayjs';
 import type { Priority, TaskWrite } from '@/shared/types';
-import { canEditTask, errorMessage, formatDateTime } from '@/shared/utils';
+import { canAssignTask, canEditTask, canTakeTask, errorMessage, formatDateTime } from '@/shared/utils';
 
 import { useUpdateTask } from '../../hooks/useTasks';
 import type { Task } from '../../types/task.types';
@@ -33,6 +33,9 @@ export const TaskMeta = ({ task }: { task: Task }) => {
   const { data: sprints = [] } = useOpenSprints(task.project.id);
   const archived = task.project.status === 'archived';
   const editable = canEditTask(user) && !archived && task.status !== 'cancelled';
+  const open = !archived && task.status !== 'cancelled' && task.status !== 'done';
+  const assignable = canAssignTask(user) && !archived && task.status !== 'cancelled';
+  const takeable = !assignable && open && canTakeTask(user, task);
 
   const patch = (p: Partial<TaskWrite>) =>
     update.mutate({ task, patch: p }, { onSuccess: () => message.success('Saved'), onError: (e) => message.error(errorMessage(e)) });
@@ -45,10 +48,20 @@ export const TaskMeta = ({ task }: { task: Task }) => {
         <StatusDropdown task={task} disabled={archived} />
       </Row>
       <Row label="Assignee">
-        {editable ? (
-          <UserSelect size="small" variant="borderless" className={inline} value={task.assignee?.id} popupMatchSelectWidth={USER_POPUP_WIDTH}
-            projectId={task.project.id} initial={task.assignee ? [task.assignee] : []} placeholder="Unassigned"
-            onChange={(v) => patch({ assignee: (v as number | undefined) ?? null })} />
+        {assignable ? (
+          <span className="flex flex-col items-start">
+            <UserSelect size="small" variant="borderless" className={inline} value={task.assignee?.id} popupMatchSelectWidth={USER_POPUP_WIDTH}
+              projectId={task.project.id} initial={task.assignee ? [task.assignee] : []} placeholder="Unassigned"
+              onChange={(v) => patch({ assignee: (v as number | undefined) ?? null })} />
+            {task.assignee?.id !== user.id && open && (
+              <Button size="small" type="link" className="!h-5 !px-2 !text-xs" loading={update.isPending} onClick={() => patch({ assignee: user.id })}>Assign to me</Button>
+            )}
+          </span>
+        ) : takeable ? (
+          <span className="flex flex-col items-start">
+            <span className="text-fg-3">Unassigned</span>
+            <Button size="small" type="link" className="!h-5 !px-0 !text-xs" loading={update.isPending} onClick={() => patch({ assignee: user.id })}>Assign to me</Button>
+          </span>
         ) : (
           <UserAvatar user={task.assignee} showName />
         )}
